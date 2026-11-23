@@ -2,7 +2,15 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#f5efe2" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="口袋山谷" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
   <title>口袋山谷 · Pocket Valley</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -15,10 +23,12 @@
       --primary: #e07a5f;
       --primary-foreground: #ffffff;
     }
-    * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+    * { box-sizing: border-box; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+    html, body { overscroll-behavior-y: contain; }
     body {
       margin: 0;
       padding: 0;
+      padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
       font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', ui-rounded, 'SF Pro Rounded', system-ui, -apple-system, sans-serif;
     }
     canvas#gameCanvas {
@@ -27,6 +37,16 @@
       height: auto;
       cursor: pointer;
       border-radius: 14px;
+      touch-action: none;
+      -webkit-touch-callout: none;
+    }
+    .touch-btn {
+      touch-action: none;
+      -webkit-touch-callout: none;
+    }
+    .touch-btn:active {
+      transform: scale(0.93);
+      filter: brightness(0.95);
     }
     .storybook-frame {
       background: linear-gradient(180deg, #b88c62 0%, #966c47 100%);
@@ -71,6 +91,14 @@
     }
     .btn-sage:hover:not(:disabled) { filter: brightness(1.06); transform: translateY(-1px); }
     .btn-sage:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-honey {
+      background: linear-gradient(180deg, #f1c36d 0%, #dfa244 100%);
+      color: #4a2f15;
+      border: 1.5px solid #a67126;
+      transition: filter 0.12s ease, transform 0.08s ease;
+    }
+    .btn-honey:hover:not(:disabled) { filter: brightness(1.05); transform: translateY(-1px); }
+    .btn-honey:disabled { opacity: 0.45; cursor: not-allowed; }
     .modal-backdrop {
       background: rgba(40, 30, 24, 0.52);
       backdrop-filter: blur(3px);
@@ -80,48 +108,65 @@
     .cozy-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
     .cozy-scroll::-webkit-scrollbar-track { background: rgba(181, 141, 96, 0.15); border-radius: 4px; }
     .cozy-scroll::-webkit-scrollbar-thumb { background: rgba(181, 141, 96, 0.5); border-radius: 4px; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-[var(--background)] text-[var(--foreground)] antialiased min-h-screen p-3 sm:p-4">
-  <div class="max-w-[990px] mx-auto flex flex-col gap-2.5">
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased min-h-screen p-2 sm:p-4">
+  <div class="max-w-[990px] mx-auto flex flex-col gap-2 sm:gap-2.5">
 
     <!-- Top Compact Header -->
-    <div class="flex flex-wrap items-center justify-between gap-2 bg-[var(--card)] border border-[var(--border)] rounded-2xl px-3.5 py-2 shadow-sm">
-      <div class="flex items-center gap-2.5">
-        <span class="text-xl" aria-hidden="true">🌼</span>
-        <div>
-          <h1 id="uiGameTitle" class="text-sm font-bold leading-tight tracking-tight text-[var(--foreground)]">口袋山谷</h1>
-          <p id="uiControlsLine" class="text-xs text-[var(--muted-foreground)] leading-tight">WASD 移动 · 点击或空格耕种 · E 互动/采摘/喂动物</p>
+    <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-2 bg-[var(--card)] border border-[var(--border)] rounded-2xl px-3 sm:px-3.5 py-2 shadow-sm">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span class="text-xl" aria-hidden="true">🌼</span>
+          <div>
+            <h1 id="uiGameTitle" class="text-sm font-bold leading-tight tracking-tight text-[var(--foreground)]">口袋山谷</h1>
+            <p id="uiControlsLine" class="hidden sm:block text-xs text-[var(--muted-foreground)] leading-tight">WASD 移动 · 点击或空格耕种 · E 互动/采摘/喂动物</p>
+            <p id="uiMobileControlsLine" class="sm:hidden text-[11px] text-[var(--muted-foreground)] leading-tight">点击地图移动/交互 · 钓鱼长按收线</p>
+          </div>
         </div>
+        <button id="btnInstallPwa" class="hidden px-2.5 py-1 rounded-xl border border-[#3c6b3f] bg-[#6aa86e] text-white text-[11px] font-bold cursor-pointer whitespace-nowrap">📲 安装到桌面</button>
       </div>
 
-      <div class="flex flex-wrap items-center gap-1.5 text-xs">
-        <button id="btnAreaToggle" class="px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90 font-semibold flex items-center gap-1 cursor-pointer">
+      <div class="flex items-center gap-1.5 text-xs overflow-x-auto sm:overflow-visible sm:flex-wrap no-scrollbar pb-0.5 sm:pb-0">
+        <button id="btnAreaToggle" class="shrink-0 px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90 font-semibold flex items-center gap-1 cursor-pointer">
           <span id="uiAreaToggleIcon">🐮</span><span id="uiAreaToggleLabel">去牧场</span>
         </button>
-        <button id="btnKitchen" class="px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer">
+        <button id="btnKitchen" class="shrink-0 px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer">
           <span>🍳</span><span id="uiKitchenBtn">厨房</span>
         </button>
-        <button id="btnShopShortcut" class="px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer">
+        <button id="btnShopShortcut" class="shrink-0 px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer">
           <span>🧺</span><span id="uiShopBtn">花种铺</span>
         </button>
-        <button id="btnRanchShopShortcut" class="px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer">
+        <button id="btnRanchShopShortcut" class="shrink-0 px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer">
           <span>🥛</span><span id="uiRanchShopBtn">牧场铺</span>
         </button>
-        <button id="btnSatchel" class="px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer">
+        <button id="btnFishDex" class="shrink-0 px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer">
+          <span>🐟</span><span id="uiFishDexBtn">钓鱼图鉴</span>
+        </button>
+        <button id="btnPet" class="shrink-0 px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer">
+          <span>🐾</span><span id="uiPetBtn">宠物</span>
+        </button>
+        <button id="btnSatchel" class="shrink-0 px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer">
           <span>💐</span><span id="uiSatchelBtn">花篮</span>
           <span id="satchelBadge" class="px-1.5 py-0.5 rounded-full text-[11px] font-bold bg-[var(--primary)] text-[var(--primary-foreground)] num-tabular">0</span>
         </button>
-        <button id="btnDress" class="px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer">
+        <button id="btnDress" class="shrink-0 px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer">
           <span>👗</span><span id="uiDressLabel">换装</span>
         </button>
-        <button id="btnLang" class="px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-semibold flex items-center gap-1 cursor-pointer">
+        <button id="btnSaveCloud" class="shrink-0 px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer" title="Save & Google Cloud Sync">
+          <span>💾</span><span id="uiSaveBtn">存档</span>
+        </button>
+        <input id="importSaveFile" type="file" accept=".json,application/json" class="hidden" />
+        <button id="btnLang" class="shrink-0 px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-semibold flex items-center gap-1 cursor-pointer">
           <span>🌐</span><span id="uiLangLabel">EN</span>
         </button>
-        <button id="btnSleepQuick" class="px-2 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium cursor-pointer" title="Sleep / 休息">🌙</button>
-        <button id="btnSound" class="px-2 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium cursor-pointer">🔊</button>
-        <button id="btnHelp" class="px-2 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium cursor-pointer">❓</button>
-        <button id="btnReset" class="px-2 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium text-[var(--muted-foreground)] cursor-pointer">↺</button>
+        <button id="btnTouchPadToggle" class="shrink-0 px-2 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium cursor-pointer" title="Toggle Touch Controls / 触屏手柄">🕹️</button>
+        <button id="btnSleepQuick" class="shrink-0 px-2 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium cursor-pointer" title="Sleep / 休息">🌙</button>
+        <button id="btnSound" class="shrink-0 px-2 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium cursor-pointer">🔊</button>
+        <button id="btnHelp" class="shrink-0 px-2 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium cursor-pointer">❓</button>
+        <button id="btnReset" class="shrink-0 px-2 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium text-[var(--muted-foreground)] cursor-pointer">↺</button>
       </div>
     </div>
 
@@ -145,7 +190,7 @@
           <span class="opacity-30">|</span>
           <div class="flex items-center gap-1">
             <span id="hudWeatherIcon">☀️</span>
-            <span id="hudWeatherText">晴朗</span>
+            <span id="hudWeatherText">晴天</span>
           </div>
           <span class="opacity-30 hidden md:inline">|</span>
           <div class="hidden md:flex items-center gap-1 text-[11px] opacity-80">
@@ -190,23 +235,28 @@
           <span id="contextHintText"></span>
         </div>
 
+        <!-- Mobile / Touch Dedicated Fishing Reel Button (appears only during bite/reeling) -->
+        <button id="mobileReelBtn" class="hidden touch-btn absolute bottom-3 left-1/2 -translate-x-1/2 btn-peach px-5 py-2.5 rounded-2xl font-extrabold text-sm shadow-xl z-10 cursor-pointer flex items-center gap-2">
+          <span>🎣</span><span id="mobileReelBtnLabel">按住拉杆</span>
+        </button>
+
         <!-- Top-Right Banner (Seasonal Bonus on Farm / Pasture Status on Pasture) -->
-        <div id="topRightPill" class="absolute top-2.5 right-2.5 parchment rounded-xl px-3 py-1 text-[11px] font-semibold opacity-95 pointer-events-none"></div>
+        <div id="topRightPill" class="absolute top-2 right-2 parchment rounded-xl px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-[11px] font-semibold opacity-95 pointer-events-none max-w-[75%] truncate"></div>
 
         <!-- Sleep / Area Fade Overlay -->
         <div id="fadeOverlay" class="fade-overlay absolute inset-0 bg-[#1e1d30] opacity-0 flex items-center justify-center">
           <div id="fadeMessage" class="text-amber-100 text-base sm:text-lg font-bold tracking-wide px-4 text-center"></div>
         </div>
 
-        <!-- Modal Overlay Layer -->
-        <div id="modalOverlay" class="hidden absolute inset-0 modal-backdrop flex items-center justify-center p-3 z-20">
-          <div id="modalCard" class="parchment rounded-2xl w-full max-w-[580px] max-h-[93%] flex flex-col overflow-hidden shadow-2xl">
+        <!-- Modal Overlay Layer (fixed full-viewport on mobile so modals are spacious & scrollable) -->
+        <div id="modalOverlay" class="hidden fixed inset-0 sm:absolute sm:inset-0 modal-backdrop flex items-center justify-center p-3 z-50 sm:z-20">
+          <div id="modalCard" class="parchment rounded-2xl w-full max-w-[580px] max-h-[88dvh] sm:max-h-[93%] flex flex-col overflow-hidden shadow-2xl">
             <div class="flex items-center justify-between px-4 py-2.5 border-b border-[#d6ba91] bg-[#f4e4c5]">
               <div class="flex items-center gap-2">
                 <span id="modalIcon" class="text-lg">🌸</span>
                 <h2 id="modalTitle" class="font-bold text-sm sm:text-base text-[#4a3525]"></h2>
               </div>
-              <button id="modalCloseBtn" class="w-7 h-7 rounded-xl bg-[#e6d0a8] hover:bg-[#dac092] border border-[#b58d60] text-[#4a3525] font-bold text-xs flex items-center justify-center cursor-pointer">✕</button>
+              <button id="modalCloseBtn" class="w-8 h-8 sm:w-7 sm:h-7 rounded-xl bg-[#e6d0a8] hover:bg-[#dac092] border border-[#b58d60] text-[#4a3525] font-bold text-xs flex items-center justify-center cursor-pointer">✕</button>
             </div>
             <div id="modalBody" class="p-3.5 overflow-y-auto cozy-scroll text-xs sm:text-sm space-y-3"></div>
             <div id="modalFooter" class="px-4 py-2.5 border-t border-[#d6ba91] bg-[#f4e4c5] flex items-center justify-between gap-2 text-xs"></div>
@@ -214,11 +264,31 @@
         </div>
       </div>
 
-      <!-- Two-Strip Compact Hotbar: Row 1 Tools & Gear + Row 2 All 10 Seeds -->
+      <!-- Mobile Touch Gamepad (auto-shown on touch/narrow screens, toggleable via 🕹️) -->
+      <div id="mobileControls" class="hidden mt-2 flex items-center justify-between gap-3 px-2.5 py-2 rounded-xl bg-[#f7ecd6]/92 border border-[#c5a176]">
+        <div class="grid grid-cols-3 gap-1 w-[124px]">
+          <div></div>
+          <button data-dir="w" class="touch-btn slot-btn h-9 rounded-xl font-bold text-sm flex items-center justify-center cursor-pointer" aria-label="Up">▲</button>
+          <div></div>
+          <button data-dir="a" class="touch-btn slot-btn h-9 rounded-xl font-bold text-sm flex items-center justify-center cursor-pointer" aria-label="Left">◀</button>
+          <button data-dir="s" class="touch-btn slot-btn h-9 rounded-xl font-bold text-sm flex items-center justify-center cursor-pointer" aria-label="Down">▼</button>
+          <button data-dir="d" class="touch-btn slot-btn h-9 rounded-xl font-bold text-sm flex items-center justify-center cursor-pointer" aria-label="Right">▶</button>
+        </div>
+        <div class="flex flex-col gap-1.5 flex-1 max-w-[196px]">
+          <button id="touchBtnAction" class="touch-btn btn-peach py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>✨</span><span id="uiTouchAction">使用工具 / 拉杆</span>
+          </button>
+          <button id="touchBtnInteract" class="touch-btn btn-sage py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>🤝</span><span id="uiTouchInteract">互动 / 采摘 / 摸宠</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Two-Strip Compact Hotbar: Row 1 Tools & Gear (6) + Row 2 All 10 Seeds -->
       <div class="mt-2 flex flex-col gap-1.5">
         <div class="flex flex-col sm:flex-row gap-1.5">
-          <div id="hotbarTools" class="grid grid-cols-5 gap-1.5 sm:w-[37%]"></div>
-          <div id="hotbarSeeds" class="grid grid-cols-5 sm:grid-cols-10 gap-1 sm:w-[63%]"></div>
+          <div id="hotbarTools" class="grid grid-cols-6 gap-1 sm:w-[41%]"></div>
+          <div id="hotbarSeeds" class="grid grid-cols-5 sm:grid-cols-10 gap-1 sm:w-[59%]"></div>
         </div>
         <div class="flex items-center justify-between px-1 text-[11px] text-amber-50/95">
           <span id="selectedToolInfo"></span>
@@ -232,6 +302,7 @@
       <div class="flex flex-wrap items-center gap-3">
         <span><span id="uiStatHarvestLabel">🌾 收获</span>: <strong id="statHarvested" class="text-[var(--foreground)] num-tabular">0</strong></span>
         <span><span id="uiStatAnimalsLabel">🐮 牧场动物</span>: <strong id="statAnimals" class="text-[var(--foreground)] num-tabular">0</strong></span>
+        <span><span id="uiStatFishLabel">🐟 垂钓</span>: <strong id="statFish" class="text-[var(--foreground)] num-tabular">0</strong></span>
         <span><span id="uiStatDishesLabel">🍳 料理</span>: <strong id="statDishes" class="text-[var(--foreground)] num-tabular">0</strong></span>
         <span><span id="uiStatGoldLabel">🪙 累计金币</span>: <strong id="statLifetimeGold" class="text-[var(--foreground)] num-tabular">0g</strong></span>
       </div>
@@ -298,6 +369,13 @@
       label: { zh: '南瓜、杨桃、胡萝卜、小麦', en: 'Pumpkin, Starfruit, Carrot & Wheat' },
       grassA: '#c6af64', grassB: '#bda55a', farmA: '#d2bc71', farmB: '#cab468',
       treeA: '#c96f4a', treeB: '#e08d58', treeHi: '#f4b572', blossom: '#f08a5d'
+    },
+    {
+      id: 'winter', name: { zh: '冬季', en: 'Winter' }, icon: '❄️',
+      bonus: ['turnip', 'pumpkin', 'carrot', 'starfruit'],
+      label: { zh: '芜菁、南瓜、胡萝卜、杨桃', en: 'Turnip, Pumpkin, Carrot & Starfruit' },
+      grassA: '#e4eef2', grassB: '#dae6ec', farmA: '#d4e2e8', farmB: '#cbdbe2',
+      treeA: '#6c93a3', treeB: '#89b0bf', treeHi: '#f4f9fc', blossom: '#ffffff'
     }
   ];
 
@@ -450,12 +528,95 @@
       desc: { zh: '秋日童话般的金黄丝滑南瓜汤！', en: 'Rich velvety storybook autumn pumpkin soup.' }
     },
     {
+      id: 'herbGrilledFish', emoji: '🐟', name: { zh: '香煎香草鱼排', en: 'Herb Grilled Fish' },
+      ingredients: { anyFish: 1, herbVeggie: 1 }, sellPrice: 265, energy: 65,
+      desc: { zh: '外焦里嫩的荷花池鲜鱼排，佐以脆甜鲜蔬。', en: 'Golden pan-seared pond fillet with garden veggies.' }
+    },
+    {
+      id: 'fishChowder', emoji: '🍲', name: { zh: '海鲜浓汤', en: "Fisherman's Chowder" },
+      ingredients: { seafood: 1, milk: 1, corn: 1 }, sellPrice: 430, energy: 85,
+      desc: { zh: '小龙虾或鲜鱼与鲜奶甜玉米慢熬的招牌浓汤！', en: 'Creamy signature chowder with fresh catch, milk & sweet corn!' }
+    },
+    {
       id: 'starTart', emoji: '✨', name: { zh: '星光水果塔', en: 'Starlight Fruit Tart' },
       ingredients: { starfruit: 1, strawberry: 1, flour: 1, honey: 1 }, sellPrice: 1220, energy: 100,
       desc: { zh: '闪耀山谷星光的梦幻甜品，天价珍品！', en: 'Dazzling signature valley tart worth a fortune!' }
     }
   ];
   const RECIPE_MAP = Object.fromEntries(RECIPES.map(r => [r.id, r]));
+
+  // 6 STORYBOOK POND FISH!
+  const FISH = {
+    riverPerch: {
+      id: 'riverPerch', name: { zh: '河鲈', en: 'River Perch' }, emoji: '🐟',
+      sellPrice: 48, energy: 22, minKg: 0.4, maxKg: 1.8, speed: 0.56, rarity: 36,
+      body: '#7fb892', belly: '#e6f4ea', fin: '#4e8a64', stripe: '#3f7353',
+      hint: { zh: '全天常见 · 荷花池里悠闲游动的小河鲈', en: 'Common all day · Peaceful pond perch' }
+    },
+    crayfish: {
+      id: 'crayfish', name: { zh: '小龙虾', en: 'Crayfish' }, emoji: '🦞',
+      sellPrice: 58, energy: 24, minKg: 0.15, maxKg: 0.65, speed: 0.50, rarity: 28,
+      body: '#e06358', belly: '#f7b2a6', fin: '#b83c32', stripe: '#992d25',
+      hint: { zh: '全天较常见 · 做海鲜浓汤的鲜美食材', en: 'Fairly common all day · Delicious in chowder' }
+    },
+    koi: {
+      id: 'koi', name: { zh: '锦鲤', en: 'Koi' }, emoji: '🎏',
+      sellPrice: 135, energy: 30, minKg: 1.2, maxKg: 4.5, speed: 0.78, rarity: 22,
+      body: '#fffaf0', belly: '#ffe8d6', fin: '#f4845f', stripe: '#e64c3c',
+      hint: { zh: '晴天或微风天出没 · 带来好运的花斑锦鲤', en: 'Sunny or Breezy days · Lucky patterned pond koi' }
+    },
+    rainbowTrout: {
+      id: 'rainbowTrout', name: { zh: '彩虹鳟鱼', en: 'Rainbow Trout' }, emoji: '🌈',
+      sellPrice: 148, energy: 32, minKg: 0.8, maxKg: 3.2, speed: 0.82, rarity: 20,
+      body: '#7ec4cf', belly: '#f7e1d7', fin: '#f29cb8', stripe: '#c77dff',
+      hint: { zh: '春/秋季或雨天出没 · 鳞片泛着彩虹光泽', en: 'Spring, Autumn or Rainy days · Shimmering rainbow scales' }
+    },
+    moonJelly: {
+      id: 'moonJelly', name: { zh: '月光水母', en: 'Moon Jelly' }, emoji: '🪼',
+      sellPrice: 230, energy: 35, minKg: 0.3, maxKg: 1.2, speed: 0.72, rarity: 24,
+      body: '#b8e0ff', belly: '#e2cfea', fin: '#80ed99', stripe: '#ffffff',
+      hint: { zh: '仅夜晚 (19:00后) 出没 · 散发温柔月光的透明水母', en: 'Night only (7 PM+) · Glowing translucent moon jellyfish' }
+    },
+    goldenCarp: {
+      id: 'goldenCarp', name: { zh: '黄金鲤鱼', en: 'Golden Carp' }, emoji: '✨',
+      sellPrice: 430, energy: 45, minKg: 2.0, maxKg: 6.8, speed: 1.12, rarity: 6,
+      body: '#ffd147', belly: '#fff7bd', fin: '#f59e0b', stripe: '#e07a16',
+      hint: { zh: '全天极稀有 · 游动敏捷的传说金色大鲤鱼！', en: 'Very rare all day · Nimble legendary golden carp!' }
+    }
+  };
+  const FISH_ORDER = ['riverPerch', 'crayfish', 'koi', 'rainbowTrout', 'moonJelly', 'goldenCarp'];
+
+  const TAG_INGREDIENTS = {
+    anyFish: {
+      emoji: '🐟', name: { zh: '任意鱼类', en: 'Any Fish' },
+      ids: ['riverPerch', 'crayfish', 'koi', 'rainbowTrout', 'moonJelly', 'goldenCarp']
+    },
+    seafood: {
+      emoji: '🦞', name: { zh: '小龙虾或鱼类', en: 'Crayfish / Fish' },
+      ids: ['crayfish', 'riverPerch', 'koi', 'rainbowTrout', 'moonJelly', 'goldenCarp']
+    },
+    herbVeggie: {
+      emoji: '🍅', name: { zh: '萝卜或小番茄', en: 'Radish / Tomato' },
+      ids: ['radish', 'tomato']
+    }
+  };
+
+  // 3 STORYBOOK FARM PET COMPANIONS!
+  const PETS = {
+    calico: {
+      id: 'calico', emoji: '🐱', name: { zh: '三花猫', en: 'Calico Cat' },
+      desc: { zh: '软乎乎的三花小猫咪，爱晒太阳打盹，还会叼回幸运小种子！', en: 'Cozy calico kitten who loves sunny naps & finding wild seeds!' }
+    },
+    corgi: {
+      id: 'corgi', emoji: '🐶', name: { zh: '柯基犬', en: 'Corgi' },
+      desc: { zh: '短腿大耳小柯基，摇着圆尾巴紧跟你跑遍农庄和牧场！', en: 'Fluffy short-legged pup who happily trots beside you everywhere!' }
+    },
+    bunny: {
+      id: 'bunny', emoji: '🐰', name: { zh: '垂耳兔', en: 'Lop Bunny' },
+      desc: { zh: '奶油色软萌垂耳小兔，爱追花园蝴蝶，轻轻一跳超治愈！', en: 'Creamy lop-eared bunny who hops softly & chases butterflies!' }
+    }
+  };
+  const PET_ORDER = ['calico', 'corgi', 'bunny'];
 
   const TILE_TYPE = { GRASS: 0, FARMABLE: 1, PATH: 2, WATER: 3, DOCK: 4, WALL: 5, PASTURE: 6 };
 
@@ -466,10 +627,19 @@
     zh: {
       gameTitle: '口袋山谷 · 绘本田园与牧场',
       controlsLine: 'WASD 散步 · 点击/空格耕种 · E 采摘/喂动物/互动 · 向东走到阳光牧场',
+      mobileControlsLine: '点击地图自动走过去 · 钓鱼时按住屏幕或下方按钮拉杆',
+      touchAction: '使用工具 / 拉杆',
+      touchInteract: '互动 / 采摘 / 摸宠',
+      installPwa: '📲 安装到桌面',
+      mobileReelBite: '鱼咬钩了！点此提竿',
+      mobileReelHold: '按住向上拉杆',
       langSwitch: 'EN',
       dressBtn: '换装',
       shopBtn: '花种铺',
       ranchShopBtn: '牧场铺',
+      fishDexBtn: '钓鱼图鉴',
+      petBtn: '宠物',
+      saveBtn: '存档',
       kitchenBtn: '厨房',
       satchelBtn: '花篮',
       toPasture: '去牧场',
@@ -480,14 +650,15 @@
       hotbarHint: '数字键 1–9, 0 / 滚轮切换 · 点远处可自动走过去',
       statHarvest: '🌾 收获',
       statAnimals: '🐮 动物',
+      statFish: '🐟 垂钓',
       statDishes: '🍳 料理',
       statGold: '🪙 累计金币',
-      autoSaveIdle: '每天清晨自动存档',
-      savedAt: (s, d) => `已存档 · ${s} 第${d}天`,
+      autoSaveIdle: '实时自动保存（刷新不丢档）',
+      savedAt: (s, d, hm) => `已自动保存 · ${s} 第${d}天${hm ? ` (${hm})` : ''}`,
       dateFmt: (s, d) => `${s} 第${d}天`,
       seasonBonus: (i, s, c) => `${i} ${s}当季加成 (+20%): ${c}`,
       pastureBanner: (fed, total, drops) => `🐮 牧场动物 ${total} 只（今日已喂 ${fed}/${total}）${drops > 0 ? ` · ✨ 有 ${drops} 件产出可收！` : ''}`,
-      weather: { sunny: '晴朗', breezy: '微风', rainy: '小雨' },
+      weather: { sunny: '晴天', cloudy: '多云', breezy: '微风', rainy: '细雨', snowy: '雪天' },
       ampm: { am: '上午', pm: '下午' },
       shopSign: '花种铺',
       ranchSign: '牧场杂货',
@@ -497,11 +668,13 @@
         hoe: ['小锄头', '红铜锄头', '精铁锄头'],
         can: ['小水壶', '红铜水壶', '精铁水壶'],
         scythe: '小镰刀',
+        rod: '竹鱼竿',
         sprinkler: '洒水器',
         lantern: '提灯',
         hoeDesc: ['翻耕 1 格松软田土', '一次翻耕前方 3 格田土！', '一次翻耕 3×3 九宫格田土！'],
         canDesc: ['浇水 1 格（可在池塘打水）', '一次浇水前方 3 格（容量 36）', '一次浇水 3×3 范围（容量 60）'],
         scytheDesc: '清理杂草/树枝/石头，或采摘成熟作物',
+        rodDesc: '竹制鱼竿 — 站在荷花池或溪塘边按左键/空格抛竿垂钓！',
         sprinklerDesc: (n) => `精致洒水器 (${n}) — 放在田里，每天清晨自动给周围 8 格浇水！`,
         lanternDesc: (n) => `花园提灯 (${n}) — 放在田边，夜晚亮起暖暖的萤火灯光！`,
         seedDesc: (name, n, days, sell, regrow) => `${name}种子 (${n}) — ${days}天成熟 · 售价 ${sell}g${regrow ? ` · 每${regrow}天复采` : ''}`
@@ -513,19 +686,36 @@
         barn: '按 E — 查看牧场谷仓（一键喂食 / 收取产出）',
         trough: (hungry) => hungry > 0 ? `按 E — 往草料槽添草料喂饱 ${hungry} 只动物` : '草料槽满满的，小动物们都吃饱啦！',
         shippingSome: (n) => `按 E — 把花篮里的 ${n} 件收获/料理放进出货箱`,
-        shippingEmpty: '出货箱 — 放入蔬果、蛋奶羊毛或料理，夜晚结算金币',
+        shippingEmpty: '出货箱 — 放入蔬果、鱼类、蛋奶羊毛或料理，夜晚结算金币',
         mailUnread: '按 E — 拆开新信件！',
         mailRead: '按 E — 查看田园信箱',
         refill: '按 E — 在荷花池塘装满小水壶',
+        castRod: '左键 / 空格 / E — 抛竿在荷花池悠闲垂钓 🎣',
+        waitingFish: '静静等待浮标下沉…（移动可收杆）',
+        biteFish: '❗ 有鱼咬钩啦！快点左键或空格收杆！',
+        reelingFish: '按住左键或空格抬高绿框，稳稳罩住小鱼！',
         harvest: (name) => `按 E — 采摘成熟的${name}`,
         gateToPasture: '向东走或按 E — 前往阳光牧场 🐮',
         gateToFarm: '向西走或按 E — 回到田园农庄 🏡',
         collectDrop: (name) => `按 E — 拾取新鲜的${name}`,
-        petAnimal: (name, fed) => fed ? `按 E — 摸摸可爱的${name} ♥` : `按 E — 摸摸${name}（记得喂牧草哦！）`
+        petAnimal: (name, fed) => fed ? `按 E — 摸摸可爱的${name} ♥` : `按 E — 摸摸${name}（记得喂牧草哦！）`,
+        petBedEmpty: '按 E / 点击 — 免费领养一只随行小宠物！🐾',
+        petBedOwned: '按 E / 点击 — 查看小宠物的小窝与亲密度',
+        petCompanion: (name) => `按 E / 右键 — 摸摸你的${name} ♥`,
+        petGift: (name) => `按 E / 点击 — 领取${name}叼回来的小礼物 🎁！`
       },
       floats: {
         tooTired: '有点累啦，吃点蔬果料理或回屋睡一觉吧',
         useScythe: '先用小镰刀 (3) 清理一下哦',
+        needPond: '走到荷花池或溪塘边再抛竿吧 🎣',
+        castLine: '🎣 扑通！静静等待鱼儿上钩…',
+        fishEscaped: '鱼儿甩甩尾巴溜走啦，再试一次吧～',
+        biteMissed: '慢了一步，鱼儿游走啦～',
+        petAdopted: (name) => `🐾 欢迎${name}加入口袋山谷！`,
+        petAffectionUp: (name, n) => `💖 ${name}好开心！亲密度 +1 (${n})`,
+        petPurr: (name) => `♥ ${name}开心地摇摇尾巴蹭着你！`,
+        petFoundGift: (name) => `🎁 ${name}在草丛里发现小礼物啦！`,
+        petGiftClaimed: (reward) => `🎁 收到宠物礼物：${reward}`,
         canEmpty: '水壶空啦！去池塘打水吧 💧',
         canFull: '小水壶已经装满啦！',
         refilled: (cap) => `💧 水壶装满啦 (${cap}/${cap})`,
@@ -637,8 +827,10 @@
         totalEarned: '总计收入',
         todayWeather: '今日天气',
         weatherDetail: {
-          rainy: '🌧️ 细雨绵绵（所有农田已自动浇满水啦！）',
-          breezy: '🍃 微风和煦（花瓣随风飘落）',
+          rainy: '🌧️ 细雨绵绵（室外农田自动保持湿润，牧场小动物会在棚屋旁避雨休息！）',
+          snowy: '❄️ 瑞雪飘飘（积雪滋润着室外农田，小动物们正窝在谷仓旁取暖！）',
+          cloudy: '☁️ 多云柔和（微凉舒适的田园云影）',
+          breezy: '🍃 微风和煦（花瓣与落叶随风轻舞）',
           sunny: '☀️ 阳光明媚'
         },
         sprinklerNote: (n) => `💦 精致洒水器在清晨自动浇灌了 <strong>${n}</strong> 格农田！`,
@@ -654,7 +846,7 @@
           <ul class="list-disc pl-4 space-y-1">
             <li><strong>农庄种田</strong>：有 10 种田园种子可选！翻地、播种、浇水，成熟后采摘。</li>
             <li><strong>阳光牧场</strong>：往东穿过木门（或点顶部 <strong>🐮 去牧场</strong>）就能去牧场养<strong>鸡、鸭、绵羊和奶牛</strong>，还能在米莉的杂货铺买牧草饲料和烘焙食材！</li>
-            <li><strong>小屋做饭</strong>：攒够 250g 在花种铺升级<strong>温馨厨房</strong>，就能按 10 种菜谱亲手做蛋糕、浓汤和水果塔啦！</li>
+            <li><strong>小屋做饭</strong>：攒够 250g 在花种铺升级<strong>温馨厨房</strong>，就能按菜谱亲手做蛋糕、浓汤和鱼排啦！</li>
           </ul>
           <p class="italic text-[#7c5c40]">—— 皮普 & 米莉 🌼</p>
         `,
@@ -664,7 +856,7 @@
           <p><strong>致富小窍门：</strong> 养牛羊鸡鸭收集鲜奶与鸡蛋，升级厨房把南瓜做成<strong>黄金南瓜浓汤</strong>、把杨桃做成<strong>星光水果塔</strong>，利润超高哦！</p>
           <p class="italic text-[#7c5c40]">—— 明日天气预报：${nextW}</p>
         `,
-        nextForecastText: { rainy: '🌧️ 小雨（免浇水！）', breezy: '🍃 微风', sunny: '☀️ 晴朗' },
+        nextForecastText: { rainy: '🌧️ 细雨（免浇水！）', snowy: '❄️ 雪天（免浇水！）', cloudy: '☁️ 多云', breezy: '🍃 微风', sunny: '☀️ 晴天' },
         dressTitle: '衣橱 · 选一条碎花小裙子',
         dressHint: '小草帽配双麻花小辫和碎花农妇裙，随时换颜色哦！',
         dressDone: '就穿这条！',
@@ -690,7 +882,57 @@
             </div>
           </div>
         `,
-        helpFooter: '游戏进度会在每天清晨自动保存在本地',
+        fishDexTitle: '荷花池钓鱼图鉴',
+        fishDexSub: (u, t) => `已点亮 ${u} / ${t} 种水彩鱼类`,
+        fishCaughtTitle: '🎣 钓到大鱼啦！',
+        newRecord: '🏆 打破最高重量纪录！',
+        weightLabel: '重量',
+        bestWeight: '历史最重',
+        caughtCount: '已捕获',
+        undiscovered: '尚未发现 — 多去荷花池在不同天气/时段垂钓看看！',
+        reelTip: '按住左键/空格上升',
+        fishKeepBtn: '放进花篮 💐',
+        petAdoptTitle: '🐾 免费领养随行小宠物',
+        petAdoptSub: '从三只绘本风小可爱中挑一只陪你散步、种田和逛牧场吧！每天还会帮你寻找小礼物哦～',
+        petChooseBtn: '免费领养它 ♥',
+        petStatusTitle: '🐾 我的随行小宠物',
+        petAffection: '亲密度',
+        petTodayPetted: '今日已抚摸 ♥',
+        petTodayNotPetted: '今日还没摸摸哦（靠近按 E 抚摸 +1 亲密度）',
+        petGiftReady: '🎁 正在叼着小礼物等你领取！',
+        petGiftDone: '✨ 今天的小礼物已经收下啦',
+        petGiftWait: '🌿 带着它到处走走，可能会在草丛里叼回小礼物哦！',
+        petSwitchLabel: '想换一只小宠物陪伴：',
+        saveTitle: '💾 存档管理与 Google 云同步',
+        saveLocalTitle: '📱 本地实时存档（自动缓存）',
+        saveLocalDesc: '你的每一次耕种、买种子、钓鱼、领养宠物和做饭都会在 1 秒内自动保存到浏览器本地（localStorage + IndexedDB 双重备份），关闭或刷新页面也会即时保存，不会丢档！',
+        saveNowBtn: '💾 立即保存本地',
+        savedNowToast: '💾 已保存到本地！',
+        cloudTitle: '☁️ Google 账号云存档（Google Drive）',
+        cloudDesc: '登录 Google 账号后，可将存档安全同步到你个人 Google Drive 的私密应用空间（appDataFolder），换电脑/手机也能继续玩！',
+        cloudClientIdLabel: 'Google OAuth Client ID（部署到 GitHub Pages 后填入一次即可）：',
+        cloudClientIdPh: '例如：1234567890-xxxx.apps.googleusercontent.com',
+        cloudSaveIdBtn: '保存 Client ID',
+        cloudSignInBtn: '🔐 使用 Google 账号登录',
+        cloudSignOutBtn: '退出登录',
+        cloudUploadBtn: '⬆️ 上传到 Google 云端',
+        cloudRestoreBtn: '⬇️ 从云端恢复存档',
+        cloudAutoLabel: '已登录时自动同步到 Google 云端',
+        cloudNotFound: '云端还没有存档，点击「上传」创建第一份云存档吧！',
+        cloudSynced: (t) => `☁️ 云端最新存档：${t}`,
+        cloudCspNotice: '提示：当前在受限预览窗格内无法加载 Google 登录脚本；发布到 GitHub Pages 或直接在独立浏览器打开 index.html 即可正常使用 Google 账号登录同步（本地实时存档与导出/导入在这里同样可用）。',
+        cloudSetupToggle: '📖 如何 2 分钟免费获取 Google Client ID？',
+        cloudSetupSteps: `<ol class="list-decimal pl-4 space-y-1 text-[11px] text-[#6d4f35] mt-1.5">
+          <li>打开 <strong>Google Cloud Console → APIs & Services → Library</strong>，启用 <strong>Google Drive API</strong>。</li>
+          <li>在 <strong>Credentials → Create Credentials → OAuth client ID</strong> 选择 <strong>Web application</strong>。</li>
+          <li>在 <strong>Authorized JavaScript origins</strong> 填入你的网址（例如 <code>https://linxianying.github.io</code>），复制生成的 Client ID 粘贴到上方即可！</li>
+        </ol>`,
+        backupTitle: '📁 本地文件备份（无需登录即可跨设备转移）',
+        exportBtn: '⬇️ 导出存档 (.json)',
+        importBtn: '⬆️ 导入存档 (.json)',
+        importOk: '✅ 存档已成功恢复！',
+        importErr: '❌ 存档文件格式不正确',
+        helpFooter: '实时自动保存 + 支持 Google 云存档',
         backToFarm: '回到山谷',
         resetTitle: '重新开始一座新农场？',
         resetBody: '这会清空当前的农田、牧场动物、料理和金币，回到 <strong>春季 第1天</strong>，确定吗？',
@@ -701,10 +943,19 @@
     en: {
       gameTitle: 'Pocket Valley · Farm, Ranch & Kitchen',
       controlsLine: 'WASD to walk · Click/Space to farm · E interact/pet/collect · Walk East to Pasture',
+      mobileControlsLine: 'Tap map to walk & farm · Hold screen or Reel button while fishing',
+      touchAction: 'Use Tool / Reel',
+      touchInteract: 'Interact / Harvest / Pet',
+      installPwa: '📲 Install App',
+      mobileReelBite: 'Bite! Tap to Hook!',
+      mobileReelHold: 'Hold to Reel Up',
       langSwitch: '中文',
       dressBtn: 'Dress',
       shopBtn: 'Seeds',
       ranchShopBtn: 'Ranch Shop',
+      fishDexBtn: 'Fish Index',
+      petBtn: 'Pet',
+      saveBtn: 'Save',
       kitchenBtn: 'Kitchen',
       satchelBtn: 'Basket',
       toPasture: 'Pasture',
@@ -715,14 +966,15 @@
       hotbarHint: 'Keys 1–9, 0 / Scroll · Click anywhere to walk & act',
       statHarvest: '🌾 Harvested',
       statAnimals: '🐮 Animals',
+      statFish: '🐟 Fish',
       statDishes: '🍳 Cooked',
       statGold: '🪙 Lifetime Gold',
-      autoSaveIdle: 'Auto-saves every morning',
-      savedAt: (s, d) => `Saved · ${s} Day ${d}`,
+      autoSaveIdle: 'Real-time auto-save (safe to refresh)',
+      savedAt: (s, d, hm) => `Auto-saved · ${s} Day ${d}${hm ? ` (${hm})` : ''}`,
       dateFmt: (s, d) => `${s} Day ${d}`,
       seasonBonus: (i, s, c) => `${i} ${s} Bonus (+20%): ${c}`,
       pastureBanner: (fed, total, drops) => `🐮 Animals: ${total} (Fed ${fed}/${total})${drops > 0 ? ` · ✨ ${drops} fresh drop${drops>1?'s':''}!` : ''}`,
-      weather: { sunny: 'Sunny', breezy: 'Breezy', rainy: 'Rainy' },
+      weather: { sunny: 'Sunny', cloudy: 'Cloudy', breezy: 'Breezy', rainy: 'Rainy', snowy: 'Snowy' },
       ampm: { am: 'AM', pm: 'PM' },
       shopSign: 'SEEDS',
       ranchSign: 'RANCH',
@@ -732,11 +984,13 @@
         hoe: ['Hoe', 'Copper Hoe', 'Iron Hoe'],
         can: ['Water Can', 'Copper Can', 'Iron Can'],
         scythe: 'Scythe',
+        rod: 'Bamboo Rod',
         sprinkler: 'Sprinkler',
         lantern: 'Lantern',
         hoeDesc: ['Till 1 tile of soft soil', 'Tills 3 tiles ahead in a row!', 'Tills a full 3×3 garden patch!'],
         canDesc: ['Water 1 tile (refill at pond)', 'Waters 3 tiles ahead (36 cap)', 'Waters a 3×3 patch (60 cap)'],
         scytheDesc: 'Clear weeds, twigs & stones, or harvest ripe crops',
+        rodDesc: 'Bamboo Fishing Rod — Stand by the pond & Click/Space to cast your line!',
         sprinklerDesc: (n) => `Quality Sprinkler (${n}) — Place on farm to auto-water 8 surrounding tiles at dawn!`,
         lanternDesc: (n) => `Garden Lantern (${n}) — Place on farm for warm golden glow at night!`,
         seedDesc: (name, n, days, sell, regrow) => `${name} Seeds (${n}) — ${days}d grow · Sells ${sell}g${regrow ? ` · Regrows ${regrow}d` : ''}`
@@ -748,19 +1002,36 @@
         barn: 'Press E — Open Pasture Barn (Feed All / Collect All)',
         trough: (h) => h > 0 ? `Press E — Fill Trough to feed ${h} hungry animal${h>1?'s':''}` : 'Feed Trough is full—everyone is happy!',
         shippingSome: (n) => `Press E — Ship ${n} item${n>1?'s':''} from your basket`,
-        shippingEmpty: 'Shipping Bin — Drop crops, eggs, milk, wool or cooked dishes to cash out overnight',
+        shippingEmpty: 'Shipping Bin — Drop crops, fish, eggs, milk, wool or cooked dishes to cash out overnight',
         mailUnread: 'Press E — Read a new letter!',
         mailRead: 'Press E — Check Meadow Mailbox',
         refill: 'Press E — Refill Watering Can at the Lotus Pond',
+        castRod: 'Click / Space / E — Cast Bamboo Rod into the Pond 🎣',
+        waitingFish: 'Waiting peacefully for a bite… (move to reel in)',
+        biteFish: '❗ A fish is biting! Click or press Space now!',
+        reelingFish: 'Hold Mouse or Space to lift the green bar over the fish!',
         harvest: (name) => `Press E — Harvest ripe ${name}`,
         gateToPasture: 'Walk East or Press E — Go to Sunny Pasture 🐮',
         gateToFarm: 'Walk West or Press E — Return to Home Farm 🏡',
         collectDrop: (name) => `Press E — Pick up fresh ${name}`,
-        petAnimal: (name, fed) => fed ? `Press E — Pet adorable ${name} ♥` : `Press E — Pet ${name} (Needs feed!)`
+        petAnimal: (name, fed) => fed ? `Press E — Pet adorable ${name} ♥` : `Press E — Pet ${name} (Needs feed!)`,
+        petBedEmpty: 'Press E / Click — Adopt a free farm pet companion! 🐾',
+        petBedOwned: 'Press E / Click — Check your pet bed & affection',
+        petCompanion: (name) => `Press E / Right-Click — Pet your ${name} ♥`,
+        petGift: (name) => `Press E / Click — Claim the gift ${name} found! 🎁`
       },
       floats: {
         tooTired: 'Getting tired! Eat a dish or rest in the cottage',
         useScythe: 'Use Scythe (3) to clear this first!',
+        needPond: 'Walk next to the Lotus Pond before casting! 🎣',
+        castLine: '🎣 Plop! Waiting peacefully for a nibble…',
+        fishEscaped: 'The fish slipped away—try again!',
+        biteMissed: 'Missed the bite—it swam away!',
+        petAdopted: (name) => `🐾 Welcome home, ${name}!`,
+        petAffectionUp: (name, n) => `💖 ${name} adores you! Affection +1 (${n})`,
+        petPurr: (name) => `♥ ${name} happily wags & nuzzles you!`,
+        petFoundGift: (name) => `🎁 ${name} sniffed out a little gift!`,
+        petGiftClaimed: (reward) => `🎁 Pet Gift: ${reward}`,
         canEmpty: 'Empty! Refill at the pond 💧',
         canFull: 'Watering can is already full!',
         refilled: (cap) => `💧 Refilled (${cap}/${cap})`,
@@ -872,8 +1143,10 @@
         totalEarned: 'Total Earned',
         todayWeather: "Today's Weather",
         weatherDetail: {
-          rainy: '🌧️ Gentle Rain (All tilled crops watered automatically!)',
-          breezy: '🍃 Breezy & Mild',
+          rainy: '🌧️ Gentle Rain (Outdoor crops stay watered & animals rest near the barn!)',
+          snowy: '❄️ Soft Snowfall (Winter snow keeps soil moist & animals stay cozy by the barn!)',
+          cloudy: '☁️ Softly Cloudy (Cool drifting meadow clouds)',
+          breezy: '🍃 Breezy & Mild (Drifting petals & leaves)',
           sunny: '☀️ Bright & Sunny'
         },
         sprinklerNote: (n) => `💦 Your Sprinklers watered <strong>${n}</strong> tile${n>1?'s':''} at dawn!`,
@@ -889,7 +1162,7 @@
           <ul class="list-disc pl-4 space-y-1">
             <li><strong>Home Farm</strong>: Choose from 10 seeds! Till, plant, water, and harvest.</li>
             <li><strong>Sunny Pasture</strong>: Walk East through the garden gate (or click <strong>🐮 Pasture</strong>) to raise <strong>Chickens, Ducks, Sheep & Cows</strong> and shop for feed & cooking ingredients at Millie's Stall!</li>
-            <li><strong>Home Cooking</strong>: Build your <strong>Cozy Cottage Kitchen (250g)</strong> at Pip's Stall to cook 10 delicious recipes!</li>
+            <li><strong>Home Cooking</strong>: Build your <strong>Cozy Cottage Kitchen (250g)</strong> at Pip's Stall to cook delicious recipes!</li>
           </ul>
           <p class="italic text-[#7c5c40]">— Pip & Millie 🌼</p>
         `,
@@ -899,7 +1172,7 @@
           <p><strong>Chef Tip:</strong> Combine fresh cow milk & pasture eggs with pumpkins or starfruit in your Cottage Kitchen for huge payouts!</p>
           <p class="italic text-[#7c5c40]">— Tomorrow's forecast: ${nextW}</p>
         `,
-        nextForecastText: { rainy: '🌧️ Rainy (free watering!)', breezy: '🍃 Breezy', sunny: '☀️ Sunny' },
+        nextForecastText: { rainy: '🌧️ Rainy (free watering!)', snowy: '❄️ Snowy (free watering!)', cloudy: '☁️ Cloudy', breezy: '🍃 Breezy', sunny: '☀️ Sunny' },
         dressTitle: 'Wardrobe · Pick a Floral Dress',
         dressHint: 'Twin braided pigtails + straw sunhat + floral cottage dress!',
         dressDone: 'Wear This!',
@@ -925,7 +1198,57 @@
             </div>
           </div>
         `,
-        helpFooter: 'Auto-saves locally every morning',
+        fishDexTitle: 'Lotus Pond Fish Index',
+        fishDexSub: (u, t) => `Discovered ${u} / ${t} watercolor pond species`,
+        fishCaughtTitle: '🎣 Lovely Catch!',
+        newRecord: '🏆 New Weight Record!',
+        weightLabel: 'Weight',
+        bestWeight: 'Best',
+        caughtCount: 'Caught',
+        undiscovered: 'Undiscovered — Try fishing at different times & weather!',
+        reelTip: 'Hold Click/Space to lift',
+        fishKeepBtn: 'Put in Basket 💐',
+        petAdoptTitle: '🐾 Adopt a Free Farm Pet Companion',
+        petAdoptSub: 'Pick one adorable storybook friend to follow you around the farm & pasture and sniff out daily gifts!',
+        petChooseBtn: 'Adopt Free ♥',
+        petStatusTitle: '🐾 My Pet Companion',
+        petAffection: 'Affection',
+        petTodayPetted: 'Petted today ♥',
+        petTodayNotPetted: 'Not petted yet today (Press E nearby for +1 Affection)',
+        petGiftReady: '🎁 Holding a little gift for you—click your pet to claim!',
+        petGiftDone: '✨ Daily gift claimed today',
+        petGiftWait: '🌿 Walk around with your pet so they can sniff out a daily gift!',
+        petSwitchLabel: 'Switch companion species:',
+        saveTitle: '💾 Save Data & Google Cloud Sync',
+        saveLocalTitle: '📱 Real-Time Local Auto-Save',
+        saveLocalDesc: 'Every farm action, purchase, fish catch, pet visit & meal auto-saves within 1 second to localStorage + IndexedDB backup (and immediately on page refresh/close)—your progress stays safe!',
+        saveNowBtn: '💾 Save Locally Now',
+        savedNowToast: '💾 Saved locally!',
+        cloudTitle: '☁️ Google Account Cloud Save (Google Drive)',
+        cloudDesc: 'Sign in with Google to sync your farm privately to your own Google Drive App Data folder (appDataFolder)—continue seamlessly on any device!',
+        cloudClientIdLabel: 'Google OAuth Client ID (enter once after deploying to GitHub Pages):',
+        cloudClientIdPh: 'e.g. 1234567890-xxxx.apps.googleusercontent.com',
+        cloudSaveIdBtn: 'Save Client ID',
+        cloudSignInBtn: '🔐 Sign in with Google',
+        cloudSignOutBtn: 'Sign Out',
+        cloudUploadBtn: '⬆️ Upload to Google Cloud',
+        cloudRestoreBtn: '⬇️ Restore from Cloud',
+        cloudAutoLabel: 'Auto-sync to Google Cloud when signed in',
+        cloudNotFound: 'No cloud save yet—click Upload to create your first Google Cloud backup!',
+        cloudSynced: (t) => `☁️ Latest cloud save: ${t}`,
+        cloudCspNotice: 'Note: Google Sign-In script cannot load inside a CSP-restricted preview iframe; open index.html in a regular browser or GitHub Pages to use Google Account Sync (local real-time save & JSON backup work everywhere!).',
+        cloudSetupToggle: '📖 How to get a free Google Client ID in 2 minutes?',
+        cloudSetupSteps: `<ol class="list-decimal pl-4 space-y-1 text-[11px] text-[#6d4f35] mt-1.5">
+          <li>Open <strong>Google Cloud Console → APIs & Services → Library</strong> and enable <strong>Google Drive API</strong>.</li>
+          <li>Go to <strong>Credentials → Create Credentials → OAuth client ID</strong> → choose <strong>Web application</strong>.</li>
+          <li>Add your origin (e.g. <code>https://linxianying.github.io</code>) under <strong>Authorized JavaScript origins</strong>, then paste the Client ID above!</li>
+        </ol>`,
+        backupTitle: '📁 Local File Backup (Works offline & across devices)',
+        exportBtn: '⬇️ Export Save (.json)',
+        importBtn: '⬆️ Import Save (.json)',
+        importOk: '✅ Save file restored!',
+        importErr: '❌ Invalid save file format',
+        helpFooter: 'Real-time auto-save + Google Cloud Sync',
         backToFarm: 'Back to Valley',
         resetTitle: 'Start a New Valley?',
         resetBody: 'Resets farm, animals, kitchen, and gold back to <strong>Spring Day 1</strong>. Continue?',
@@ -971,6 +1294,9 @@
     },
     hoe() { this.noise(0.08, 0.09, 580); this.tone(160, 0.07, 'triangle', 0.1, 95); },
     water() { this.noise(0.14, 0.08, 1900); this.tone(460, 0.1, 'sine', 0.06, 720); },
+    splash() { this.noise(0.16, 0.09, 1500); this.tone(520, 0.09, 'sine', 0.08, 290); },
+    bite() { this.tone(740, 0.08, 'sine', 0.12, 1120); this.tone(980, 0.12, 'triangle', 0.11, 1320, 0.07); this.noise(0.1, 0.07, 2200); },
+    fishCatch() { [523, 659, 784, 988, 1318].forEach((f, i) => this.tone(f, 0.18, 'triangle', 0.09, null, i * 0.07)); },
     plant() { this.tone(392, 0.06, 'sine', 0.09, 523); },
     harvest() { this.tone(587, 0.08, 'triangle', 0.11, 740); this.tone(880, 0.13, 'sine', 0.11, 987, 0.06); },
     cook() { [523, 659, 784, 1046].forEach((f, i) => this.tone(f, 0.14, 'triangle', 0.09, null, i * 0.07)); },
@@ -1134,6 +1460,8 @@
       lifetimeGold: 0,
       totalHarvested: 0,
       totalCooked: 0,
+      totalFishCaught: 0,
+      fishDex: {},      // fishId -> { count, maxWeight }
       wood: 0,
       stone: 0,
       energy: 100,
@@ -1148,58 +1476,597 @@
       selectedSlot: 0,
       seeds,
       placeables: { sprinkler: 0, lantern: 0 },
-      satchel: {},      // crops & produce: `${id}_${quality}` -> count
+      satchel: {},      // crops, fish & produce: `${id}_${quality}` -> count
       pantry: {},       // bought staples: `${itemId}` -> count (flour, sugar, butter, honey)
       dishes: {},       // cooked dishes: `${recipeId}` -> count
       shippingBin: {},  // `crop:${id}_${q}` or `prod:${id}_${q}` or `dish:${id}` -> count
       animals: starterAnimals,
       pastureDrops: [], // { id, itemId, quality, x, y }
+      pet: { type: null, affection: 0, pettedToday: false, giftFoundToday: false, hasGift: false },
       farm,
       unreadMail: true,
+      lastSavedAt: null,
       player: { x: 4.5 * TILE, y: 6.2 * TILE, dir: 'down', walkFrame: 0, swingTimer: 0, swingTool: null }
     };
   }
 
+  const GOOGLE_CLIENT_ID_KEY = 'pocket_valley_google_client_id';
+  const CLOUD_AUTO_KEY = 'pocket_valley_cloud_auto';
+  const CLOUD_FILE_NAME = 'pocket_valley_save.json';
+  const GSI_SCRIPT_URL = 'https://accounts.google.com/gsi/client';
+
+  let hadLocalSave = false;
+  let gameBooted = false;
+  let autoSaveTimer = null;
+  let cloudSyncTimer = null;
+
   let state = loadState();
+
+  const petAI = {
+    x: state.player.x - 28,
+    y: state.player.y + 8,
+    dir: 1,
+    walkFrame: 0,
+    idleTimer: 0,
+    idleMode: 'follow', // 'follow' | 'nap' | 'wag' | 'butterfly'
+    idleCycleTimer: 0,
+    walkAccum: 0,
+    butterflyAngle: 0
+  };
+  function syncPetNearPlayer() {
+    petAI.x = state.player.x - 24;
+    petAI.y = state.player.y + 6;
+    petAI.idleTimer = 0;
+    petAI.idleMode = 'follow';
+  }
+
+  function hydrateState(parsed) {
+    if (!parsed || typeof parsed.day !== 'number' || !parsed.farm) return null;
+    const base = createInitialState(parsed.lang || 'zh', parsed.dressIdx || 0);
+    return {
+      ...base,
+      ...parsed,
+      seeds: { ...base.seeds, ...(parsed.seeds || {}) },
+      placeables: { ...base.placeables, ...(parsed.placeables || {}) },
+      pantry: { ...(parsed.pantry || {}) },
+      dishes: { ...(parsed.dishes || {}) },
+      fishDex: { ...(parsed.fishDex || {}) },
+      totalFishCaught: typeof parsed.totalFishCaught === 'number' ? parsed.totalFishCaught : 0,
+      pet: { ...base.pet, ...(parsed.pet || {}) },
+      animals: Array.isArray(parsed.animals) ? parsed.animals : base.animals,
+      pastureDrops: Array.isArray(parsed.pastureDrops) ? parsed.pastureDrops : [],
+      player: { ...base.player, ...(parsed.player || {}) },
+      lastSavedAt: parsed.lastSavedAt || null
+    };
+  }
 
   function loadState() {
     try {
       const raw = localStorage.getItem(SAVE_KEY) || localStorage.getItem(OLD_SAVE_KEY);
       if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed.day === 'number' && parsed.farm) {
-          const base = createInitialState(parsed.lang || 'zh', parsed.dressIdx || 0);
-          return {
-            ...base,
-            ...parsed,
-            seeds: { ...base.seeds, ...(parsed.seeds || {}) },
-            placeables: { ...base.placeables, ...(parsed.placeables || {}) },
-            pantry: { ...(parsed.pantry || {}) },
-            dishes: { ...(parsed.dishes || {}) },
-            animals: Array.isArray(parsed.animals) ? parsed.animals : base.animals,
-            pastureDrops: Array.isArray(parsed.pastureDrops) ? parsed.pastureDrops : [],
-            player: { ...base.player, ...(parsed.player || {}) }
-          };
+        const hydrated = hydrateState(JSON.parse(raw));
+        if (hydrated) {
+          hadLocalSave = true;
+          return hydrated;
         }
       }
     } catch (e) {}
     return createInitialState('zh', 0);
   }
 
-  function saveState(quiet = false) {
+  const IDBBackup = {
+    open() {
+      return new Promise((resolve, reject) => {
+        if (typeof indexedDB === 'undefined') return reject(new Error('no_idb'));
+        try {
+          const req = indexedDB.open('pocket_valley_db', 1);
+          req.onupgradeneeded = () => {
+            const db = req.result;
+            if (!db.objectStoreNames.contains('saves')) db.createObjectStore('saves');
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        } catch (e) { reject(e); }
+      });
+    },
+    async save(jsonStr) {
+      try {
+        const db = await this.open();
+        const tx = db.transaction('saves', 'readwrite');
+        tx.objectStore('saves').put(jsonStr, 'main');
+      } catch (e) {}
+    },
+    async load() {
+      try {
+        const db = await this.open();
+        return await new Promise((resolve) => {
+          const tx = db.transaction('saves', 'readonly');
+          const req = tx.objectStore('saves').get('main');
+          req.onsuccess = () => {
+            try { resolve(req.result ? JSON.parse(req.result) : null); } catch (e) { resolve(null); }
+          };
+          req.onerror = () => resolve(null);
+        });
+      } catch (e) { return null; }
+    },
+    async clear() {
+      try {
+        const db = await this.open();
+        const tx = db.transaction('saves', 'readwrite');
+        tx.objectStore('saves').delete('main');
+      } catch (e) {}
+    }
+  };
+
+  function formatSaveClock(iso) {
+    if (!iso) return '';
     try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify(state));
-      if (!quiet) {
-        const el = document.getElementById('saveStatus');
-        if (el) el.textContent = T().savedAt(getSeasonName(), state.day);
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      return d.toTimeString().slice(0, 8);
+    } catch (e) { return ''; }
+  }
+
+  function formatCloudTimestamp(iso) {
+    if (!iso) return '';
+    try {
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      return d.toLocaleString(state.lang === 'zh' ? 'zh-CN' : 'en-US', { hour12: false });
+    } catch (e) { return iso; }
+  }
+
+  function updateSaveStatusLabel() {
+    const el = document.getElementById('saveStatus');
+    if (!el) return;
+    const hm = formatSaveClock(state.lastSavedAt);
+    el.textContent = hm ? T().savedAt(getSeasonName(), state.day, hm) : T().autoSaveIdle;
+  }
+
+  function saveState(quiet = false, skipCloud = false) {
+    try {
+      state.lastSavedAt = new Date().toISOString();
+      const serialized = JSON.stringify(state);
+      localStorage.setItem(SAVE_KEY, serialized);
+      IDBBackup.save(serialized);
+      updateSaveStatusLabel();
+      if (!skipCloud && GoogleCloudSave.isSignedIn() && GoogleCloudSave.autoSync) {
+        scheduleCloudSync();
+      }
+      if (!quiet && document.getElementById('pvSaveCloudRoot')) {
+        openSaveCloudModal();
       }
     } catch (e) {}
+  }
+
+  function scheduleAutoSave() {
+    if (!gameBooted) return;
+    if (autoSaveTimer) clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => {
+      autoSaveTimer = null;
+      saveState(true);
+    }, 900);
+  }
+
+  function scheduleCloudSync() {
+    if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
+    cloudSyncTimer = setTimeout(() => {
+      cloudSyncTimer = null;
+      if (GoogleCloudSave.isSignedIn() && GoogleCloudSave.autoSync) {
+        GoogleCloudSave.uploadSave(true);
+      }
+    }, 4000);
+  }
+
+  function applyRestoredState(parsed) {
+    const next = hydrateState(parsed);
+    if (!next) return false;
+    state = next;
+    if (typeof cancelFishing === 'function') cancelFishing();
+    syncPetNearPlayer();
+    saveState(true, true);
+    applyStaticLabels();
+    updateHUD();
+    renderHotbar();
+    return true;
+  }
+
+  // =========================================================================
+  // GOOGLE ACCOUNT CLOUD SAVE (Google Identity Services + Drive appDataFolder)
+  // =========================================================================
+  const GoogleCloudSave = {
+    accessToken: null,
+    user: null,
+    fileId: null,
+    cloudUpdatedAt: null,
+    busy: false,
+    lastStatus: null,
+    lastError: null,
+    cspBlocked: false,
+    autoSync: (() => { try { return localStorage.getItem(CLOUD_AUTO_KEY) !== '0'; } catch (e) { return true; } })(),
+
+    getClientId() {
+      try { return (localStorage.getItem(GOOGLE_CLIENT_ID_KEY) || '').trim(); } catch (e) { return ''; }
+    },
+    setClientId(val) {
+      try { localStorage.setItem(GOOGLE_CLIENT_ID_KEY, (val || '').trim()); } catch (e) {}
+    },
+    setAutoSync(enabled) {
+      this.autoSync = Boolean(enabled);
+      try { localStorage.setItem(CLOUD_AUTO_KEY, this.autoSync ? '1' : '0'); } catch (e) {}
+    },
+    isSignedIn() {
+      return Boolean(this.accessToken && this.user);
+    },
+    refreshModalIfOpen() {
+      if (document.getElementById('pvSaveCloudRoot')) openSaveCloudModal();
+    },
+
+    loadGsiScript() {
+      return new Promise((resolve, reject) => {
+        if (window.google && window.google.accounts && window.google.accounts.oauth2) {
+          this.cspBlocked = false;
+          return resolve();
+        }
+        const existing = document.getElementById('pv-gsi-script');
+        if (existing) existing.remove();
+        let settled = false;
+        const done = (err) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          if (err) { this.cspBlocked = true; reject(err); }
+          else { this.cspBlocked = false; resolve(); }
+        };
+        const timer = setTimeout(() => done(new Error('CSP_OR_OFFLINE')), 5500);
+        const script = document.createElement('script');
+        script.id = 'pv-gsi-script';
+        script.src = GSI_SCRIPT_URL;
+        script.async = true;
+        script.defer = true;
+        script.onload = () => {
+          if (window.google && window.google.accounts && window.google.accounts.oauth2) done(null);
+          else done(new Error('CSP_OR_OFFLINE'));
+        };
+        script.onerror = () => done(new Error('CSP_OR_OFFLINE'));
+        document.head.appendChild(script);
+      });
+    },
+
+    async signIn() {
+      const clientId = this.getClientId();
+      this.lastError = null;
+      this.lastStatus = null;
+      if (!clientId) {
+        this.lastError = state.lang === 'zh'
+          ? '请先在上方填写并保存你的 Google OAuth Client ID。'
+          : 'Please enter and save your Google OAuth Client ID above first.';
+        this.refreshModalIfOpen();
+        return;
+      }
+      this.busy = true;
+      this.refreshModalIfOpen();
+      try {
+        await this.loadGsiScript();
+        const tokenResp = await new Promise((resolve, reject) => {
+          const client = window.google.accounts.oauth2.initTokenClient({
+            client_id: clientId,
+            scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+            callback: (resp) => {
+              if (resp && resp.access_token) resolve(resp);
+              else reject(new Error(resp?.error_description || resp?.error || 'Sign-in cancelled'));
+            },
+            error_callback: (err) => reject(new Error(err?.message || err?.type || 'Popup blocked or closed'))
+          });
+          client.requestAccessToken({ prompt: 'select_account' });
+        });
+        this.accessToken = tokenResp.access_token;
+        const uResp = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${this.accessToken}` }
+        });
+        if (uResp.ok) {
+          const u = await uResp.json();
+          this.user = { name: u.name || u.email || 'Google User', email: u.email || '', picture: u.picture || '' };
+        } else {
+          this.user = { name: 'Google Account', email: '', picture: '' };
+        }
+        await this.findCloudSave();
+        this.lastStatus = state.lang === 'zh' ? '✅ Google 账号已连接！' : '✅ Connected to Google!';
+      } catch (e) {
+        if (e && e.message === 'CSP_OR_OFFLINE') {
+          this.cspBlocked = true;
+          this.lastError = T().modals.cloudCspNotice;
+        } else {
+          this.lastError = (state.lang === 'zh' ? '登录失败：' : 'Sign-in failed: ') + (e?.message || e);
+        }
+      } finally {
+        this.busy = false;
+        this.refreshModalIfOpen();
+      }
+    },
+
+    signOut() {
+      try {
+        if (this.accessToken && window.google?.accounts?.oauth2?.revoke) {
+          window.google.accounts.oauth2.revoke(this.accessToken, () => {});
+        }
+      } catch (e) {}
+      this.accessToken = null;
+      this.user = null;
+      this.fileId = null;
+      this.cloudUpdatedAt = null;
+      this.lastError = null;
+      this.lastStatus = null;
+      this.refreshModalIfOpen();
+    },
+
+    async findCloudSave() {
+      if (!this.accessToken) return null;
+      const q = encodeURIComponent(`name='${CLOUD_FILE_NAME}' and trashed=false`);
+      const resp = await fetch(
+        `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=${q}&fields=files(id,name,modifiedTime)&orderBy=modifiedTime%20desc`,
+        { headers: { Authorization: `Bearer ${this.accessToken}` } }
+      );
+      if (resp.status === 401) {
+        this.signOut();
+        throw new Error(state.lang === 'zh' ? '登录已过期，请重新登录 Google 账号。' : 'Session expired—please sign in again.');
+      }
+      if (!resp.ok) throw new Error(`Drive API ${resp.status}`);
+      const data = await resp.json();
+      const first = (data.files && data.files[0]) || null;
+      this.fileId = first ? first.id : null;
+      this.cloudUpdatedAt = first ? first.modifiedTime : null;
+      return first;
+    },
+
+    async uploadSave(silent = false) {
+      if (!this.accessToken) return false;
+      if (!silent) { this.busy = true; this.lastError = null; this.lastStatus = null; this.refreshModalIfOpen(); }
+      try {
+        if (!this.fileId) await this.findCloudSave();
+        state.lastSavedAt = new Date().toISOString();
+        const metadata = this.fileId
+          ? { name: CLOUD_FILE_NAME, mimeType: 'application/json' }
+          : { name: CLOUD_FILE_NAME, parents: ['appDataFolder'], mimeType: 'application/json' };
+        const boundary = 'pv_cloud_boundary_7f9a2';
+        const body =
+          `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n` +
+          `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(state)}\r\n` +
+          `--${boundary}--`;
+        const url = this.fileId
+          ? `https://www.googleapis.com/upload/drive/v3/files/${this.fileId}?uploadType=multipart&fields=id,modifiedTime`
+          : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,modifiedTime`;
+        const resp = await fetch(url, {
+          method: this.fileId ? 'PATCH' : 'POST',
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            'Content-Type': `multipart/related; boundary=${boundary}`
+          },
+          body
+        });
+        if (resp.status === 401) {
+          this.signOut();
+          throw new Error(state.lang === 'zh' ? '登录已过期，请重新登录。' : 'Session expired—please sign in again.');
+        }
+        if (!resp.ok) throw new Error(`Upload error ${resp.status}`);
+        const saved = await resp.json();
+        this.fileId = saved.id;
+        this.cloudUpdatedAt = saved.modifiedTime || state.lastSavedAt;
+        if (!silent) {
+          this.lastStatus = state.lang === 'zh' ? '☁️ 已上传到 Google 云端！' : '☁️ Uploaded to Google Cloud!';
+          AudioFX.coin();
+        }
+        return true;
+      } catch (e) {
+        if (!silent) this.lastError = (state.lang === 'zh' ? '上传失败：' : 'Upload failed: ') + (e?.message || e);
+        return false;
+      } finally {
+        if (!silent) { this.busy = false; this.refreshModalIfOpen(); }
+      }
+    },
+
+    async restoreSave() {
+      if (!this.accessToken) return false;
+      this.busy = true;
+      this.lastError = null;
+      this.lastStatus = null;
+      this.refreshModalIfOpen();
+      try {
+        const meta = await this.findCloudSave();
+        if (!meta) {
+          this.lastError = T().modals.cloudNotFound;
+          return false;
+        }
+        const resp = await fetch(`https://www.googleapis.com/drive/v3/files/${meta.id}?alt=media`, {
+          headers: { Authorization: `Bearer ${this.accessToken}` }
+        });
+        if (!resp.ok) throw new Error(`Download error ${resp.status}`);
+        const parsed = await resp.json();
+        if (!applyRestoredState(parsed)) throw new Error(T().modals.importErr);
+        this.lastStatus = state.lang === 'zh' ? '✅ 已从 Google 云端恢复存档！' : '✅ Restored save from Google Cloud!';
+        AudioFX.morning();
+        addFloatText(state.player.x, state.player.y - 28, '☁️ OK!', '#60a5fa');
+        return true;
+      } catch (e) {
+        this.lastError = (state.lang === 'zh' ? '恢复失败：' : 'Restore failed: ') + (e?.message || e);
+        return false;
+      } finally {
+        this.busy = false;
+        this.refreshModalIfOpen();
+      }
+    }
+  };
+
+  function exportSaveJSON() {
+    saveState(true, true);
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pocket-valley-${getSeason().id}-day${state.day}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    AudioFX.ui();
+  }
+
+  function handleImportFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(String(reader.result || ''));
+        if (applyRestoredState(parsed)) {
+          AudioFX.morning();
+          GoogleCloudSave.lastError = null;
+          GoogleCloudSave.lastStatus = T().modals.importOk;
+          addFloatText(state.player.x, state.player.y - 28, T().modals.importOk, '#34d399');
+          if (document.getElementById('pvSaveCloudRoot')) openSaveCloudModal();
+        } else {
+          GoogleCloudSave.lastError = T().modals.importErr;
+          if (document.getElementById('pvSaveCloudRoot')) openSaveCloudModal();
+        }
+      } catch (e) {
+        GoogleCloudSave.lastError = T().modals.importErr;
+        if (document.getElementById('pvSaveCloudRoot')) openSaveCloudModal();
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function openSaveCloudModal() {
+    const m = T().modals;
+    const g = GoogleCloudSave;
+    const clientId = g.getClientId();
+    const localTime = formatCloudTimestamp(state.lastSavedAt) || (state.lang === 'zh' ? '刚刚' : 'Just now');
+    const signedIn = g.isSignedIn();
+    const escapedClientId = clientId.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
+    const cloudBlock = signedIn
+      ? `<div class="rounded-xl bg-[#eef7ee] border border-[#9ac49a] p-2.5 space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <div class="text-xs font-bold text-[#2e5e32]">
+              🟢 ${g.user.name} ${g.user.email ? `<span class="font-normal text-[#4f7a53]">(${g.user.email})</span>` : ''}
+            </div>
+            <button id="btnCloudSignOut" class="px-2 py-1 rounded-lg bg-white border border-[#c8a97e] text-[11px] font-bold text-[#6d4f35] cursor-pointer">${m.cloudSignOutBtn}</button>
+          </div>
+          <div class="text-[11px] text-[#456847]">
+            ${g.cloudUpdatedAt ? m.cloudSynced(formatCloudTimestamp(g.cloudUpdatedAt)) : m.cloudNotFound}
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button id="btnCloudUpload" ${g.busy ? 'disabled' : ''} class="btn-sage px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer disabled:opacity-50">${m.cloudUploadBtn}</button>
+            <button id="btnCloudRestore" ${g.busy ? 'disabled' : ''} class="btn-honey px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer disabled:opacity-50">${m.cloudRestoreBtn}</button>
+          </div>
+          <label class="flex items-center gap-1.5 text-[11px] text-[#4d3520] cursor-pointer pt-0.5">
+            <input id="chkCloudAuto" type="checkbox" ${g.autoSync ? 'checked' : ''} />
+            <span>${m.cloudAutoLabel}</span>
+          </label>
+        </div>`
+      : `<div class="space-y-2">
+          <label class="block text-[11px] font-bold text-[#6d4f35]">${m.cloudClientIdLabel}</label>
+          <div class="flex gap-1.5">
+            <input id="inpGoogleClientId" type="text" value="${escapedClientId}" placeholder="${m.cloudClientIdPh}" class="flex-1 px-2.5 py-1.5 rounded-lg bg-white border border-[#c8a97e] text-xs text-[#3b2919]" />
+            <button id="btnSaveClientId" class="px-2.5 py-1.5 rounded-lg bg-[#e8d5b3] border border-[#b58d60] font-bold text-xs text-[#4d3520] cursor-pointer whitespace-nowrap">${m.cloudSaveIdBtn}</button>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button id="btnCloudSignIn" ${g.busy ? 'disabled' : ''} class="btn-sage px-3.5 py-1.5 rounded-xl font-bold text-xs cursor-pointer disabled:opacity-50">${g.busy ? '⏳ ...' : m.cloudSignInBtn}</button>
+          </div>
+          <details class="rounded-lg bg-[#f6ebd4] border border-[#d9c099] px-2.5 py-1.5">
+            <summary class="text-[11px] font-bold text-[#7c5328] cursor-pointer">${m.cloudSetupToggle}</summary>
+            ${m.cloudSetupSteps}
+          </details>
+        </div>`;
+
+    const body = `
+      <div id="pvSaveCloudRoot" class="space-y-3 text-xs">
+        <div class="rounded-xl bg-[#fbf2df] border border-[#d6bc93] p-3 space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <div class="font-extrabold text-[#4d3520]">${m.saveLocalTitle}</div>
+            <span class="text-[11px] font-bold text-[#4a7c4d]">✓ ${localTime}</span>
+          </div>
+          <p class="text-[11px] text-[#6d4f35] leading-relaxed">${m.saveLocalDesc}</p>
+          <button id="btnSaveLocalNow" class="btn-honey px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${m.saveNowBtn}</button>
+        </div>
+
+        <div class="rounded-xl bg-[#fbf2df] border border-[#d6bc93] p-3 space-y-2">
+          <div class="font-extrabold text-[#4d3520]">${m.cloudTitle}</div>
+          <p class="text-[11px] text-[#6d4f35] leading-relaxed">${m.cloudDesc}</p>
+          ${g.lastStatus ? `<div class="rounded-lg bg-[#e5f5e5] border border-[#96c496] px-2.5 py-1.5 text-[11px] font-bold text-[#2f6333]">${g.lastStatus}</div>` : ''}
+          ${g.lastError ? `<div class="rounded-lg bg-[#fdecec] border border-[#e3a3a3] px-2.5 py-1.5 text-[11px] font-bold text-[#8a2d2d]">${g.lastError}</div>` : ''}
+          ${cloudBlock}
+        </div>
+
+        <div class="rounded-xl bg-[#fbf2df] border border-[#d6bc93] p-3 space-y-2">
+          <div class="font-extrabold text-[#4d3520]">${m.backupTitle}</div>
+          <div class="flex flex-wrap gap-2">
+            <button id="btnExportSave" class="px-3 py-1.5 rounded-xl bg-[#e8d5b3] border border-[#b58d60] font-bold text-xs text-[#4d3520] cursor-pointer">${m.exportBtn}</button>
+            <button id="btnImportSave" class="px-3 py-1.5 rounded-xl bg-[#e8d5b3] border border-[#b58d60] font-bold text-xs text-[#4d3520] cursor-pointer">${m.importBtn}</button>
+          </div>
+        </div>
+      </div>`;
+
+    openModal('💾', m.saveTitle, body, `<button id="btnCloseSaveCloud" class="btn-honey px-4 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${m.backToFarm}</button>`);
+    document.getElementById('btnCloseSaveCloud').addEventListener('click', closeModal);
+
+    document.getElementById('btnSaveLocalNow').addEventListener('click', () => {
+      saveState(false, false);
+      GoogleCloudSave.lastError = null;
+      GoogleCloudSave.lastStatus = m.savedNowToast;
+      AudioFX.ui();
+      openSaveCloudModal();
+    });
+
+    const btnSaveId = document.getElementById('btnSaveClientId');
+    if (btnSaveId) {
+      btnSaveId.addEventListener('click', () => {
+        const val = document.getElementById('inpGoogleClientId').value.trim();
+        GoogleCloudSave.setClientId(val);
+        GoogleCloudSave.lastError = null;
+        GoogleCloudSave.lastStatus = state.lang === 'zh' ? '✅ Client ID 已保存！' : '✅ Client ID saved!';
+        AudioFX.ui();
+        openSaveCloudModal();
+      });
+    }
+
+    const btnSignIn = document.getElementById('btnCloudSignIn');
+    if (btnSignIn) {
+      btnSignIn.addEventListener('click', () => {
+        const inp = document.getElementById('inpGoogleClientId');
+        if (inp && inp.value.trim()) GoogleCloudSave.setClientId(inp.value.trim());
+        GoogleCloudSave.signIn();
+      });
+    }
+
+    const btnSignOut = document.getElementById('btnCloudSignOut');
+    if (btnSignOut) btnSignOut.addEventListener('click', () => GoogleCloudSave.signOut());
+
+    const btnUpload = document.getElementById('btnCloudUpload');
+    if (btnUpload) btnUpload.addEventListener('click', () => GoogleCloudSave.uploadSave(false));
+
+    const btnRestore = document.getElementById('btnCloudRestore');
+    if (btnRestore) btnRestore.addEventListener('click', () => GoogleCloudSave.restoreSave());
+
+    const chkAuto = document.getElementById('chkCloudAuto');
+    if (chkAuto) chkAuto.addEventListener('change', (e) => GoogleCloudSave.setAutoSync(e.target.checked));
+
+    document.getElementById('btnExportSave').addEventListener('click', exportSaveJSON);
+    document.getElementById('btnImportSave').addEventListener('click', () => {
+      const fi = document.getElementById('importSaveFile');
+      if (fi) { fi.value = ''; fi.click(); }
+    });
   }
 
   function T() { return I18N[state.lang === 'en' ? 'en' : 'zh']; }
   function L(obj) { return obj[state.lang === 'en' ? 'en' : 'zh']; }
   function getSeason() { return SEASONS[state.seasonIdx % SEASONS.length]; }
   function getSeasonName() { return L(getSeason().name); }
+  function isWinter(sIdx = state.seasonIdx) { return SEASONS[sIdx % SEASONS.length].id === 'winter'; }
+  function getWeatherKey(w = state.weather, sIdx = state.seasonIdx) { return (w === 'rainy' && isWinter(sIdx)) ? 'snowy' : (w || 'sunny'); }
+  function getWeatherIcon(w = state.weather, sIdx = state.seasonIdx) {
+    const k = getWeatherKey(w, sIdx);
+    return ({ sunny: '☀️', cloudy: '☁️', breezy: '🍃', rainy: '🌧️', snowy: '❄️' })[k] || '☀️';
+  }
   function getDress() { return DRESS_THEMES[state.dressIdx % DRESS_THEMES.length]; }
   function getCanCapacity() { return state.canLevel === 1 ? 20 : state.canLevel === 2 ? 36 : 60; }
   function getTileData(x, y) { return state.farm[`${x},${y}`] || null; }
@@ -1211,8 +2078,10 @@
 
   function getItemMeta(id) {
     if (CROPS[id]) return { ...CROPS[id], source: 'crop' };
+    if (FISH[id]) return { ...FISH[id], source: 'fish' };
     if (ITEMS[id]) return { ...ITEMS[id], source: ITEMS[id].kind };
     if (RECIPE_MAP[id]) return { ...RECIPE_MAP[id], source: 'dish' };
+    if (TAG_INGREDIENTS[id]) return { ...TAG_INGREDIENTS[id], source: 'tag' };
     return null;
   }
 
@@ -1220,6 +2089,11 @@
     if (CROPS[id]) {
       let val = CROPS[id].sellPrice;
       if (getSeason().bonus.includes(id)) val = Math.round(val * 1.2);
+      if (quality === 1) val = Math.round(val * 1.5);
+      return val;
+    }
+    if (FISH[id]) {
+      let val = FISH[id].sellPrice;
       if (quality === 1) val = Math.round(val * 1.5);
       return val;
     }
@@ -1232,12 +2106,14 @@
     return 0;
   }
 
-  // Ingredient counting & consumption for cooking (works across crops, produce, and bought pantry!)
+  // Ingredient counting & consumption for cooking (supports crops, fish, produce, pantry, and flexible tags!)
   function getAvailableIngredientCount(ingId) {
+    if (TAG_INGREDIENTS[ingId]) {
+      return TAG_INGREDIENTS[ingId].ids.reduce((sum, subId) => sum + getAvailableIngredientCount(subId), 0);
+    }
     if (ITEMS[ingId] && ITEMS[ingId].kind === 'pantry') {
       return state.pantry[ingId] || 0;
     }
-    // Crops & produce (egg, milk, duckEgg, turnip, etc.): count normal + gold quality in satchel (+ pantry fallback if bought)
     const normal = state.satchel[`${ingId}_0`] || 0;
     const gold = state.satchel[`${ingId}_1`] || 0;
     const pantryExtra = state.pantry[ingId] || 0;
@@ -1246,7 +2122,20 @@
 
   function consumeIngredient(ingId, qty) {
     let rem = qty;
-    // Prefer bought pantry stock first, then normal satchel, then gold satchel
+    if (TAG_INGREDIENTS[ingId]) {
+      // Consume lowest-value matching item first to protect rare fish like Golden Carp!
+      const sorted = [...TAG_INGREDIENTS[ingId].ids].sort((a, b) => getSellValue(a, 0) - getSellValue(b, 0));
+      for (const subId of sorted) {
+        if (rem <= 0) break;
+        const avail = getAvailableIngredientCount(subId);
+        if (avail > 0) {
+          const take = Math.min(rem, avail);
+          consumeIngredient(subId, take);
+          rem -= take;
+        }
+      }
+      return;
+    }
     if (state.pantry[ingId]) {
       const take = Math.min(rem, state.pantry[ingId]);
       state.pantry[ingId] -= take;
@@ -1273,7 +2162,7 @@
   }
 
   // =========================================================================
-  // HOTBAR SLOTS (5 tools/placeables + 10 seeds = 15 clean slots!)
+  // HOTBAR SLOTS (6 tools/placeables + 10 seeds = 16 clean slots!)
   // =========================================================================
   function getAllHotbarSlots() {
     const tr = T().tools;
@@ -1286,6 +2175,7 @@
       { id: 'hoe', kind: 'tool', label: hoeName, icon: '⛏️', count: null, desc: `${hoeName} (Lv.${state.hoeLevel}) — ${tr.hoeDesc[state.hoeLevel - 1]}` },
       { id: 'can', kind: 'tool', label: canName, icon: '🚿', count: `${state.water}`, desc: `${canName} (${state.water}/${getCanCapacity()}) — ${tr.canDesc[state.canLevel - 1]}` },
       { id: 'scythe', kind: 'tool', label: tr.scythe, icon: '🌿', count: null, desc: `${tr.scythe} — ${tr.scytheDesc}` },
+      { id: 'rod', kind: 'tool', label: tr.rod, icon: '🎣', count: null, desc: tr.rodDesc },
       { id: 'sprinkler', kind: 'placeable', label: tr.sprinkler, icon: '💦', count: sprCount, desc: tr.sprinklerDesc(sprCount) },
       { id: 'lantern', kind: 'placeable', label: tr.lantern, icon: '🏮', count: lanCount, desc: tr.lanternDesc(lanCount) }
     ];
@@ -1335,11 +2225,59 @@
   let modalOpen = false;
   let isTransitioning = false;
 
+  // Fishing Mini-game State & Pond Fish Shadows
+  const fishing = {
+    phase: 'idle', // 'idle' | 'waiting' | 'bite' | 'reeling'
+    bobberX: 0, bobberY: 0,
+    timer: 0,
+    fishId: null,
+    barPos: 0.5,      // 0 (bottom) .. 1 (top)
+    barVel: 0,
+    barHeight: 0.27,  // forgiving cozy green zone height
+    fishPos: 0.45,
+    fishTarget: 0.5,
+    fishWait: 0,
+    progress: 0.28,
+    hold: false
+  };
+  const pondFishShadows = [
+    { x: 19.2 * TILE, y: 10.6 * TILE, ang: 0.4, speed: 12, phase: 0, size: 1.0 },
+    { x: 20.4 * TILE, y: 11.8 * TILE, ang: 2.5, speed: 9, phase: 2.1, size: 0.8 },
+    { x: 19.6 * TILE, y: 12.2 * TILE, ang: 4.1, speed: 14, phase: 4.0, size: 1.15 }
+  ];
+
+  function getSelectedSlot() {
+    const all = getAllHotbarSlots().all;
+    return all[state.selectedSlot] || all[0];
+  }
+  function cancelFishing() {
+    fishing.phase = 'idle';
+    fishing.hold = false;
+    fishing.fishId = null;
+  }
+
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modalOpen) { closeModal(); return; }
+    if (e.key === 'Escape') {
+      if (modalOpen) { closeModal(); return; }
+      if (fishing.phase !== 'idle') { cancelFishing(); AudioFX.ui(); return; }
+    }
     if (modalOpen || isTransitioning) return;
     const k = e.key.toLowerCase();
     if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k) || e.key === ' ') e.preventDefault();
+
+    // Fishing active controls
+    if (fishing.phase === 'reeling') {
+      if (k === ' ') fishing.hold = true;
+      return;
+    }
+    if (fishing.phase === 'bite') {
+      if (k === ' ' || k === 'e') { hookBitingFish(); return; }
+    }
+    if (fishing.phase === 'waiting') {
+      if (['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(k)) { cancelFishing(); }
+      else if (k === ' ' || k === 'e') { cancelFishing(); AudioFX.ui(); return; }
+    }
+
     keys[k] = true;
     if (['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(k)) walkTarget = null;
 
@@ -1349,10 +2287,20 @@
     else if (k === 'e') performSmartInteract();
     else if (k === 'b') state.area === 'pasture' ? openRanchShopModal() : openShopModal();
     else if (k === 'c') openKitchenModal();
+    else if (k === 'f') openFishDexModal();
     else if (k === 'i' || k === 'tab') { e.preventDefault(); openSatchelModal(); }
     else if (k === 'm') toggleSound();
   });
-  window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+  window.addEventListener('keyup', (e) => {
+    const k = e.key.toLowerCase();
+    keys[k] = false;
+    if (k === ' ') fishing.hold = false;
+  });
+  window.addEventListener('pointerup', () => { fishing.hold = false; });
+  window.addEventListener('pointercancel', () => { fishing.hold = false; });
+  window.addEventListener('mouseup', () => { fishing.hold = false; });
+  window.addEventListener('touchend', () => { fishing.hold = false; }, { passive: true });
+  window.addEventListener('blur', () => { fishing.hold = false; for (const k in keys) keys[k] = false; });
 
   canvas.addEventListener('mousemove', (e) => {
     const rect = canvas.getBoundingClientRect();
@@ -1362,16 +2310,29 @@
   });
   canvas.addEventListener('mouseleave', () => { mouseTile.inside = false; });
   canvas.addEventListener('wheel', (e) => {
-    if (modalOpen) return;
+    if (modalOpen || fishing.phase !== 'idle') return;
     e.preventDefault();
     const len = getAllHotbarSlots().all.length;
     selectSlot((state.selectedSlot + (e.deltaY > 0 ? 1 : -1) + len) % len);
   }, { passive: false });
-  canvas.addEventListener('contextmenu', (e) => { e.preventDefault(); if (!modalOpen && !isTransitioning) handleCanvasClick(e, true); });
-  canvas.addEventListener('mousedown', (e) => { if (!modalOpen && !isTransitioning && e.button === 0) handleCanvasClick(e, false); });
+  canvas.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    if (!modalOpen && !isTransitioning && fishing.phase === 'idle') handleCanvasClick(e, true);
+  });
+  canvas.addEventListener('pointerdown', (e) => {
+    if (modalOpen || isTransitioning) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (e.pointerType === 'touch') e.preventDefault();
+    AudioFX.ensure();
+    if (fishing.phase === 'reeling') { fishing.hold = true; return; }
+    if (fishing.phase === 'bite') { hookBitingFish(); return; }
+    if (fishing.phase === 'waiting') { cancelFishing(); AudioFX.ui(); return; }
+    handleCanvasClick(e, false);
+  });
 
   function switchArea(targetArea, spawnX = null, spawnY = null) {
     if (state.area === targetArea || isTransitioning) return;
+    cancelFishing();
     state.area = targetArea;
     walkTarget = null;
     particles.length = 0;
@@ -1382,12 +2343,15 @@
     } else {
       state.player.x = 22.2 * TILE; state.player.y = 5.6 * TILE; state.player.dir = 'left';
     }
+    syncPetNearPlayer();
     AudioFX.ui();
     updateHUD();
   }
 
   function handleCanvasClick(e, isRightClick) {
     AudioFX.ensure();
+    const isTouch = e.pointerType === 'touch';
+    const hitPad = isTouch ? 12 : 0;
     const rect = canvas.getBoundingClientRect();
     const sx = (e.clientX - rect.left) * (CANVAS_W / rect.width);
     const sy = (e.clientY - rect.top) * (CANVAS_H / rect.height);
@@ -1397,15 +2361,22 @@
     const ptx = state.player.x / TILE, pty = state.player.y / TILE;
     const dist = Math.hypot(tx + 0.5 - ptx, ty + 0.5 - pty);
 
+    // Check Farm Pet Companion clicked directly (either Farm or Pasture!)
+    if (state.pet && state.pet.type && Math.hypot(petAI.x - sx, petAI.y - sy) < 22 + hitPad) {
+      if (Math.hypot(petAI.x - state.player.x, petAI.y - state.player.y) < 85) interactWithPet();
+      else walkTarget = { x: petAI.x, y: petAI.y, stopDist: 0.9, onArrive: () => interactWithPet() };
+      return;
+    }
+
     // Check Pasture drops or Animals clicked directly!
     if (state.area === 'pasture') {
-      const drop = state.pastureDrops.find(d => Math.hypot(d.x - sx, d.y - sy) < 22);
+      const drop = state.pastureDrops.find(d => Math.hypot(d.x - sx, d.y - sy) < 22 + hitPad);
       if (drop) {
         if (Math.hypot(drop.x - state.player.x, drop.y - state.player.y) < 70) collectDrop(drop.id);
         else walkTarget = { x: drop.x, y: drop.y, stopDist: 0.4, onArrive: () => collectDrop(drop.id) };
         return;
       }
-      const ani = state.animals.find(a => Math.hypot(a.x - sx, a.y - sy) < 24);
+      const ani = state.animals.find(a => Math.hypot(a.x - sx, a.y - sy) < 24 + hitPad);
       if (ani) {
         if (Math.hypot(ani.x - state.player.x, ani.y - state.player.y) < 75) petOrFeedAnimal(ani);
         else walkTarget = { x: ani.x, y: ani.y, stopDist: 0.9, onArrive: () => petOrFeedAnimal(ani) };
@@ -1424,8 +2395,21 @@
     }
 
     if (curMap()[ty][tx] === TILE_TYPE.WATER) {
-      if (dist <= 2.6) { faceToward(tx, ty); refillWater(); }
-      else walkTarget = { x: (state.area === 'farm' ? 17.5 : 17.2) * TILE, y: 11.5 * TILE, onArrive: () => { faceToward(18, 11); refillWater(); } };
+      const wantFish = getSelectedSlot().id === 'rod';
+      if (dist <= 2.9) {
+        faceToward(tx, ty);
+        if (wantFish) startFishingCast(tx, ty);
+        else refillWater();
+      } else {
+        walkTarget = {
+          x: (state.area === 'farm' ? 17.8 : 17.3) * TILE, y: 11.5 * TILE,
+          onArrive: () => {
+            faceToward(19, 11);
+            if (wantFish) startFishingCast(19, 11);
+            else refillWater();
+          }
+        };
+      }
       return;
     }
 
@@ -1467,6 +2451,7 @@
   function getLandmarkAt(tx, ty) {
     if (state.area === 'farm') {
       if (tx >= 2 && tx <= 5 && ty >= 2 && ty <= 4) return 'cottage';
+      if (tx === 2 && ty === 5) return 'petBed';
       if (tx === 6 && ty === 4) return 'mailbox';
       if (tx === 7 && ty === 4) return 'shipping';
       if (tx >= 16 && tx <= 20 && ty >= 2 && ty <= 4) return 'shop';
@@ -1482,7 +2467,7 @@
 
   function getLandmarkStandTile(lm) {
     const map = {
-      cottage: { x: 3.5, y: 5 }, mailbox: { x: 6, y: 5 }, shipping: { x: 7, y: 5 },
+      cottage: { x: 3.5, y: 5 }, petBed: { x: 3, y: 5.5 }, mailbox: { x: 6, y: 5 }, shipping: { x: 7, y: 5 },
       shop: { x: 18, y: 5 }, gateToPasture: { x: 22.2, y: 5.5 },
       barn: { x: 5, y: 5 }, trough: { x: 9.5, y: 5 }, ranchShop: { x: 17.5, y: 5 },
       gateToFarm: { x: 1.5, y: 5.5 }
@@ -1492,6 +2477,7 @@
 
   function triggerLandmark(lm) {
     if (lm === 'cottage') openCottageModal();
+    else if (lm === 'petBed') openPetModal();
     else if (lm === 'shop') openShopModal();
     else if (lm === 'shipping') shipAllFromSatchel();
     else if (lm === 'mailbox') openMailboxModal();
@@ -1502,22 +2488,352 @@
     else if (lm === 'ranchShop') openRanchShopModal();
   }
 
+  // =========================================================================
+  // FARM PET COMPANION SYSTEM (Adoption, Follow/Idle AI, Affection & Gifts)
+  // =========================================================================
+  function interactWithPet() {
+    if (!state.pet || !state.pet.type) { openPetModal(); return; }
+    const meta = PETS[state.pet.type];
+    const pname = L(meta.name);
+    if (state.pet.hasGift) {
+      claimPetGift();
+      return;
+    }
+    if (!state.pet.pettedToday) {
+      state.pet.pettedToday = true;
+      state.pet.affection = (state.pet.affection || 0) + 1;
+      AudioFX.pet();
+      spawnParticles(petAI.x, petAI.y - 12, '#ff8fab', 12, 1.9, 3.4);
+      addFloatText(petAI.x, petAI.y - 24, T().floats.petAffectionUp(pname, state.pet.affection), '#ffd6e0');
+      saveState(true);
+    } else {
+      AudioFX.pet();
+      spawnParticles(petAI.x, petAI.y - 10, '#ffb3c6', 8, 1.5, 3.0);
+      addFloatText(petAI.x, petAI.y - 22, T().floats.petPurr(pname), '#ffe3ec');
+    }
+    petAI.idleMode = 'wag';
+    petAI.idleTimer = 1.5;
+  }
+
+  function claimPetGift() {
+    if (!state.pet || !state.pet.hasGift) return;
+    state.pet.hasGift = false;
+    const roll = Math.random();
+    let rewardLabel = '';
+    if (roll < 0.42) {
+      const coins = 18 + Math.floor(Math.random() * 22);
+      state.gold += coins;
+      state.lifetimeGold += coins;
+      rewardLabel = `🪙 +${coins}g`;
+    } else if (roll < 0.78) {
+      const pool = ['turnip', 'wheat', 'radish', 'carrot', 'tomato', 'strawberry'];
+      const cid = pool[Math.floor(Math.random() * pool.length)];
+      const qty = Math.random() < 0.4 ? 2 : 1;
+      state.seeds[cid] = (state.seeds[cid] || 0) + qty;
+      rewardLabel = `${CROPS[cid].emoji} ${L(CROPS[cid].name)} ×${qty}`;
+      renderHotbar();
+    } else {
+      // Sweet wildflower honey or wildflower gift -> honey jar!
+      state.pantry.honey = (state.pantry.honey || 0) + 1;
+      rewardLabel = `🍯 ${L(ITEMS.honey.name)} ×1`;
+    }
+    AudioFX.coin();
+    spawnParticles(petAI.x, petAI.y - 12, '#fde047', 14, 2.0, 3.2);
+    addFloatText(petAI.x, petAI.y - 26, T().floats.petGiftClaimed(rewardLabel), '#fef08a');
+    saveState(true);
+    updateHUD();
+  }
+
+  function updatePetAI(dt, playerMoved) {
+    if (!state.pet || !state.pet.type) return;
+    const dx = state.player.x - petAI.x;
+    const dy = (state.player.y + 4) - petAI.y;
+    const dist = Math.hypot(dx, dy);
+
+    if (playerMoved || dist > 44) {
+      petAI.idleTimer = 0;
+      petAI.idleMode = 'follow';
+      if (dist > 34) {
+        const speed = Math.min(132, 68 + (dist - 34) * 1.8) * dt;
+        const stepX = (dx / dist) * speed, stepY = (dy / dist) * speed;
+        petAI.x += stepX;
+        petAI.y += stepY;
+        if (Math.abs(dx) > 2) petAI.dir = dx >= 0 ? 1 : -1;
+        petAI.walkFrame += dt * 11;
+        petAI.walkAccum += Math.hypot(stepX, stepY);
+
+        // Once per day while strolling around, pet sniffs out a little gift!
+        if (!state.pet.giftFoundToday && petAI.walkAccum > 260) {
+          state.pet.giftFoundToday = true;
+          state.pet.hasGift = true;
+          AudioFX.harvest();
+          spawnParticles(petAI.x, petAI.y - 8, '#fef08a', 10, 1.7, 3);
+          addFloatText(petAI.x, petAI.y - 24, T().floats.petFoundGift(L(PETS[state.pet.type].name)), '#fef08a');
+          saveState(true);
+        }
+      } else {
+        petAI.walkFrame = 0;
+      }
+    } else {
+      petAI.walkFrame = 0;
+      petAI.idleTimer += dt;
+      // After standing still > 3 seconds, trigger cute idle behavior (nap / wag / butterfly chase)!
+      if (petAI.idleTimer > 3.0) {
+        if (petAI.idleMode === 'follow') {
+          const modes = ['nap', 'wag', 'butterfly'];
+          petAI.idleMode = modes[Math.floor(Math.random() * modes.length)];
+          petAI.idleCycleTimer = 6.5 + Math.random() * 4;
+        } else {
+          petAI.idleCycleTimer -= dt;
+          if (petAI.idleCycleTimer <= 0) {
+            const modes = ['nap', 'wag', 'butterfly'];
+            petAI.idleMode = modes[Math.floor(Math.random() * modes.length)];
+            petAI.idleCycleTimer = 6.5 + Math.random() * 4;
+          }
+        }
+      }
+      if (petAI.idleMode === 'butterfly') {
+        petAI.butterflyAngle += dt * 2.8;
+        petAI.dir = Math.cos(petAI.butterflyAngle) >= 0 ? 1 : -1;
+      }
+    }
+  }
+
+  function drawPetBed() {
+    const px = 2.5 * TILE, py = 5.45 * TILE;
+    // Soft shadow
+    ctx.fillStyle = 'rgba(56, 40, 25, 0.16)';
+    ctx.beginPath(); ctx.ellipse(px, py + 5, 14, 5.5, 0, 0, Math.PI * 2); ctx.fill();
+    // Woven wicker basket rim
+    ctx.fillStyle = '#c99763'; ctx.strokeStyle = INK; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.ellipse(px, py + 1, 13.5, 8.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    // Soft rose-cream cushion inside
+    ctx.fillStyle = '#fce1e4';
+    ctx.beginPath(); ctx.ellipse(px, py + 0.5, 9.5, 5.5, 0, 0, Math.PI * 2); ctx.fill();
+    // Inviting paw bubble before adoption!
+    if (!state.pet || !state.pet.type) {
+      const bob = Math.sin(animTime * 4) * 2.5;
+      ctx.fillStyle = '#fffdf5'; ctx.strokeStyle = '#e07a5f'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(px, py - 15 + bob, 9, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('🐾', px, py - 11.5 + bob);
+    }
+  }
+
+  // Hand-drawn storybook pet renderer (works on main canvas AND portrait mini-canvases!)
+  function drawPetSprite(c, type, x, y, dir = 1, walkFrame = 0, idleMode = 'follow', hasGift = false, scale = 1) {
+    const hopping = walkFrame > 0 ? Math.abs(Math.sin(walkFrame)) * (type === 'bunny' ? -4.2 : -2.2) : (idleMode === 'butterfly' ? Math.abs(Math.sin(animTime * 6)) * -3.0 : 0);
+    const isNap = idleMode === 'nap';
+    const wag = Math.sin(animTime * (idleMode === 'wag' ? 14 : 6)) * (idleMode === 'wag' ? 4 : 2);
+
+    c.save();
+    c.translate(x, y);
+    c.scale(scale, scale);
+
+    // Shadow
+    c.fillStyle = 'rgba(56, 40, 25, 0.2)';
+    c.beginPath(); c.ellipse(0, 5.5, 9.5, 3.6, 0, 0, Math.PI * 2); c.fill();
+
+    c.save();
+    c.translate(0, hopping);
+    c.scale(dir, 1);
+    c.strokeStyle = INK; c.lineWidth = 1.2;
+
+    if (type === 'calico') {
+      // Tail curling happily
+      c.strokeStyle = '#d98a4e'; c.lineWidth = 2.6; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(-7, 1); c.quadraticCurveTo(-13, -4 + wag * 0.5, -10, -9 + wag * 0.6); c.stroke();
+      c.lineCap = 'butt'; c.strokeStyle = INK; c.lineWidth = 1.2;
+      // Plump creamy calico body
+      c.fillStyle = '#fffdf7';
+      c.beginPath(); c.ellipse(0, isNap ? 2 : 0, isNap ? 9.5 : 8, isNap ? 5.5 : 6, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+      // Cute ginger & cocoa patches
+      c.fillStyle = '#eb9454'; c.beginPath(); c.ellipse(-3, -1, 3.5, 2.8, 0.3, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#6b4936'; c.beginPath(); c.ellipse(2, 1, 2.5, 2, -0.2, 0, Math.PI * 2); c.fill();
+      // Head
+      const hx = isNap ? 5 : 4.5, hy = isNap ? 0 : -6;
+      c.fillStyle = '#fffdf7'; c.beginPath(); c.arc(hx, hy, 5.6, 0, Math.PI * 2); c.fill(); c.stroke();
+      // Ears
+      c.fillStyle = '#eb9454';
+      c.beginPath(); c.moveTo(hx - 4, hy - 3); c.lineTo(hx - 5, hy - 9); c.lineTo(hx - 0.5, hy - 5); c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = '#6b4936';
+      c.beginPath(); c.moveTo(hx + 1, hy - 5); c.lineTo(hx + 5, hy - 9); c.lineTo(hx + 4.5, hy - 3); c.closePath(); c.fill(); c.stroke();
+      // Face
+      if (isNap) {
+        c.strokeStyle = INK; c.lineWidth = 1.1;
+        c.beginPath(); c.arc(hx + 2, hy, 1.5, 0.1 * Math.PI, 0.9 * Math.PI); c.stroke();
+      } else {
+        c.fillStyle = '#2d1c10'; c.beginPath(); c.arc(hx + 2.2, hy - 0.5, 1.2, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#f5a3b0'; c.beginPath(); c.arc(hx + 4.2, hy + 1.2, 1.1, 0, Math.PI * 2); c.fill();
+      }
+    } else if (type === 'corgi') {
+      // Fluffy wiggly nub tail
+      c.fillStyle = '#e8a258'; c.beginPath(); c.arc(-9.5, -1 + wag * 0.4, 3, 0, Math.PI * 2); c.fill(); c.stroke();
+      // Little paws
+      if (!isNap) {
+        c.fillStyle = '#fffdf7';
+        c.fillRect(-5, 3, 3, 3.5); c.fillRect(3, 3, 3, 3.5);
+      }
+      // Golden corgi loaf body + white chest
+      c.fillStyle = '#e8a258';
+      c.beginPath(); c.ellipse(-0.5, isNap ? 2 : 0.5, isNap ? 10 : 9, isNap ? 5.5 : 5.8, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.fillStyle = '#fffdf7';
+      c.beginPath(); c.ellipse(5, isNap ? 2.5 : 1.5, 4.2, 4.2, 0, 0, Math.PI * 2); c.fill();
+      // Head + big iconic Corgi ears
+      const hx = isNap ? 6 : 5.5, hy = isNap ? -0.5 : -6;
+      c.fillStyle = '#e8a258'; c.beginPath(); c.arc(hx, hy, 5.8, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.beginPath(); c.ellipse(hx - 3.5, hy - 6.8, 2.5, 4.6, -0.35, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.beginPath(); c.ellipse(hx + 2.5, hy - 7.2, 2.5, 4.6, 0.25, 0, Math.PI * 2); c.fill(); c.stroke();
+      // Cream muzzle & nose
+      c.fillStyle = '#fffdf7'; c.beginPath(); c.ellipse(hx + 3.5, hy + 1.5, 3.2, 2.2, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#3a2416'; c.beginPath(); c.arc(hx + 5.8, hy + 0.8, 1.3, 0, Math.PI * 2); c.fill();
+      if (isNap) {
+        c.strokeStyle = INK; c.lineWidth = 1.1; c.beginPath(); c.arc(hx + 1.8, hy - 0.8, 1.5, 0.1 * Math.PI, 0.9 * Math.PI); c.stroke();
+      } else {
+        c.fillStyle = '#2d1c10'; c.beginPath(); c.arc(hx + 1.8, hy - 1.2, 1.3, 0, Math.PI * 2); c.fill();
+      }
+    } else {
+      // Lop Bunny (垂耳兔)
+      // Cotton puff tail
+      c.fillStyle = '#ffffff'; c.beginPath(); c.arc(-7.5, 1 + wag * 0.2, 3.2, 0, Math.PI * 2); c.fill(); c.stroke();
+      // Round fluffy cream body
+      c.fillStyle = '#f8ecd8';
+      c.beginPath(); c.ellipse(0, isNap ? 2 : 0.5, isNap ? 8.8 : 7.6, isNap ? 5.5 : 6.2, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+      const hx = isNap ? 4.8 : 4.2, hy = isNap ? 0 : -5.8;
+      c.fillStyle = '#f8ecd8'; c.beginPath(); c.arc(hx, hy, 5.4, 0, Math.PI * 2); c.fill(); c.stroke();
+      // Iconic long floppy lop ears!
+      c.fillStyle = '#e8d2b5';
+      c.beginPath(); c.ellipse(hx - 2.6, hy + 2.2 + wag * 0.25, 2.6, 5.8, 0.25, 0, Math.PI * 2); c.fill(); c.stroke();
+      // Rosy nose & eye
+      c.fillStyle = '#f5a3b0'; c.beginPath(); c.arc(hx + 4.8, hy + 0.6, 1.2, 0, Math.PI * 2); c.fill();
+      if (isNap) {
+        c.strokeStyle = INK; c.lineWidth = 1.1; c.beginPath(); c.arc(hx + 1.8, hy - 0.8, 1.4, 0.1 * Math.PI, 0.9 * Math.PI); c.stroke();
+      } else {
+        c.fillStyle = '#3a2416'; c.beginPath(); c.arc(hx + 1.8, hy - 1, 1.25, 0, Math.PI * 2); c.fill();
+      }
+    }
+    c.restore();
+
+    // Idle visual cues: zZz when napping, fluttering butterfly when chasing!
+    if (isNap) {
+      const zBob = (animTime * 10) % 12;
+      c.fillStyle = '#fffdf5'; c.strokeStyle = '#5c4632'; c.lineWidth = 2;
+      c.font = 'bold 9px sans-serif'; c.textAlign = 'center';
+      c.strokeText('zZz', 8, -12 - zBob * 0.6); c.fillText('zZz', 8, -12 - zBob * 0.6);
+    } else if (idleMode === 'butterfly') {
+      const bx = Math.cos(petAI.butterflyAngle) * 18, by = -18 + Math.sin(petAI.butterflyAngle * 2) * 5;
+      const flap = Math.abs(Math.sin(animTime * 16));
+      c.fillStyle = '#ffccd5';
+      c.beginPath(); c.ellipse(bx - 2.5, by, 3.2 * flap + 1, 2.4, -0.3, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#ffe599';
+      c.beginPath(); c.ellipse(bx + 2.5, by, 3.2 * flap + 1, 2.4, 0.3, 0, Math.PI * 2); c.fill();
+    }
+
+    // Bouncing Gift Bubble when pet found a daily gift!
+    if (hasGift) {
+      const gb = Math.sin(animTime * 5) * 2.5;
+      c.fillStyle = '#fff9d6'; c.strokeStyle = '#d97706'; c.lineWidth = 1.6;
+      c.beginPath(); c.arc(0, -24 + gb, 9, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.font = '11px sans-serif'; c.textAlign = 'center';
+      c.fillText('🎁', 0, -20 + gb);
+    }
+    c.restore();
+  }
+
+  function openPetModal() {
+    AudioFX.ui();
+    const m = T().modals;
+    const hasPet = !!(state.pet && state.pet.type);
+
+    const petCards = PET_ORDER.map(pid => {
+      const p = PETS[pid], selected = hasPet && state.pet.type === pid;
+      return `
+        <div class="rounded-2xl p-2.5 bg-[#fffdf7] border-2 ${selected ? 'border-[#e07a5f] bg-[#fff5e4]' : 'border-[#d6ba91]'} flex flex-col items-center text-center gap-1.5">
+          <div class="rounded-xl p-1 bg-[#edf5e6] border border-[#cde0bd]">
+            <canvas id="petArt_${pid}" width="72" height="56"></canvas>
+          </div>
+          <div class="font-bold text-sm text-[#4a3525]">${p.emoji} ${L(p.name)}</div>
+          <p class="text-[11px] text-[#75583e] leading-snug">${L(p.desc)}</p>
+          <button data-adoptpet="${pid}" class="${selected ? 'btn-sage' : 'btn-peach'} w-full py-1.5 rounded-xl text-xs font-bold cursor-pointer">
+            ${selected ? m.owned : m.petChooseBtn}
+          </button>
+        </div>`;
+    }).join('');
+
+    let body = '';
+    if (!hasPet) {
+      body = `<p class="text-xs text-[#73563d]">${m.petAdoptSub}</p><div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">${petCards}</div>`;
+    } else {
+      const cur = PETS[state.pet.type];
+      const hearts = '💖'.repeat(Math.min(5, Math.max(1, Math.ceil((state.pet.affection || 1) / 2))));
+      const giftLine = state.pet.hasGift ? m.petGiftReady : state.pet.giftFoundToday ? m.petGiftDone : m.petGiftWait;
+      body = `
+        <div class="rounded-2xl p-3 bg-[#fffdf7] border border-[#d6ba91] flex items-center gap-3.5">
+          <div class="rounded-2xl p-1.5 bg-[#edf5e6] border border-[#cde0bd] shrink-0">
+            <canvas id="petArt_current" width="84" height="64"></canvas>
+          </div>
+          <div class="space-y-1 text-xs">
+            <div class="font-bold text-base text-[#4a3525]">${cur.emoji} ${L(cur.name)}</div>
+            <div><strong>${m.petAffection}:</strong> ${hearts} <span class="num-tabular font-bold">(${state.pet.affection || 0})</span></div>
+            <div class="text-[#6e5036]">${state.pet.pettedToday ? m.petTodayPetted : m.petTodayNotPetted}</div>
+            <div class="font-semibold text-amber-900">${giftLine}</div>
+          </div>
+        </div>
+        <div class="text-xs font-bold text-[#6e5036] pt-1">${m.petSwitchLabel}</div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">${petCards}</div>
+      `;
+    }
+
+    openModal('🐾', hasPet ? m.petStatusTitle : m.petAdoptTitle, body,
+      `<span class="text-[11px] opacity-75">🏡 ${T().areaFarm}</span>
+       <button id="btnClosePet" class="btn-peach px-4 py-1.5 rounded-xl text-xs font-bold cursor-pointer">${m.backToFarm}</button>`);
+
+    for (const pid of PET_ORDER) {
+      const cv = document.getElementById(`petArt_${pid}`);
+      if (cv) drawPetSprite(cv.getContext('2d'), pid, 36, 36, 1, 0, 'wag', false, 1.45);
+    }
+    const curCv = document.getElementById('petArt_current');
+    if (curCv && hasPet) drawPetSprite(curCv.getContext('2d'), state.pet.type, 42, 42, 1, 0, 'wag', false, 1.65);
+
+    document.querySelectorAll('[data-adoptpet]').forEach(b => b.addEventListener('click', () => {
+      const pid = b.dataset.adoptpet;
+      state.pet.type = pid;
+      syncPetNearPlayer();
+      AudioFX.harvest();
+      saveState(true);
+      closeModal();
+      spawnParticles(petAI.x, petAI.y - 10, '#ffb3c6', 14, 2.0, 3.5);
+      addFloatText(petAI.x, petAI.y - 26, T().floats.petAdopted(L(PETS[pid].name)), '#fef08a');
+    }));
+    document.getElementById('btnClosePet').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
+  }
+
   function getNearbyContext() {
     const ptx = state.player.x / TILE, pty = state.player.y / TILE;
     const faced = getFacedTile();
     const c = T().ctx;
 
+    if (fishing.phase === 'waiting') return { icon: '🎣', text: c.waitingFish, action: () => cancelFishing() };
+    if (fishing.phase === 'bite') return { icon: '❗', text: c.biteFish, action: () => hookBitingFish() };
+    if (fishing.phase === 'reeling') return { icon: '🐟', text: c.reelingFish, action: null };
+
+    // Companion pet nearby!
+    if (state.pet && state.pet.type && Math.hypot(petAI.x - state.player.x, petAI.y - state.player.y) < 46) {
+      const pname = L(PETS[state.pet.type].name);
+      if (state.pet.hasGift) return { icon: '🎁', text: c.petGift(pname), action: () => interactWithPet() };
+      if (!state.pet.pettedToday) return { icon: PETS[state.pet.type].emoji, text: c.petCompanion(pname), action: () => interactWithPet() };
+    }
+
     if (state.area === 'pasture') {
-      // Nearest collectible drop
       const drop = state.pastureDrops.find(d => Math.hypot(d.x - state.player.x, d.y - state.player.y) < 42);
       if (drop) return { icon: ITEMS[drop.itemId].emoji, text: c.collectDrop(L(ITEMS[drop.itemId].name)), action: () => collectDrop(drop.id) };
-      // Nearest animal
       const ani = state.animals.find(a => Math.hypot(a.x - state.player.x, a.y - state.player.y) < 44);
       if (ani) return { icon: ANIMALS[ani.type].emoji, text: c.petAnimal(L(ANIMALS[ani.type].name), ani.fed), action: () => petOrFeedAnimal(ani) };
     }
 
     const lm = getLandmarkAt(faced.x, faced.y);
     if (lm === 'cottage') return { icon: '🏡', text: c.cottage(state.kitchenUnlocked), action: () => openCottageModal() };
+    if (lm === 'petBed') return { icon: '🐾', text: (state.pet && state.pet.type) ? c.petBedOwned : c.petBedEmpty, action: () => openPetModal() };
     if (lm === 'shop') return { icon: '🌸', text: c.shop, action: () => openShopModal() };
     if (lm === 'ranchShop') return { icon: '🥛', text: c.ranchShop, action: () => openRanchShopModal() };
     if (lm === 'barn') return { icon: '🏠', text: c.barn, action: () => openBarnModal() };
@@ -1533,8 +2849,13 @@
     }
     if (lm === 'mailbox') return { icon: '📬', text: state.unreadMail ? c.mailUnread : c.mailRead, action: () => openMailboxModal() };
 
-    if (isNearWater(ptx, pty) && state.water < getCanCapacity()) {
-      return { icon: '💧', text: c.refill, action: () => refillWater() };
+    if (isNearWater(ptx, pty)) {
+      if (getSelectedSlot().id === 'rod') {
+        return { icon: '🎣', text: c.castRod, action: () => startFishingCast() };
+      }
+      if (state.water < getCanCapacity()) {
+        return { icon: '💧', text: c.refill, action: () => refillWater() };
+      }
     }
     if (state.area === 'farm') {
       const td = getTileData(faced.x, faced.y);
@@ -1545,13 +2866,21 @@
     return null;
   }
 
-  function isNearWater(ptx, pty) {
+  function findNearbyWaterTile(ptx, pty) {
     const cx = Math.floor(ptx), cy = Math.floor(pty), m = curMap();
-    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+    let best = null, bestD = 99;
+    for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
       const nx = cx + dx, ny = cy + dy;
-      if (nx >= 0 && nx < COLS && ny >= 0 && ny < ROWS && m[ny][nx] === TILE_TYPE.WATER) return true;
+      if (nx >= 0 && nx < COLS && ny >= 0 && ny < ROWS && m[ny][nx] === TILE_TYPE.WATER) {
+        const d = Math.hypot(nx + 0.5 - ptx, ny + 0.5 - pty);
+        if (d < bestD && d <= 2.4) { bestD = d; best = { x: nx, y: ny }; }
+      }
     }
-    return false;
+    return best;
+  }
+
+  function isNearWater(ptx, pty) {
+    return !!findNearbyWaterTile(ptx, pty);
   }
 
   function performSmartInteract() {
@@ -1564,7 +2893,11 @@
   function tryHarvestOrInteractTile(tx, ty) {
     const lm = getLandmarkAt(tx, ty);
     if (lm) { triggerLandmark(lm); return; }
-    if (tx >= 0 && tx < COLS && ty >= 0 && ty < ROWS && curMap()[ty][tx] === TILE_TYPE.WATER) { refillWater(); return; }
+    if (tx >= 0 && tx < COLS && ty >= 0 && ty < ROWS && curMap()[ty][tx] === TILE_TYPE.WATER) {
+      if (getSelectedSlot().id === 'rod') startFishingCast(tx, ty);
+      else refillWater();
+      return;
+    }
     if (state.area === 'farm') {
       const td = getTileData(tx, ty);
       if (td && td.crop && isCropRipe(td.crop)) { harvestTile(tx, ty); return; }
@@ -1577,6 +2910,312 @@
       }
       performPrimaryAction(tx, ty);
     }
+  }
+
+  // =========================================================================
+  // LOTUS POND FISHING SYSTEM (6 Species, Mini-Game, Fish Index & Art)
+  // =========================================================================
+  function pickPondFish() {
+    const season = getSeason().id;
+    const isNight = state.timeMinutes >= 19 * 60;
+    const isRain = state.weather === 'rainy';
+    const isSunnyOrBreezy = state.weather === 'sunny' || state.weather === 'breezy';
+
+    const pool = [];
+    for (const fid of FISH_ORDER) {
+      const f = FISH[fid];
+      if (fid === 'moonJelly' && !isNight) continue;
+      if (fid === 'koi' && !isSunnyOrBreezy) continue;
+      if (fid === 'rainbowTrout' && !(season === 'spring' || season === 'autumn' || isRain)) continue;
+      pool.push({ id: fid, w: f.rarity });
+    }
+    const totalW = pool.reduce((s, p) => s + p.w, 0);
+    let r = Math.random() * totalW;
+    for (const p of pool) { r -= p.w; if (r <= 0) return p.id; }
+    return 'riverPerch';
+  }
+
+  function startFishingCast(tx = null, ty = null) {
+    if (fishing.phase !== 'idle') return;
+    const wt = (tx !== null && ty !== null && curMap()[ty]?.[tx] === TILE_TYPE.WATER)
+      ? { x: tx, y: ty }
+      : findNearbyWaterTile(state.player.x / TILE, state.player.y / TILE);
+    if (!wt) {
+      AudioFX.error();
+      addFloatText(state.player.x, state.player.y - 24, T().floats.needPond, '#bae6fd');
+      return;
+    }
+    if (!spendEnergy(2)) return;
+    faceToward(wt.x, wt.y);
+    fishing.phase = 'waiting';
+    fishing.bobberX = (wt.x + 0.35 + Math.random() * 0.35) * TILE;
+    fishing.bobberY = (wt.y + 0.35 + Math.random() * 0.35) * TILE;
+    fishing.timer = 2.0 + Math.random() * 3.0; // 2-5 seconds cozy wait
+    fishing.fishId = null;
+    fishing.hold = false;
+    AudioFX.splash();
+    spawnParticles(fishing.bobberX, fishing.bobberY, '#e0f7ff', 10, 1.5, 2.8);
+    addFloatText(fishing.bobberX, fishing.bobberY - 14, T().floats.castLine, '#e0f2fe');
+  }
+
+  function hookBitingFish() {
+    if (fishing.phase !== 'bite') return;
+    fishing.phase = 'reeling';
+    fishing.fishId = pickPondFish();
+    fishing.barPos = 0.42;
+    fishing.barVel = 0;
+    fishing.barHeight = fishing.fishId === 'goldenCarp' ? 0.24 : 0.28;
+    fishing.fishPos = 0.48;
+    fishing.fishTarget = 0.2 + Math.random() * 0.6;
+    fishing.fishWait = 0.4;
+    fishing.progress = 0.30;
+    fishing.hold = true;
+    AudioFX.water();
+    spawnParticles(fishing.bobberX, fishing.bobberY, '#fff9c4', 12, 1.9, 3);
+  }
+
+  function finishFishCatch() {
+    const fid = fishing.fishId || 'riverPerch';
+    const fish = FISH[fid];
+    cancelFishing();
+
+    const weight = Number((fish.minKg + Math.random() * (fish.maxKg - fish.minKg)).toFixed(2));
+    const goldChance = state.luckyCharm ? 0.38 : 0.18;
+    const quality = (weight > fish.minKg + (fish.maxKg - fish.minKg) * 0.8 || Math.random() < goldChance) ? 1 : 0;
+
+    const key = `${fid}_${quality}`;
+    state.satchel[key] = (state.satchel[key] || 0) + 1;
+    state.totalFishCaught = (state.totalFishCaught || 0) + 1;
+
+    const prev = state.fishDex[fid] || { count: 0, maxWeight: 0 };
+    const isNewRecord = weight > (prev.maxWeight || 0);
+    state.fishDex[fid] = {
+      count: (prev.count || 0) + 1,
+      maxWeight: Math.max(prev.maxWeight || 0, weight)
+    };
+
+    AudioFX.fishCatch();
+    saveState(true);
+    updateHUD();
+    openFishCatchModal(fid, weight, quality, isNewRecord);
+  }
+
+  function updateFishing(dt) {
+    // Animate peaceful pond fish shadows
+    for (const s of pondFishShadows) {
+      s.phase += dt * 1.4;
+      s.ang += Math.sin(s.phase * 0.6) * dt * 0.8;
+      s.x += Math.cos(s.ang) * s.speed * dt;
+      s.y += Math.sin(s.ang) * s.speed * dt;
+      if (s.x < 18.6 * TILE) s.ang = 0.2;
+      if (s.x > 21.4 * TILE) s.ang = Math.PI - 0.2;
+      if (s.y < 9.7 * TILE) s.ang = Math.PI / 2;
+      if (s.y > 12.6 * TILE) s.ang = -Math.PI / 2;
+    }
+
+    if (fishing.phase === 'waiting') {
+      fishing.timer -= dt;
+      if (fishing.timer <= 0) {
+        fishing.phase = 'bite';
+        fishing.timer = 2.6; // cozy 2.6s hook window
+        AudioFX.bite();
+        spawnParticles(fishing.bobberX, fishing.bobberY, '#ffffff', 14, 2.0, 3.0);
+      }
+    } else if (fishing.phase === 'bite') {
+      fishing.timer -= dt;
+      if (fishing.timer <= 0) {
+        cancelFishing();
+        AudioFX.error();
+        addFloatText(state.player.x, state.player.y - 26, T().floats.biteMissed, '#fde68a');
+      }
+    } else if (fishing.phase === 'reeling') {
+      const fish = FISH[fishing.fishId] || FISH.riverPerch;
+      // Green bar physics (cozy & responsive!)
+      const accel = fishing.hold ? 2.45 : -2.15;
+      fishing.barVel = Math.max(-1.3, Math.min(1.3, fishing.barVel + accel * dt));
+      fishing.barPos += fishing.barVel * dt;
+      const half = fishing.barHeight / 2;
+      if (fishing.barPos < half) { fishing.barPos = half; fishing.barVel = Math.max(0, -fishing.barVel * 0.25); }
+      if (fishing.barPos > 1 - half) { fishing.barPos = 1 - half; fishing.barVel = Math.min(0, -fishing.barVel * 0.25); }
+
+      // Fish target swimming AI
+      fishing.fishWait -= dt;
+      if (fishing.fishWait <= 0) {
+        fishing.fishTarget = 0.08 + Math.random() * 0.84;
+        fishing.fishWait = (0.65 + Math.random() * 1.1) / Math.max(0.6, fish.speed);
+      }
+      const diff = fishing.fishTarget - fishing.fishPos;
+      const step = Math.sign(diff) * Math.min(Math.abs(diff), fish.speed * 0.58 * dt);
+      fishing.fishPos = Math.max(0.06, Math.min(0.94, fishing.fishPos + step));
+
+      // Overlap check
+      const overlapping = Math.abs(fishing.fishPos - fishing.barPos) <= half + 0.045;
+      fishing.progress += (overlapping ? 0.34 : -0.17) * dt;
+      if (fishing.progress >= 1) {
+        finishFishCatch();
+      } else if (fishing.progress <= 0) {
+        cancelFishing();
+        AudioFX.error();
+        addFloatText(state.player.x, state.player.y - 26, T().floats.fishEscaped, '#fecaca');
+      }
+    }
+    syncMobileReelButton();
+  }
+
+  let _lastReelBtnKey = '';
+  function syncMobileReelButton() {
+    const btn = document.getElementById('mobileReelBtn');
+    const lbl = document.getElementById('mobileReelBtnLabel');
+    if (!btn || !lbl) return;
+    const key = `${fishing.phase}_${state.lang}`;
+    if (key === _lastReelBtnKey) return;
+    _lastReelBtnKey = key;
+    if (fishing.phase === 'bite') {
+      lbl.textContent = T().mobileReelBite;
+      btn.classList.remove('hidden');
+    } else if (fishing.phase === 'reeling') {
+      lbl.textContent = T().mobileReelHold;
+      btn.classList.remove('hidden');
+    } else {
+      btn.classList.add('hidden');
+    }
+  }
+
+  // Hand-drawn watercolor fish artist (used on Catch Card & Fish Index mini-canvases!)
+  function drawFishArtwork(c, fish, w, h, silhouette = false) {
+    c.clearRect(0, 0, w, h);
+    c.save();
+    c.translate(w / 2, h / 2);
+    const inkCol = silhouette ? '#7a6958' : '#4a3525';
+    const bodyCol = silhouette ? '#9c8b78' : fish.body;
+    const finCol = silhouette ? '#877664' : fish.fin;
+    const bellyCol = silhouette ? '#9c8b78' : fish.belly;
+    const stripeCol = silhouette ? '#877664' : fish.stripe;
+
+    if (fish.id === 'moonJelly') {
+      // Translucent glowing storybook jellyfish!
+      if (!silhouette) {
+        const g = c.createRadialGradient(0, -4, 3, 0, 0, w * 0.42);
+        g.addColorStop(0, 'rgba(184, 224, 255, 0.55)'); g.addColorStop(1, 'rgba(226, 207, 234, 0)');
+        c.fillStyle = g; c.beginPath(); c.arc(0, 0, w * 0.42, 0, Math.PI * 2); c.fill();
+      }
+      c.strokeStyle = finCol; c.lineWidth = 2.2;
+      for (const ox of [-10, -3, 4, 11]) {
+        c.beginPath(); c.moveTo(ox, 2); c.quadraticCurveTo(ox - 4, 11, ox + 2, 20); c.stroke();
+      }
+      c.fillStyle = bodyCol; c.strokeStyle = inkCol; c.lineWidth = 1.6;
+      c.beginPath(); c.arc(0, 2, 17, Math.PI, 0); c.quadraticCurveTo(0, 8, -17, 2); c.fill(); c.stroke();
+      if (!silhouette) {
+        c.fillStyle = 'rgba(255,255,255,0.65)';
+        c.beginPath(); c.ellipse(-5, -5, 5, 3, -0.3, 0, Math.PI * 2); c.fill();
+      }
+    } else if (fish.id === 'crayfish') {
+      c.fillStyle = bodyCol; c.strokeStyle = inkCol; c.lineWidth = 1.5;
+      // Tail fan & segmented body
+      c.beginPath(); c.ellipse(-18, 2, 8, 5, -0.2, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.beginPath(); c.ellipse(-4, 0, 14, 8, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.beginPath(); c.ellipse(10, -1, 9, 7, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+      // Cute pincers
+      c.fillStyle = finCol;
+      c.beginPath(); c.ellipse(22, -9, 6.5, 3.8, -0.4, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.beginPath(); c.ellipse(22, 8, 6.5, 3.8, 0.4, 0, Math.PI * 2); c.fill(); c.stroke();
+      if (!silhouette) { c.fillStyle = '#2d1c10'; c.beginPath(); c.arc(14, -4, 1.8, 0, Math.PI * 2); c.fill(); }
+    } else {
+      // Classic plump watercolor fish (River Perch, Koi, Rainbow Trout, Golden Carp)
+      c.fillStyle = finCol; c.strokeStyle = inkCol; c.lineWidth = 1.5;
+      // Tail fin
+      c.beginPath(); c.moveTo(-14, 0); c.lineTo(-27, -11); c.quadraticCurveTo(-22, 0, -27, 11); c.closePath(); c.fill(); c.stroke();
+      // Dorsal fin
+      c.beginPath(); c.ellipse(-2, -11, 10, 5, -0.15, 0, Math.PI * 2); c.fill(); c.stroke();
+      // Body
+      c.fillStyle = bodyCol;
+      c.beginPath(); c.ellipse(2, 0, 21, 12.5, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+      if (!silhouette) {
+        c.fillStyle = bellyCol;
+        c.beginPath(); c.ellipse(3, 4.5, 14, 5.5, 0, 0, Math.PI * 2); c.fill();
+        // Pattern stripes / koi spots
+        c.fillStyle = stripeCol;
+        if (fish.id === 'koi') {
+          c.beginPath(); c.ellipse(-5, -4, 6, 4, 0.3, 0, Math.PI * 2); c.ellipse(8, -2, 5, 3.5, -0.2, 0, Math.PI * 2); c.fill();
+        } else {
+          c.globalAlpha = 0.6;
+          c.beginPath(); c.ellipse(-5, -2, 2.5, 7, 0.2, 0, Math.PI * 2); c.ellipse(2, -2, 2.5, 8, 0.2, 0, Math.PI * 2); c.ellipse(9, -2, 2.2, 6, 0.2, 0, Math.PI * 2); c.fill();
+          c.globalAlpha = 1;
+        }
+        // Sparkling eye
+        c.fillStyle = '#2d1c10'; c.beginPath(); c.arc(14, -3, 2.3, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#ffffff'; c.beginPath(); c.arc(14.8, -3.7, 0.9, 0, Math.PI * 2); c.fill();
+      }
+    }
+    c.restore();
+  }
+
+  function openFishCatchModal(fid, weight, quality, isNewRecord) {
+    const f = FISH[fid], m = T().modals;
+    const val = getSellValue(fid, quality);
+    const body = `
+      <div class="flex flex-col items-center text-center gap-2.5 py-1">
+        <div class="rounded-2xl p-2 bg-[#e8f5fa] border-2 border-[#a4cfe0] shadow-inner">
+          <canvas id="catchFishArt" width="120" height="72"></canvas>
+        </div>
+        <div class="font-bold text-base text-[#4a3525]">
+          ${f.emoji} ${L(f.name)} ${quality ? '⭐' : ''}
+        </div>
+        ${isNewRecord ? `<span class="px-3 py-0.5 rounded-full bg-amber-400/35 border border-amber-600 text-amber-950 font-bold text-xs">${m.newRecord}</span>` : ''}
+        <div class="flex items-center gap-4 text-xs font-semibold text-[#664930] bg-[#fffdf7] px-4 py-2 rounded-xl border border-[#d6ba91]">
+          <span>⚖️ ${m.weightLabel}: <strong class="num-tabular">${weight.toFixed(2)} kg</strong></span>
+          <span>🪙 ${m.sells}: <strong class="num-tabular">${val}g</strong></span>
+        </div>
+        <p class="text-[11px] text-[#75583e]">${L(f.hint)}</p>
+      </div>
+    `;
+    openModal('🎣', m.fishCaughtTitle, body,
+      `<button id="btnOpenDexAfterCatch" class="text-xs font-bold text-[#9c4a34] underline cursor-pointer">🐟 ${T().fishDexBtn}</button>
+       <button id="btnCloseCatch" class="btn-peach px-4 py-1.5 rounded-xl text-xs font-bold cursor-pointer">${m.fishKeepBtn}</button>`);
+
+    const art = document.getElementById('catchFishArt');
+    if (art) drawFishArtwork(art.getContext('2d'), f, 120, 72, false);
+    document.getElementById('btnCloseCatch').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
+    document.getElementById('btnOpenDexAfterCatch').addEventListener('click', () => openFishDexModal());
+  }
+
+  function openFishDexModal() {
+    AudioFX.ui();
+    const m = T().modals;
+    const unlocked = FISH_ORDER.filter(fid => (state.fishDex[fid]?.count || 0) > 0).length;
+    const cards = FISH_ORDER.map(fid => {
+      const f = FISH[fid], rec = state.fishDex[fid];
+      const caught = (rec?.count || 0) > 0;
+      return `
+        <div class="rounded-2xl p-2.5 bg-[#fffdf7] border border-[#d6ba91] flex items-center gap-2.5">
+          <div class="rounded-xl p-1 ${caught ? 'bg-[#e8f5fa] border border-[#b0d7e6]' : 'bg-[#ede3d2] border border-[#d2c0a5]'} shrink-0">
+            <canvas id="dexArt_${fid}" width="72" height="48"></canvas>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="font-bold text-xs sm:text-sm text-[#4a3525] flex items-center justify-between gap-1">
+              <span>${caught ? `${f.emoji} ${L(f.name)}` : '❓ ???'}</span>
+              ${caught ? `<span class="text-[11px] text-amber-800 num-tabular">🪙 ${f.sellPrice}g</span>` : ''}
+            </div>
+            <p class="text-[11px] text-[#75583e] leading-snug mt-0.5">${caught ? L(f.hint) : m.undiscovered}</p>
+            ${caught ? `<div class="text-[10px] font-semibold text-[#5c4028] mt-1 flex gap-2.5 num-tabular">
+              <span>${m.caughtCount}: ${rec.count}</span>
+              <span>⚖️ ${m.bestWeight}: ${rec.maxWeight.toFixed(2)} kg</span>
+            </div>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+
+    openModal('🐟', m.fishDexTitle,
+      `<div class="text-xs font-semibold text-[#6e4f35] mb-1">${m.fishDexSub(unlocked, FISH_ORDER.length)}</div>
+       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${cards}</div>`,
+      `<span class="text-xs opacity-75">🎣 ${T().tools.rod} (Key 4)</span>
+       <button id="btnCloseDex" class="btn-peach px-4 py-1.5 rounded-xl text-xs font-bold cursor-pointer">${m.backToFarm}</button>`);
+
+    for (const fid of FISH_ORDER) {
+      const c = document.getElementById(`dexArt_${fid}`);
+      if (c) drawFishArtwork(c.getContext('2d'), FISH[fid], 72, 48, !((state.fishDex[fid]?.count || 0) > 0));
+    }
+    document.getElementById('btnCloseDex').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
   }
 
   // =========================================================================
@@ -1663,10 +3302,13 @@
   }
 
   function performPrimaryAction(tx, ty) {
+    const slot = getSelectedSlot();
+    if (slot.id === 'rod') {
+      startFishingCast();
+      return;
+    }
     if (state.area !== 'farm') { performSmartInteract(); return; }
     if (tx < 0 || tx >= COLS || ty < 0 || ty >= ROWS) return;
-    const slots = getAllHotbarSlots().all;
-    const slot = slots[state.selectedSlot] || slots[0];
     const existing = getTileData(tx, ty);
     if (existing && existing.crop && isCropRipe(existing.crop)) { harvestTile(tx, ty); return; }
     if (slot.id === 'can' && curMap()[ty][tx] === TILE_TYPE.WATER) { refillWater(); return; }
@@ -1887,7 +3529,7 @@
 
       state.weather = state.nextWeather;
       const r = Math.random();
-      state.nextWeather = r < 0.28 ? 'rainy' : r < 0.56 ? 'breezy' : 'sunny';
+      state.nextWeather = r < 0.24 ? 'rainy' : r < 0.44 ? 'cloudy' : r < 0.66 ? 'breezy' : 'sunny';
 
       // Farm growth
       for (const key of Object.keys(state.farm)) {
@@ -1929,6 +3571,12 @@
         }
         a.fed = false;
         a.petted = false;
+        // On rainy/snowy days, keep animals cozy near the Red Barn shelter
+        if (state.weather === 'rainy') {
+          a.x = (3.8 + Math.random() * 4.4) * TILE;
+          a.y = (7.4 + Math.random() * 1.4) * TILE;
+          a.tx = a.x; a.ty = a.y; a.wait = 2 + Math.random() * 2;
+        }
         // Auto-feeder refills for today!
         if (state.autoFeeder && state.feed > 0) {
           state.feed -= 1;
@@ -1943,6 +3591,13 @@
       state.energy = passedOut ? Math.round(state.maxEnergy * 0.8) : state.maxEnergy;
       state.player.x = 4 * TILE; state.player.y = 5.5 * TILE; state.player.dir = 'down';
       walkTarget = null;
+      if (state.pet) {
+        state.pet.pettedToday = false;
+        state.pet.giftFoundToday = false;
+        state.pet.hasGift = false;
+      }
+      petAI.walkAccum = 0;
+      syncPetNearPlayer();
       if (state.day === 2 || state.day === 5 || seasonChanged) state.unreadMail = true;
 
       saveState();
@@ -2411,7 +4066,7 @@
           </div>
         </div>
         <div class="rounded-2xl p-2.5 bg-[#fffdf7] border border-[#d6ba91] text-xs space-y-1">
-          <div><strong>${m.todayWeather}：</strong>${m.weatherDetail[state.weather]}</div>
+          <div><strong>${m.todayWeather}：</strong>${m.weatherDetail[getWeatherKey()]}</div>
           ${sprinklerWaters > 0 ? `<div>${m.sprinklerNote(sprinklerWaters)}</div>` : ''}
           ${newDrops > 0 ? `<div class="text-emerald-800">${m.pastureMorningNote(newDrops)}</div>` : ''}
           ${autoFedCount > 0 ? `<div>${m.autoFedNote(autoFedCount)}</div>` : ''}
@@ -2456,7 +4111,8 @@
   function openMailboxModal() {
     AudioFX.ui(); state.unreadMail = false;
     const m = T().modals, season = getSeason();
-    const letter = (state.day === 1 && state.seasonIdx === 0) ? m.mailDay1 : m.mailGazette(season.icon, getSeasonName(), state.day, L(season.label), m.nextForecastText[state.nextWeather]);
+    const nextSIdx = state.day >= 14 ? (state.seasonIdx + 1) % SEASONS.length : state.seasonIdx;
+    const letter = (state.day === 1 && state.seasonIdx === 0) ? m.mailDay1 : m.mailGazette(season.icon, getSeasonName(), state.day, L(season.label), m.nextForecastText[getWeatherKey(state.nextWeather, nextSIdx)]);
     openModal('📬', m.mailTitle, `<div class="space-y-2.5 leading-relaxed">${letter}</div>`,
       `<span class="text-[11px] opacity-75">${m.mailChecked}</span><button id="btnCloseMail" class="btn-peach px-3.5 py-1 rounded-xl text-xs font-bold cursor-pointer">${m.mailOk}</button>`);
     document.getElementById('btnCloseMail').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
@@ -2496,7 +4152,7 @@
 
     document.getElementById('hotbarTools').innerHTML = toolSlots.map((s, i) => renderBtn(s, i, String(i + 1))).join('');
     document.getElementById('hotbarSeeds').innerHTML = seedSlots.map((s, i) => {
-      const gIdx = 5 + i;
+      const gIdx = 6 + i;
       const k = gIdx < 9 ? String(gIdx + 1) : gIdx === 9 ? '0' : '';
       return renderBtn(s, gIdx, k);
     }).join('');
@@ -2517,19 +4173,32 @@
     document.documentElement.lang = state.lang === 'zh' ? 'zh-CN' : 'en';
     document.getElementById('uiGameTitle').textContent = t.gameTitle;
     document.getElementById('uiControlsLine').textContent = t.controlsLine;
+    const mobLine = document.getElementById('uiMobileControlsLine');
+    if (mobLine) mobLine.textContent = t.mobileControlsLine;
+    const ta = document.getElementById('uiTouchAction');
+    if (ta) ta.textContent = t.touchAction;
+    const ti = document.getElementById('uiTouchInteract');
+    if (ti) ti.textContent = t.touchInteract;
+    const ipwa = document.getElementById('btnInstallPwa');
+    if (ipwa) ipwa.textContent = t.installPwa;
     document.getElementById('uiLangLabel').textContent = t.langSwitch;
     document.getElementById('uiDressLabel').textContent = t.dressBtn;
     document.getElementById('uiShopBtn').textContent = t.shopBtn;
     document.getElementById('uiRanchShopBtn').textContent = t.ranchShopBtn;
+    document.getElementById('uiFishDexBtn').textContent = t.fishDexBtn;
+    document.getElementById('uiPetBtn').textContent = t.petBtn;
+    document.getElementById('uiSaveBtn').textContent = t.saveBtn;
     document.getElementById('uiKitchenBtn').textContent = t.kitchenBtn;
     document.getElementById('uiSatchelBtn').textContent = t.satchelBtn;
     document.getElementById('uiForecastLabel').textContent = t.forecast;
     document.getElementById('uiHotbarHint').textContent = t.hotbarHint;
     document.getElementById('uiStatHarvestLabel').textContent = t.statHarvest;
     document.getElementById('uiStatAnimalsLabel').textContent = t.statAnimals;
+    document.getElementById('uiStatFishLabel').textContent = t.statFish;
     document.getElementById('uiStatDishesLabel').textContent = t.statDishes;
     document.getElementById('uiStatGoldLabel').textContent = t.statGold;
-    document.getElementById('saveStatus').textContent = t.autoSaveIdle;
+    updateSaveStatusLabel();
+    syncMobileReelButton();
   }
 
   function updateHUD() {
@@ -2544,10 +4213,11 @@
     document.getElementById('hudTime').textContent = formatTime(state.timeMinutes);
     document.getElementById('hudClockIcon').textContent = state.timeMinutes >= 19 * 60 ? '🌙' : state.timeMinutes >= 17 * 60 ? '🌅' : '☀️';
 
-    const wIcons = { sunny: '☀️', breezy: '🍃', rainy: '🌧️' };
-    document.getElementById('hudWeatherIcon').textContent = wIcons[state.weather] || '☀️';
-    document.getElementById('hudWeatherText').textContent = t.weather[state.weather] || t.weather.sunny;
-    document.getElementById('hudForecastIcon').textContent = wIcons[state.nextWeather] || '☀️';
+    const wk = getWeatherKey();
+    const nextSIdx = state.day >= 14 ? (state.seasonIdx + 1) % SEASONS.length : state.seasonIdx;
+    document.getElementById('hudWeatherIcon').textContent = getWeatherIcon(state.weather, state.seasonIdx);
+    document.getElementById('hudWeatherText').textContent = t.weather[wk] || t.weather.sunny;
+    document.getElementById('hudForecastIcon').textContent = getWeatherIcon(state.nextWeather, nextSIdx);
 
     document.getElementById('hudGold').textContent = state.gold;
     document.getElementById('hudFeed').textContent = state.feed;
@@ -2567,6 +4237,7 @@
     document.getElementById('satchelBadge').textContent = getBasketBadgeTotal();
     document.getElementById('statHarvested').textContent = state.totalHarvested;
     document.getElementById('statAnimals').textContent = state.animals.length;
+    document.getElementById('statFish').textContent = state.totalFishCaught || 0;
     document.getElementById('statDishes').textContent = state.totalCooked;
     document.getElementById('statLifetimeGold').textContent = `${state.lifetimeGold}g`;
 
@@ -2576,6 +4247,7 @@
     } else {
       document.getElementById('topRightPill').textContent = t.seasonBonus(season.icon, getSeasonName(), L(season.label));
     }
+    scheduleAutoSave();
   }
 
   function toggleSound() { AudioFX.muted = !AudioFX.muted; document.getElementById('btnSound').textContent = AudioFX.muted ? '🔇' : '🔊'; }
@@ -2585,12 +4257,130 @@
   document.getElementById('btnKitchen').addEventListener('click', openKitchenModal);
   document.getElementById('btnShopShortcut').addEventListener('click', () => openShopModal());
   document.getElementById('btnRanchShopShortcut').addEventListener('click', () => openRanchShopModal());
+  document.getElementById('btnFishDex').addEventListener('click', openFishDexModal);
+  document.getElementById('btnPet').addEventListener('click', openPetModal);
+  document.getElementById('btnSaveCloud').addEventListener('click', openSaveCloudModal);
+  document.getElementById('importSaveFile').addEventListener('change', (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (f) handleImportFile(f);
+  });
   document.getElementById('btnSatchel').addEventListener('click', () => openSatchelModal());
   document.getElementById('btnDress').addEventListener('click', openDressModal);
   document.getElementById('btnLang').addEventListener('click', toggleLanguage);
   document.getElementById('btnSleepQuick').addEventListener('click', openCottageModal);
   document.getElementById('btnSound').addEventListener('click', toggleSound);
   document.getElementById('btnHelp').addEventListener('click', openHelpModal);
+
+  // Mobile Touch Controls & Dedicated Fishing Touch Button
+  const mobileControlsEl = document.getElementById('mobileControls');
+  const touchPadToggleBtn = document.getElementById('btnTouchPadToggle');
+  function setTouchPadVisible(show) {
+    if (!mobileControlsEl) return;
+    mobileControlsEl.classList.toggle('hidden', !show);
+    if (touchPadToggleBtn) {
+      touchPadToggleBtn.style.outline = show ? '2px solid #e07a5f' : '';
+    }
+  }
+  const autoShowTouchPad = Boolean(
+    (typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches) ||
+    (typeof window.innerWidth === 'number' && window.innerWidth < 640)
+  );
+  setTouchPadVisible(autoShowTouchPad);
+  if (touchPadToggleBtn) {
+    touchPadToggleBtn.addEventListener('click', () => {
+      AudioFX.ui();
+      setTouchPadVisible(mobileControlsEl.classList.contains('hidden'));
+    });
+  }
+
+  document.querySelectorAll('#mobileControls [data-dir]').forEach(btn => {
+    const dirKey = btn.dataset.dir;
+    const press = (e) => {
+      e.preventDefault();
+      AudioFX.ensure();
+      if (modalOpen || isTransitioning) return;
+      if (fishing.phase === 'waiting') cancelFishing();
+      walkTarget = null;
+      keys[dirKey] = true;
+    };
+    const release = () => { keys[dirKey] = false; };
+    btn.addEventListener('pointerdown', press);
+    btn.addEventListener('pointerup', release);
+    btn.addEventListener('pointerleave', release);
+    btn.addEventListener('pointercancel', release);
+  });
+
+  const touchBtnAction = document.getElementById('touchBtnAction');
+  if (touchBtnAction) {
+    touchBtnAction.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      AudioFX.ensure();
+      if (modalOpen || isTransitioning) return;
+      if (fishing.phase === 'reeling') { fishing.hold = true; return; }
+      if (fishing.phase === 'bite') { hookBitingFish(); return; }
+      if (fishing.phase === 'waiting') { cancelFishing(); AudioFX.ui(); return; }
+      performPrimaryAction(getFacedTile().x, getFacedTile().y);
+    });
+    const relAct = () => { fishing.hold = false; };
+    touchBtnAction.addEventListener('pointerup', relAct);
+    touchBtnAction.addEventListener('pointercancel', relAct);
+    touchBtnAction.addEventListener('pointerleave', relAct);
+  }
+
+  const touchBtnInteract = document.getElementById('touchBtnInteract');
+  if (touchBtnInteract) {
+    touchBtnInteract.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      AudioFX.ensure();
+      if (modalOpen || isTransitioning) return;
+      if (fishing.phase === 'bite') { hookBitingFish(); return; }
+      if (fishing.phase === 'waiting') { cancelFishing(); AudioFX.ui(); return; }
+      performSmartInteract();
+    });
+  }
+
+  const mobileReelBtn = document.getElementById('mobileReelBtn');
+  if (mobileReelBtn) {
+    mobileReelBtn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      AudioFX.ensure();
+      if (fishing.phase === 'bite') { hookBitingFish(); return; }
+      if (fishing.phase === 'reeling') { fishing.hold = true; }
+    });
+    const relReel = () => { fishing.hold = false; };
+    mobileReelBtn.addEventListener('pointerup', relReel);
+    mobileReelBtn.addEventListener('pointercancel', relReel);
+    mobileReelBtn.addEventListener('pointerleave', relReel);
+  }
+
+  // PWA Install Prompt & Offline Service Worker Registration
+  let deferredInstallPrompt = null;
+  const installPwaBtn = document.getElementById('btnInstallPwa');
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    if (installPwaBtn) installPwaBtn.classList.remove('hidden');
+  });
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    if (installPwaBtn) installPwaBtn.classList.add('hidden');
+  });
+  if (installPwaBtn) {
+    installPwaBtn.addEventListener('click', async () => {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      try { await deferredInstallPrompt.userChoice; } catch (err) {}
+      deferredInstallPrompt = null;
+      installPwaBtn.classList.add('hidden');
+    });
+  }
+  if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator && typeof location !== 'undefined' && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
+  }
+
   document.getElementById('btnReset').addEventListener('click', () => {
     const m = T().modals;
     openModal('🌼', m.resetTitle, `<p class="text-xs">${m.resetBody}</p>`,
@@ -2600,7 +4390,11 @@
     document.getElementById('btnDoReset').addEventListener('click', () => {
       const kl = state.lang, kd = state.dressIdx;
       localStorage.removeItem(SAVE_KEY); localStorage.removeItem(OLD_SAVE_KEY);
+      IDBBackup.clear();
       state = createInitialState(kl, kd);
+      cancelFishing();
+      syncPetNearPlayer();
+      saveState(true, true);
       closeModal(); applyStaticLabels(); updateHUD(); renderHotbar();
       AudioFX.morning(); addFloatText(state.player.x, state.player.y - 26, T().floats.freshStart, '#fef08a');
     });
@@ -2647,19 +4441,25 @@
       if (s.life <= 0) smokePuffs.splice(i, 1);
     }
 
-    // Gentle wandering AI for Pasture Animals
+    // Gentle wandering AI for Pasture Animals (stay sheltered near Barn on Rainy/Snowy days!)
+    const shelteredWeather = state.weather === 'rainy';
     for (const a of state.animals) {
       if (a.wait > 0) {
         a.wait -= dt;
         if (a.wait <= 0) {
-          a.tx = (3.8 + Math.random() * 12) * TILE;
-          a.ty = (7.6 + Math.random() * 5.2) * TILE;
+          if (shelteredWeather) {
+            a.tx = (3.6 + Math.random() * 4.6) * TILE;
+            a.ty = (7.2 + Math.random() * 1.5) * TILE;
+          } else {
+            a.tx = (3.8 + Math.random() * 12) * TILE;
+            a.ty = (7.6 + Math.random() * 5.2) * TILE;
+          }
         }
       } else {
         const dx = a.tx - a.x, dy = a.ty - a.y, dist = Math.hypot(dx, dy);
-        if (dist < 4) { a.wait = 1.6 + Math.random() * 3.0; }
+        if (dist < 4) { a.wait = shelteredWeather ? (3.0 + Math.random() * 3.5) : (1.6 + Math.random() * 3.0); }
         else {
-          const spd = (a.type === 'cow' ? 18 : a.type === 'sheep' ? 21 : 28) * dt;
+          const spd = (a.type === 'cow' ? 18 : a.type === 'sheep' ? 21 : 28) * (shelteredWeather ? 0.6 : 1) * dt;
           a.x += (dx / dist) * spd; a.y += (dy / dist) * spd;
           a.dir = dx >= 0 ? 1 : -1;
         }
@@ -2667,6 +4467,7 @@
     }
 
     updateAmbient(dt);
+    updateFishing(dt);
     if (modalOpen || isTransitioning) return;
 
     clockAccum += dt;
@@ -2674,42 +4475,48 @@
       clockAccum -= 2.4;
       state.timeMinutes += 10;
       updateHUD();
-      if (state.timeMinutes >= 24 * 60) { startSleepSequence(true); return; }
+      if (state.timeMinutes >= 24 * 60) { cancelFishing(); startSleepSequence(true); return; }
     }
 
-    let mx = 0, my = 0;
-    if (keys['w'] || keys['arrowup']) my -= 1;
-    if (keys['s'] || keys['arrowdown']) my += 1;
-    if (keys['a'] || keys['arrowleft']) mx -= 1;
-    if (keys['d'] || keys['arrowright']) mx += 1;
+    let playerMoved = false;
+    if (fishing.phase === 'idle') {
+      let mx = 0, my = 0;
+      if (keys['w'] || keys['arrowup']) my -= 1;
+      if (keys['s'] || keys['arrowdown']) my += 1;
+      if (keys['a'] || keys['arrowleft']) mx -= 1;
+      if (keys['d'] || keys['arrowright']) mx += 1;
 
-    if (mx === 0 && my === 0 && walkTarget) {
-      const dx = walkTarget.x - state.player.x, dy = walkTarget.y - state.player.y, dist = Math.hypot(dx, dy);
-      if (dist <= (walkTarget.stopDist || 0.25) * TILE + 3) { const cb = walkTarget.onArrive; walkTarget = null; if (cb) cb(); }
-      else { mx = dx / dist; my = dy / dist; }
-    }
-
-    if (mx !== 0 || my !== 0) {
-      const len = Math.hypot(mx, my); mx /= len; my /= len;
-      const speed = 116 * dt;
-      if (Math.abs(mx) > Math.abs(my)) state.player.dir = mx > 0 ? 'right' : 'left';
-      else state.player.dir = my > 0 ? 'down' : 'up';
-
-      const nx = state.player.x + mx * speed, ny = state.player.y + my * speed;
-      let moved = false;
-      if (!isSolidAtPixel(nx, state.player.y)) { state.player.x = nx; moved = true; }
-      if (!isSolidAtPixel(state.player.x, ny)) { state.player.y = ny; moved = true; }
-      if (moved) state.player.walkFrame += dt * 9.5;
-      else if (walkTarget) walkTarget = null;
-
-      // Seamless Walk-Through Area Gates!
-      if (state.area === 'farm' && state.player.x > (COLS - 0.55) * TILE && state.player.y > 4.6 * TILE && state.player.y < 8 * TILE) {
-        switchArea('pasture', 1.4 * TILE, state.player.y);
-      } else if (state.area === 'pasture' && state.player.x < 0.55 * TILE && state.player.y > 4.6 * TILE && state.player.y < 8 * TILE) {
-        switchArea('farm', (COLS - 1.4) * TILE, state.player.y);
+      if (mx === 0 && my === 0 && walkTarget) {
+        const dx = walkTarget.x - state.player.x, dy = walkTarget.y - state.player.y, dist = Math.hypot(dx, dy);
+        if (dist <= (walkTarget.stopDist || 0.25) * TILE + 3) { const cb = walkTarget.onArrive; walkTarget = null; if (cb) cb(); }
+        else { mx = dx / dist; my = dy / dist; }
       }
-    } else state.player.walkFrame = 0;
 
+      if (mx !== 0 || my !== 0) {
+        const len = Math.hypot(mx, my); mx /= len; my /= len;
+        const speed = 116 * dt;
+        if (Math.abs(mx) > Math.abs(my)) state.player.dir = mx > 0 ? 'right' : 'left';
+        else state.player.dir = my > 0 ? 'down' : 'up';
+
+        const nx = state.player.x + mx * speed, ny = state.player.y + my * speed;
+        let moved = false;
+        if (!isSolidAtPixel(nx, state.player.y)) { state.player.x = nx; moved = true; }
+        if (!isSolidAtPixel(state.player.x, ny)) { state.player.y = ny; moved = true; }
+        if (moved) { state.player.walkFrame += dt * 9.5; playerMoved = true; }
+        else if (walkTarget) walkTarget = null;
+
+        // Seamless Walk-Through Area Gates!
+        if (state.area === 'farm' && state.player.x > (COLS - 0.55) * TILE && state.player.y > 4.6 * TILE && state.player.y < 8 * TILE) {
+          switchArea('pasture', 1.4 * TILE, state.player.y);
+        } else if (state.area === 'pasture' && state.player.x < 0.55 * TILE && state.player.y > 4.6 * TILE && state.player.y < 8 * TILE) {
+          switchArea('farm', (COLS - 1.4) * TILE, state.player.y);
+        }
+      } else state.player.walkFrame = 0;
+    } else {
+      state.player.walkFrame = 0;
+    }
+
+    updatePetAI(dt, playerMoved);
     if (state.player.swingTimer > 0) state.player.swingTimer = Math.max(0, state.player.swingTimer - dt);
 
     const hint = getNearbyContext(), hintEl = document.getElementById('contextHint');
@@ -2720,25 +4527,52 @@
     } else hintEl.classList.add('hidden');
   }
 
+  const rainRipples = [];
   function updateAmbient(dt) {
+    const season = getSeason();
     const isNight = state.timeMinutes >= 19 * 60;
-    const desired = state.weather === 'rainy' ? 75 : state.weather === 'breezy' ? 24 : isNight ? 20 : 12;
-    while (ambientDrops.length < desired) ambientDrops.push({ x: Math.random() * CANVAS_W, y: Math.random() * CANVAS_H, phase: Math.random() * Math.PI * 2, speed: 0.7 + Math.random() * 0.6 });
+    const snowy = isWinter();
+    const isRain = state.weather === 'rainy' && !snowy;
+    const isSnowfall = snowy && (state.weather === 'rainy' || state.weather === 'breezy');
+    const desired = isRain ? 80 : isSnowfall ? 68 : snowy ? 34 : state.weather === 'breezy' ? 28 : (isNight && season.id === 'summer') ? 26 : isNight ? 16 : 12;
+
+    while (ambientDrops.length < desired) {
+      ambientDrops.push({ x: Math.random() * CANVAS_W, y: Math.random() * CANVAS_H, phase: Math.random() * Math.PI * 2, speed: 0.65 + Math.random() * 0.65, size: 1.6 + Math.random() * 2.2 });
+    }
     if (ambientDrops.length > desired) ambientDrops.length = desired;
+
     for (const d of ambientDrops) {
-      d.phase += dt * 2.3;
-      if (state.weather === 'rainy') {
-        d.x -= 85 * dt * d.speed; d.y += 300 * dt * d.speed;
+      d.phase += dt * 2.2;
+      if (isRain) {
+        d.x -= 82 * dt * d.speed; d.y += 310 * dt * d.speed;
         if (d.y > CANVAS_H) { d.y = -10; d.x = Math.random() * (CANVAS_W + 90); }
         if (d.x < -10) d.x = CANVAS_W + 10;
+      } else if (snowy) {
+        d.x += (Math.sin(d.phase) * 18 - (state.weather === 'breezy' ? 24 : 8)) * dt;
+        d.y += (isSnowfall ? 48 : 26) * dt * d.speed;
+        if (d.y > CANVAS_H + 8) { d.y = -8; d.x = Math.random() * CANVAS_W; }
+        if (d.x < -10) d.x = CANVAS_W + 10;
+        if (d.x > CANVAS_W + 10) d.x = -10;
       } else if (isNight) {
-        d.x += Math.cos(d.phase) * 14 * dt; d.y += Math.sin(d.phase * 1.3) * 10 * dt;
+        d.x += Math.cos(d.phase) * 15 * dt; d.y += Math.sin(d.phase * 1.3) * 11 * dt;
+        if (d.x < 10) d.x = CANVAS_W - 10; if (d.x > CANVAS_W - 10) d.x = 10;
+        if (d.y < 10) d.y = CANVAS_H - 10; if (d.y > CANVAS_H - 10) d.y = 10;
       } else {
-        d.x += (state.weather === 'breezy' ? 36 : 16) * dt * d.speed;
-        d.y += (15 + Math.sin(d.phase) * 9) * dt;
+        d.x += (state.weather === 'breezy' ? 42 : 16) * dt * d.speed;
+        d.y += (16 + Math.sin(d.phase) * 9) * dt;
         if (d.x > CANVAS_W + 10) d.x = -10;
         if (d.y > CANVAS_H + 10) { d.y = -10; d.x = Math.random() * CANVAS_W; }
       }
+    }
+
+    // Rain ground water ripples
+    if (isRain && Math.random() < dt * 14) {
+      rainRipples.push({ x: Math.random() * CANVAS_W, y: 60 + Math.random() * (CANVAS_H - 70), r: 1, maxR: 7 + Math.random() * 5, life: 1 });
+    }
+    for (let i = rainRipples.length - 1; i >= 0; i--) {
+      const rp = rainRipples[i];
+      rp.r += dt * 14; rp.life -= dt * 1.6;
+      if (rp.life <= 0) rainRipples.splice(i, 1);
     }
   }
 
@@ -2752,11 +4586,124 @@
     ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
   }
 
+  function drawPondFishShadows() {
+    for (const s of pondFishShadows) {
+      ctx.save();
+      ctx.translate(s.x, s.y);
+      ctx.rotate(s.ang);
+      ctx.scale(s.size, s.size);
+      ctx.fillStyle = 'rgba(32, 74, 102, 0.28)';
+      ctx.beginPath(); ctx.ellipse(0, 0, 7.5, 3.2, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-6, 0); ctx.lineTo(-11, -3.5 + Math.sin(animTime * 8 + s.phase) * 1.4); ctx.lineTo(-11, 3.5 + Math.sin(animTime * 8 + s.phase) * 1.4); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  function drawFishingLineAndBobber() {
+    if (fishing.phase === 'idle') return;
+    const p = state.player;
+    // Bamboo rod extending toward bobber
+    const ang = Math.atan2(fishing.bobberY - (p.y - 12), fishing.bobberX - p.x);
+    const tipX = p.x + Math.cos(ang) * 26, tipY = p.y - 14 + Math.sin(ang) * 18 - 8;
+    ctx.strokeStyle = '#9c7840'; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(p.x + Math.cos(ang) * 5, p.y - 10); ctx.lineTo(tipX, tipY); ctx.stroke();
+
+    // Soft sagging fishing line
+    const dip = fishing.phase === 'bite' ? 6 : Math.sin(animTime * 4) * 1.8;
+    const bx = fishing.bobberX, by = fishing.bobberY + dip;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.72)'; ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    ctx.moveTo(tipX, tipY);
+    ctx.quadraticCurveTo((tipX + bx) / 2, Math.max(tipY, by) + 8, bx, by);
+    ctx.stroke();
+    ctx.lineCap = 'butt';
+
+    // Expanding concentric ripples around bobber
+    const rr = ((animTime * 12) % 14) + 3;
+    ctx.strokeStyle = `rgba(255, 255, 255, ${(1 - rr / 18) * 0.65})`;
+    ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.ellipse(bx, by + 2, rr, rr * 0.45, 0, 0, Math.PI * 2); ctx.stroke();
+
+    // Red-and-white cork bobber
+    ctx.fillStyle = '#e63946'; ctx.strokeStyle = INK; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(bx, by, 4.2, Math.PI, 0); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fffdf7';
+    ctx.beginPath(); ctx.arc(bx, by, 4.2, 0, Math.PI); ctx.fill(); ctx.stroke();
+
+    // Bouncing "!" alert over player head on bite!
+    if (fishing.phase === 'bite') {
+      const bounce = Math.abs(Math.sin(animTime * 14)) * -5;
+      ctx.fillStyle = '#fff9d6'; ctx.strokeStyle = '#d97706'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(p.x, p.y - 44 + bounce, 11, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#d9480f'; ctx.font = 'bold 15px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('!', p.x, p.y - 39 + bounce);
+    }
+  }
+
+  function drawFishingReelOverlay() {
+    if (fishing.phase !== 'reeling') return;
+    const panelX = CANVAS_W - 118, panelY = 92, panelW = 94, panelH = 276;
+
+    // Warm parchment backdrop card
+    roundRectPath(panelX, panelY, panelW, panelH, 14);
+    ctx.fillStyle = 'rgba(255, 250, 240, 0.94)'; ctx.fill();
+    ctx.strokeStyle = '#9c6e44'; ctx.lineWidth = 2.2; ctx.stroke();
+
+    // Water column track (left)
+    const trackX = panelX + 16, trackY = panelY + 20, trackW = 34, trackH = 212;
+    roundRectPath(trackX, trackY, trackW, trackH, 9);
+    const wg = ctx.createLinearGradient(0, trackY, 0, trackY + trackH);
+    wg.addColorStop(0, '#9bd8ec'); wg.addColorStop(1, '#4c9ac0');
+    ctx.fillStyle = wg; ctx.fill();
+    ctx.strokeStyle = '#5c8aa3'; ctx.lineWidth = 1.5; ctx.stroke();
+
+    // Green catch zone frame
+    const zoneH = fishing.barHeight * trackH;
+    const zoneCenterY = trackY + (1 - fishing.barPos) * trackH;
+    const overlapping = Math.abs(fishing.fishPos - fishing.barPos) <= fishing.barHeight / 2 + 0.045;
+    roundRectPath(trackX + 3, zoneCenterY - zoneH / 2, trackW - 6, zoneH, 6);
+    ctx.fillStyle = overlapping ? 'rgba(116, 207, 114, 0.85)' : 'rgba(138, 198, 134, 0.52)';
+    ctx.fill();
+    ctx.strokeStyle = overlapping ? '#2d7a36' : '#588c56'; ctx.lineWidth = 2; ctx.stroke();
+
+    // Swimming Fish icon inside track
+    const fishY = trackY + (1 - fishing.fishPos) * trackH;
+    const fObj = FISH[fishing.fishId] || FISH.riverPerch;
+    ctx.font = '18px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(fObj.emoji, trackX + trackW / 2, fishY + 6);
+
+    // Right vertical Progress Meter
+    const progX = panelX + 62, progY = trackY, progW = 16, progH = trackH;
+    roundRectPath(progX, progY, progW, progH, 7);
+    ctx.fillStyle = '#e5d5b7'; ctx.fill();
+    ctx.strokeStyle = '#a88358'; ctx.lineWidth = 1.4; ctx.stroke();
+
+    const fillH = Math.max(0, Math.min(1, fishing.progress)) * (progH - 4);
+    roundRectPath(progX + 2, progY + progH - 2 - fillH, progW - 4, fillH, 5);
+    ctx.fillStyle = fishing.progress > 0.65 ? '#52b788' : fishing.progress > 0.3 ? '#f4a261' : '#e76f51';
+    ctx.fill();
+
+    // Bottom tiny instruction
+    ctx.fillStyle = '#5c4028';
+    ctx.font = 'bold 9.5px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(T().modals.reelTip, panelX + panelW / 2, panelY + panelH - 13);
+  }
+
   function render() {
     const season = getSeason();
     ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
 
+    // Layer 1: Ground & Water tiles
     for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) drawGroundTile(x, y, season);
+
+    // Layer 2: Pond fish shadows
+    drawPondFishShadows();
+
+    // Layer 3 & 4: Area props, buildings & Y-sorted characters (Girl + Pet + Animals)
+    const petActor = (state.pet && state.pet.type)
+      ? [{ y: petAI.y, draw: () => drawPetSprite(ctx, state.pet.type, petAI.x, petAI.y, petAI.dir, petAI.walkFrame, petAI.idleMode, state.pet.hasGift, 1) }]
+      : [];
 
     if (state.area === 'farm') {
       drawPondDuckling();
@@ -2766,28 +4713,32 @@
       }
       drawCursorHighlight();
       drawCottage();
+      drawPetBed();
       drawMailbox();
       drawShippingBin();
       drawShopStand();
       drawSignpost(22, 4, T().gateToPasture);
-      drawGirlFarmer();
+      const farmActors = [{ y: state.player.y, draw: () => drawGirlFarmer() }, ...petActor];
+      farmActors.sort((a, b) => a.y - b.y);
+      for (const ac of farmActors) ac.draw();
     } else {
       drawPastureFences();
       drawBarn();
       drawFeedTrough();
       drawRanchShopStand();
       drawSignpost(1, 4, T().gateToFarm);
-      // Collectible pasture drops
       for (const d of state.pastureDrops) drawPastureDrop(d);
-      // Y-sort animals and player for cozy depth!
       const actors = [
         ...state.animals.map(a => ({ y: a.y, draw: () => drawAnimal(a) })),
-        { y: state.player.y, draw: () => drawGirlFarmer() }
+        { y: state.player.y, draw: () => drawGirlFarmer() },
+        ...petActor
       ];
       actors.sort((a, b) => a.y - b.y);
       for (const ac of actors) ac.draw();
     }
 
+    // Layer 5: Fishing rod/line, trees occlusion, smoke & particles
+    drawFishingLineAndBobber();
     drawTrees(season);
 
     if (state.area === 'farm') {
@@ -2804,6 +4755,7 @@
     ctx.globalAlpha = 1;
 
     drawAtmosphere(season);
+    drawFishingReelOverlay();
 
     ctx.font = 'bold 12px "PingFang SC", "Microsoft YaHei", ui-rounded, system-ui, sans-serif';
     ctx.textAlign = 'center';
@@ -2819,20 +4771,28 @@
   function drawGroundTile(x, y, season) {
     const px = x * TILE, py = y * TILE, m = curMap(), t = m[y][x], h = hash2(x, y);
     if (t === TILE_TYPE.WATER) {
-      ctx.fillStyle = '#6fb8d6'; ctx.fillRect(px, py, TILE, TILE);
+      ctx.fillStyle = season.id === 'winter' ? '#86c5dc' : '#6fb8d6'; ctx.fillRect(px, py, TILE, TILE);
       if (y > 0 && m[y - 1][x] !== TILE_TYPE.WATER) {
-        ctx.fillStyle = '#e7d7b1'; ctx.fillRect(px, py, TILE, 3);
-        ctx.fillStyle = '#97d2e8'; ctx.fillRect(px, py + 3, TILE, 4);
+        ctx.fillStyle = season.id === 'winter' ? '#eef5f8' : '#e7d7b1'; ctx.fillRect(px, py, TILE, 3);
+        ctx.fillStyle = '#a4d9ee'; ctx.fillRect(px, py + 3, TILE, 4);
       }
       const wave = Math.sin(animTime * 2.2 + x * 1.3 + y);
-      ctx.strokeStyle = 'rgba(255,255,255,0.45)'; ctx.lineWidth = 1.5;
+      ctx.strokeStyle = 'rgba(255,255,255,0.48)'; ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.arc(px + 14 + wave * 2, py + 15, 6, 0.2, 1.8); ctx.stroke();
-      if ((x === 19 && y === 10) || (x === 20 && y === 12)) {
-        const bob = Math.sin(animTime * 2 + x) * 1.2;
+      const isLotusTile = (x === 19 && y === 10) || (x === 20 && y === 12) || (season.id === 'summer' && ((x === 19 && y === 12) || (x === 20 && y === 10)));
+      if (isLotusTile && season.id !== 'winter') {
+        const bob = Math.sin(animTime * 2 + x + y) * 1.2;
         ctx.fillStyle = '#5eb06d';
         ctx.beginPath(); ctx.arc(px + 16, py + 16 + bob, 8.5, 0.35, Math.PI * 2 - 0.35); ctx.lineTo(px + 16, py + 16 + bob); ctx.fill();
-        ctx.fillStyle = '#ffb5c8'; ctx.beginPath(); ctx.arc(px + 16, py + 13 + bob, 3.6, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#ffe58f'; ctx.beginPath(); ctx.arc(px + 16, py + 13 + bob, 1.5, 0, Math.PI * 2); ctx.fill();
+        if (season.id === 'summer' || (x === 19 && y === 10)) {
+          // Layered blooming pink lotus!
+          ctx.fillStyle = '#ff9ebb';
+          for (let p = 0; p < 5; p++) {
+            const pa = p * (Math.PI * 2 / 5) + animTime * 0.1;
+            ctx.beginPath(); ctx.ellipse(px + 16 + Math.cos(pa) * 3, py + 13 + bob + Math.sin(pa) * 2.2, 2.8, 1.8, pa, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.fillStyle = '#ffe58f'; ctx.beginPath(); ctx.arc(px + 16, py + 13 + bob, 1.8, 0, Math.PI * 2); ctx.fill();
+        }
       }
       return;
     }
@@ -2842,7 +4802,12 @@
     ctx.fillRect(px, py, TILE, TILE);
 
     if ((t === TILE_TYPE.GRASS || t === TILE_TYPE.PASTURE) && h > 0.56) {
-      if (h > 0.78) {
+      if (season.id === 'winter') {
+        if (h > 0.72) {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+          ctx.beginPath(); ctx.ellipse(px + 8 + (h * 16) % 16, py + 10 + (h * 25) % 14, 4.5, 2.2, 0, 0, Math.PI * 2); ctx.fill();
+        }
+      } else if (h > 0.78) {
         const fx = px + 8 + (h * 17) % 16, fy = py + 8 + (h * 29) % 16;
         ctx.fillStyle = h > 0.89 ? season.blossom : '#fffdf5';
         for (let a = 0; a < 4; a++) { ctx.beginPath(); ctx.arc(fx + Math.cos(a * Math.PI / 2) * 2.2, fy + Math.sin(a * Math.PI / 2) * 2.2, 1.7, 0, Math.PI * 2); ctx.fill(); }
@@ -3011,8 +4976,12 @@
     roundRectPath(x + w - 34, y - 6, 16, 26, 3); ctx.fillStyle = '#c2a791'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.4; ctx.stroke();
     roundRectPath(x + 8, y + 36, w - 16, h - 36, 6); ctx.fillStyle = '#fbf1dc'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.6; ctx.stroke();
     ctx.beginPath(); ctx.moveTo(x - 2, y + 40); ctx.quadraticCurveTo(x + w / 2, y - 4, x + w + 2, y + 40); ctx.closePath();
-    ctx.fillStyle = '#d47462'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.6; ctx.stroke();
-    ctx.fillStyle = '#f8e6cb';
+    ctx.fillStyle = isWinter() ? '#eef6fa' : '#d47462'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.6; ctx.stroke();
+    if (isWinter()) {
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.moveTo(x + 6, y + 32); ctx.quadraticCurveTo(x + w / 2, y + 2, x + w - 6, y + 32); ctx.quadraticCurveTo(x + w / 2, y + 24, x + 6, y + 32); ctx.fill();
+    }
+    ctx.fillStyle = isWinter() ? '#ffffff' : '#f8e6cb';
     for (let sx = x + 6; sx < x + w - 4; sx += 12) { ctx.beginPath(); ctx.arc(sx, y + 40, 4.5, 0, Math.PI); ctx.fill(); }
     // Door
     ctx.beginPath(); ctx.moveTo(x + 50, y + h); ctx.lineTo(x + 50, y + 66); ctx.arc(x + 63, y + 66, 13, Math.PI, 0); ctx.lineTo(x + 76, y + h); ctx.closePath();
@@ -3045,7 +5014,7 @@
   function drawShippingBin() {
     const px = 7 * TILE, py = 4 * TILE;
     roundRectPath(px + 4, py + 8, 24, 19, 4); ctx.fillStyle = '#c48d59'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.4; ctx.stroke();
-    roundRectPath(px + 2.5, py + 5, 27, 7, 3); ctx.fillStyle = '#dba672'; ctx.fill(); ctx.stroke();
+    roundRectPath(px + 2.5, py + 5, 27, 7, 3); ctx.fillStyle = isWinter() ? '#f1f7fa' : '#dba672'; ctx.fill(); ctx.stroke();
     if (getShippingPendingGold() > 0) { ctx.fillStyle = '#ffd166'; ctx.beginPath(); ctx.arc(px + 25, py + 5, 4.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
   }
 
@@ -3069,6 +5038,7 @@
       ctx.fillRect(x + i * sw, y + 12, sw, 22);
       ctx.beginPath(); ctx.arc(x + i * sw + sw / 2, y + 34, sw / 2, 0, Math.PI); ctx.fill();
     }
+    if (isWinter()) { ctx.fillStyle = 'rgba(255,255,255,0.88)'; roundRectPath(x + 2, y + 10, w - 4, 8, 4); ctx.fill(); }
     ctx.strokeStyle = INK; ctx.lineWidth = 1.4; ctx.strokeRect(x, y + 12, w, 22);
   }
 
@@ -3081,7 +5051,7 @@
     ctx.beginPath();
     ctx.moveTo(x, y + 38); ctx.lineTo(x + 24, y + 12); ctx.lineTo(x + w / 2, y + 2); ctx.lineTo(x + w - 24, y + 12); ctx.lineTo(x + w, y + 38);
     ctx.closePath();
-    ctx.fillStyle = '#9c5243'; ctx.fill(); ctx.stroke();
+    ctx.fillStyle = isWinter() ? '#eef6fa' : '#9c5243'; ctx.fill(); ctx.stroke();
     // Hay loft window
     roundRectPath(x + w / 2 - 14, y + 16, 28, 18, 4); ctx.fillStyle = '#f5d27a'; ctx.fill(); ctx.stroke();
     // Big white X barn double doors
@@ -3393,22 +5363,89 @@
 
   function drawAtmosphere(season) {
     const mins = state.timeMinutes;
-    let tint = null;
-    if (mins < 7.5 * 60) tint = `rgba(255, 214, 153, ${((1 - (mins - 360) / 90) * 0.16).toFixed(3)})`;
-    else if (mins >= 17 * 60 && mins < 20 * 60) tint = `rgba(232, 132, 88, ${(((mins - 1020) / 180) * 0.25).toFixed(3)})`;
-    else if (mins >= 20 * 60) tint = `rgba(32, 42, 88, ${(0.26 + Math.min(1, (mins - 1200) / 180) * 0.30).toFixed(3)})`;
+    const snowy = isWinter();
+    const isRain = state.weather === 'rainy' && !snowy;
+    const isNight = mins >= 19 * 60;
 
-    if (state.weather === 'rainy') { ctx.fillStyle = 'rgba(56, 86, 120, 0.14)'; ctx.fillRect(0, 0, CANVAS_W, CANVAS_H); }
-    if (tint) { ctx.fillStyle = tint; ctx.fillRect(0, 0, CANVAS_W, CANVAS_H); }
+    // 1. Cloudy drifting cloud shadows (soft cool-warm veil)
+    if (state.weather === 'cloudy') {
+      ctx.fillStyle = 'rgba(78, 96, 122, 0.10)';
+      ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+      ctx.fillStyle = 'rgba(60, 76, 98, 0.08)';
+      for (let i = 0; i < 3; i++) {
+        const cx = ((animTime * 14 + i * 310) % (CANVAS_W + 260)) - 130;
+        const cy = 110 + i * 145;
+        ctx.beginPath(); ctx.ellipse(cx, cy, 120, 46, -0.1, 0, Math.PI * 2); ctx.fill();
+      }
+    }
 
+    // 2. Rain ground water ripples (drawn under atmospheric filter)
+    if (isRain) {
+      ctx.strokeStyle = 'rgba(220, 245, 255, 0.45)';
+      ctx.lineWidth = 1.1;
+      for (const rp of rainRipples) {
+        ctx.globalAlpha = Math.max(0, rp.life * 0.65);
+        ctx.beginPath(); ctx.ellipse(rp.x, rp.y, rp.r, rp.r * 0.45, 0, 0, Math.PI * 2); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // 3. Weather particles (Rain streaks / Winter snowflakes / Autumn maple leaves / Spring petals / Night fireflies)
+    for (const d of ambientDrops) {
+      if (isRain) {
+        ctx.strokeStyle = 'rgba(205, 238, 255, 0.58)'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.moveTo(d.x, d.y); ctx.lineTo(d.x - 3.5, d.y + 11); ctx.stroke();
+      } else if (snowy) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
+        ctx.beginPath(); ctx.arc(d.x, d.y, d.size || 2.2, 0, Math.PI * 2); ctx.fill();
+      } else if (isNight) {
+        const pulse = 0.35 + 0.65 * Math.abs(Math.sin(d.phase));
+        const rad = season.id === 'summer' ? 2.6 : 2.1;
+        ctx.fillStyle = `rgba(254, 245, 158, ${pulse.toFixed(2)})`;
+        ctx.beginPath(); ctx.arc(d.x, d.y, rad, 0, Math.PI * 2); ctx.fill();
+        if (season.id === 'summer') {
+          ctx.fillStyle = `rgba(254, 245, 158, ${(pulse * 0.25).toFixed(2)})`;
+          ctx.beginPath(); ctx.arc(d.x, d.y, 6, 0, Math.PI * 2); ctx.fill();
+        }
+      } else if (season.id === 'autumn') {
+        ctx.save();
+        ctx.translate(d.x, d.y); ctx.rotate(d.phase * 0.7);
+        ctx.fillStyle = d.speed > 1 ? '#e86f3a' : '#f2a93b';
+        ctx.globalAlpha = 0.82;
+        ctx.beginPath(); ctx.moveTo(0, -3.5); ctx.lineTo(3, 0); ctx.lineTo(0, 3.5); ctx.lineTo(-3, 0); ctx.closePath(); ctx.fill();
+        ctx.restore();
+        ctx.globalAlpha = 1;
+      } else {
+        ctx.fillStyle = season.blossom; ctx.globalAlpha = 0.8;
+        ctx.beginPath(); ctx.ellipse(d.x, d.y, 3.2, 1.9, d.phase, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+      }
+    }
+
+    // 4. Smooth Dawn Mist -> Sunlit Day -> Amber Sunset -> Deep Cozy Night filter
+    if (mins < 8 * 60) {
+      const t = 1 - (mins - 360) / 120;
+      ctx.fillStyle = `rgba(255, 232, 200, ${(t * 0.20).toFixed(3)})`;
+      ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+    } else if (mins >= 16.5 * 60 && mins < 19.5 * 60) {
+      const t = (mins - 990) / 180;
+      ctx.fillStyle = `rgba(232, 132, 82, ${(t * 0.27).toFixed(3)})`;
+      ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+    } else if (mins >= 19.5 * 60) {
+      const t = Math.min(1, (mins - 1170) / 180);
+      ctx.fillStyle = `rgba(24, 34, 78, ${(0.28 + t * 0.30).toFixed(3)})`;
+      ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+    }
+    if (isRain) { ctx.fillStyle = 'rgba(46, 76, 112, 0.14)'; ctx.fillRect(0, 0, CANVAS_W, CANVAS_H); }
+
+    // 5. Warm glowing cottage windows & garden lanterns at dusk/night
     if (mins >= 18 * 60) {
-      const glowAlpha = Math.min(0.42, ((mins - 1080) / 180) * 0.42);
+      const glowAlpha = Math.min(0.45, ((mins - 1080) / 180) * 0.45);
       const lights = state.area === 'farm'
-        ? [[3.3 * TILE, 4.3 * TILE, 62], [4.8 * TILE, 4.3 * TILE, 62], [18.5 * TILE, 4.2 * TILE, 72]]
+        ? [[3.3 * TILE, 4.3 * TILE, 64], [4.8 * TILE, 4.3 * TILE, 64], [18.5 * TILE, 4.2 * TILE, 74]]
         : [[5.5 * TILE, 4 * TILE, 68], [18 * TILE, 4.2 * TILE, 74]];
       if (state.area === 'farm') {
         for (const [k, td] of Object.entries(state.farm)) {
-          if (td.placeable === 'lantern') { const [lx, ly] = k.split(',').map(Number); lights.push([(lx + 0.5) * TILE, (ly + 0.5) * TILE, 80]); }
+          if (td.placeable === 'lantern') { const [lx, ly] = k.split(',').map(Number); lights.push([(lx + 0.5) * TILE, (ly + 0.5) * TILE, 82]); }
         }
       }
       ctx.save(); ctx.globalCompositeOperation = 'lighter';
@@ -3418,20 +5455,6 @@
         ctx.fillStyle = g; ctx.beginPath(); ctx.arc(lx, ly, rad, 0, Math.PI * 2); ctx.fill();
       }
       ctx.restore();
-    }
-
-    const isNight = mins >= 19 * 60;
-    for (const d of ambientDrops) {
-      if (state.weather === 'rainy') {
-        ctx.strokeStyle = 'rgba(205, 238, 255, 0.58)'; ctx.lineWidth = 1.3;
-        ctx.beginPath(); ctx.moveTo(d.x, d.y); ctx.lineTo(d.x - 3.5, d.y + 10); ctx.stroke();
-      } else if (isNight) {
-        ctx.fillStyle = `rgba(254, 245, 158, ${(0.35 + 0.65 * Math.abs(Math.sin(d.phase))).toFixed(2)})`;
-        ctx.beginPath(); ctx.arc(d.x, d.y, 2.2, 0, Math.PI * 2); ctx.fill();
-      } else {
-        ctx.fillStyle = season.blossom; ctx.globalAlpha = 0.78;
-        ctx.beginPath(); ctx.ellipse(d.x, d.y, 3, 1.8, d.phase, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
-      }
     }
   }
 
@@ -3444,10 +5467,25 @@
   }
 
   window.addEventListener('themechange', () => render());
+  window.addEventListener('beforeunload', () => { if (gameBooted) saveState(true, true); });
+  window.addEventListener('pagehide', () => { if (gameBooted) saveState(true, true); });
+  document.addEventListener('visibilitychange', () => {
+    if (gameBooted && document.visibilityState === 'hidden') saveState(true, false);
+  });
+  setInterval(() => { if (gameBooted) saveState(true, true); }, 15000);
 
   applyStaticLabels();
   updateHUD();
   renderHotbar();
+  gameBooted = true;
+  if (!hadLocalSave) {
+    IDBBackup.load().then(parsed => {
+      if (parsed && !hadLocalSave) {
+        hadLocalSave = true;
+        applyRestoredState(parsed);
+      }
+    }).catch(() => {});
+  }
   requestAnimationFrame(loop);
 })();
 </script>
