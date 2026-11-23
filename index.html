@@ -12,7 +12,7 @@
   <link rel="icon" type="image/svg+xml" href="./icon.svg" />
   <link rel="apple-touch-icon" href="./icon-192.png" />
   <title>口袋山谷 · Pocket Valley</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="./tailwindcss.js"></script>
   <style>
     :root {
       --background: #f5efe2;
@@ -100,8 +100,18 @@
     .btn-honey:hover:not(:disabled) { filter: brightness(1.05); transform: translateY(-1px); }
     .btn-honey:disabled { opacity: 0.45; cursor: not-allowed; }
     .modal-backdrop {
-      background: rgba(40, 30, 24, 0.52);
-      backdrop-filter: blur(3px);
+      background: rgba(40, 30, 24, 0.56);
+      backdrop-filter: blur(4px);
+    }
+    #importSaveFile.hidden, #modalOverlay.hidden { display: none !important; }
+    #modalOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem;
     }
     .num-tabular { font-variant-numeric: tabular-nums; }
     .fade-overlay { transition: opacity 0.4s ease; pointer-events: none; }
@@ -152,21 +162,11 @@
           <span>💐</span><span id="uiSatchelBtn">花篮</span>
           <span id="satchelBadge" class="px-1.5 py-0.5 rounded-full text-[11px] font-bold bg-[var(--primary)] text-[var(--primary-foreground)] num-tabular">0</span>
         </button>
-        <button id="btnDress" class="shrink-0 px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer">
-          <span>👗</span><span id="uiDressLabel">换装</span>
-        </button>
-        <button id="btnSaveCloud" class="shrink-0 px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer" title="Save & Google Cloud Sync">
-          <span>💾</span><span id="uiSaveBtn">存档</span>
+        <button id="btnSleepQuick" class="shrink-0 px-2 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium cursor-pointer" title="Sleep / 休息">🌙</button>
+        <button id="btnSettings" class="shrink-0 px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-semibold flex items-center gap-1 cursor-pointer" title="Settings / 设置">
+          <span>⚙️</span><span id="uiSettingsBtn">设置</span>
         </button>
         <input id="importSaveFile" type="file" accept=".json,application/json" class="hidden" />
-        <button id="btnLang" class="shrink-0 px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-semibold flex items-center gap-1 cursor-pointer">
-          <span>🌐</span><span id="uiLangLabel">EN</span>
-        </button>
-        <button id="btnTouchPadToggle" class="shrink-0 px-2 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium cursor-pointer" title="Toggle Touch Controls / 触屏手柄">🕹️</button>
-        <button id="btnSleepQuick" class="shrink-0 px-2 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium cursor-pointer" title="Sleep / 休息">🌙</button>
-        <button id="btnSound" class="shrink-0 px-2 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium cursor-pointer">🔊</button>
-        <button id="btnHelp" class="shrink-0 px-2 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium cursor-pointer">❓</button>
-        <button id="btnReset" class="shrink-0 px-2 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium text-[var(--muted-foreground)] cursor-pointer">↺</button>
       </div>
     </div>
 
@@ -248,9 +248,9 @@
           <div id="fadeMessage" class="text-amber-100 text-base sm:text-lg font-bold tracking-wide px-4 text-center"></div>
         </div>
 
-        <!-- Modal Overlay Layer (fixed full-viewport on mobile so modals are spacious & scrollable) -->
-        <div id="modalOverlay" class="hidden fixed inset-0 sm:absolute sm:inset-0 modal-backdrop flex items-center justify-center p-3 z-50 sm:z-20">
-          <div id="modalCard" class="parchment rounded-2xl w-full max-w-[580px] max-h-[88dvh] sm:max-h-[93%] flex flex-col overflow-hidden shadow-2xl">
+        <!-- Modal Overlay Layer (full-viewport centered popup dialog) -->
+        <div id="modalOverlay" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center p-3 z-50">
+          <div id="modalCard" class="parchment rounded-2xl w-full max-w-[620px] max-h-[90dvh] flex flex-col overflow-hidden shadow-2xl">
             <div class="flex items-center justify-between px-4 py-2.5 border-b border-[#d6ba91] bg-[#f4e4c5]">
               <div class="flex items-center gap-2">
                 <span id="modalIcon" class="text-lg">🌸</span>
@@ -806,6 +806,7 @@
       fishDexBtn: '钓鱼图鉴',
       petBtn: '宠物',
       saveBtn: '存档',
+      settingsBtn: '设置',
       kitchenBtn: '厨房',
       satchelBtn: '花篮',
       toPasture: '去牧场',
@@ -1039,7 +1040,24 @@
         genderMale: '👦 男孩',
         setupSpinHint: '点击角色可转身预览',
         setupStartBtn: '🌱 开始我的田园生活！',
-        setupMapNote: '角色与小屋外观随时可在顶部「👗 换装」修改；地图布局选定后即生成农庄。',
+        setupMapNote: '进入游戏后，角色穿搭与小屋外观可随时在右上角「⚙️ 设置」中修改。',
+        settingsTitle: '游戏设置与外观定制',
+        settingsTabAppearance: '🎨 角色与小屋',
+        settingsTabSave: '💾 存档与云同步',
+        settingsTabGeneral: '⚙️ 游戏偏好',
+        prefLangTitle: '🌐 界面语言',
+        prefLangBtn: '切换到 English',
+        prefSoundTitle: '🔊 音效开关',
+        prefSoundOn: '已开启 🔊',
+        prefSoundOff: '已静音 🔇',
+        prefTouchTitle: '🕹️ 触屏虚拟手柄',
+        prefTouchOn: '显示中',
+        prefTouchOff: '已隐藏',
+        prefHelpTitle: '📖 玩法手册',
+        prefHelpBtn: '查看操作指南',
+        prefResetTitle: '↺ 重新开始新农场',
+        prefResetDesc: '清空当前进度并重新弹出开局向导，可重选地图水池位置与角色。',
+        prefResetBtn: '重新开局',
         helpTitle: '口袋山谷田园与牧场手册',
         helpBody: `
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs leading-relaxed">
@@ -1136,6 +1154,7 @@
       fishDexBtn: 'Fish Index',
       petBtn: 'Pet',
       saveBtn: 'Save',
+      settingsBtn: 'Settings',
       kitchenBtn: 'Kitchen',
       satchelBtn: 'Basket',
       toPasture: 'Pasture',
@@ -1369,7 +1388,24 @@
         genderMale: '👦 Boy',
         setupSpinHint: 'Click character to turn',
         setupStartBtn: '🌱 Start Farming!',
-        setupMapNote: 'You can change character & cottage style anytime via "👗 Wardrobe". Map layout sets up your farm.',
+        setupMapNote: 'Once in game, you can change your character, outfit, or cottage style anytime via "⚙️ Settings".',
+        settingsTitle: 'Settings & Customization',
+        settingsTabAppearance: '🎨 Character & Cottage',
+        settingsTabSave: '💾 Save & Cloud',
+        settingsTabGeneral: '⚙️ Preferences',
+        prefLangTitle: '🌐 Language',
+        prefLangBtn: 'Switch to 中文',
+        prefSoundTitle: '🔊 Sound Effects',
+        prefSoundOn: 'On 🔊',
+        prefSoundOff: 'Muted 🔇',
+        prefTouchTitle: '🕹️ Touch Gamepad',
+        prefTouchOn: 'Visible',
+        prefTouchOff: 'Hidden',
+        prefHelpTitle: '📖 Gameplay Guide',
+        prefHelpBtn: 'Open Guide',
+        prefResetTitle: '↺ Start a New Farm',
+        prefResetDesc: 'Reset progress and reopen the setup popup to pick a new map layout, cottage, and character.',
+        prefResetBtn: 'New Farm',
         helpTitle: 'Pocket Valley Guide',
         helpBody: `
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs leading-relaxed">
@@ -2198,6 +2234,7 @@
 
     const body = `
       <div id="pvSaveCloudRoot" class="space-y-3 text-xs">
+        ${typeof renderSettingsTabsBar === 'function' ? renderSettingsTabsBar('save') : ''}
         <div class="rounded-xl bg-[#fbf2df] border border-[#d6bc93] p-3 space-y-2">
           <div class="flex items-center justify-between gap-2">
             <div class="font-extrabold text-[#4d3520]">${m.saveLocalTitle}</div>
@@ -2224,7 +2261,8 @@
         </div>
       </div>`;
 
-    openModal('💾', m.saveTitle, body, `<button id="btnCloseSaveCloud" class="btn-honey px-4 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${m.backToFarm}</button>`);
+    openModal('⚙️', m.settingsTitle, body, `<button id="btnCloseSaveCloud" class="btn-honey px-4 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${m.backToFarm}</button>`);
+    if (typeof bindSettingsTabs === 'function') bindSettingsTabs();
     document.getElementById('btnCloseSaveCloud').addEventListener('click', closeModal);
 
     document.getElementById('btnSaveLocalNow').addEventListener('click', () => {
@@ -4437,102 +4475,185 @@
     pctx.fillText('→', w - 2, 6.2 * th);
   }
 
-  // --- WARDROBE & COTTAGE STYLE MODAL ---
-  let wardrobeTab = 'char';
+  // --- UNIFIED SETTINGS MODAL (Appearance + Save & Cloud + Preferences) ---
+  let settingsTab = 'appearance';
   let previewSpinDirIdx = 0;
   const PREVIEW_DIRS = ['down', 'right', 'up', 'left'];
 
-  function openDressModal(tab = wardrobeTab) {
-    wardrobeTab = tab === 'house' ? 'house' : 'char';
+  function renderSettingsTabsBar(activeTab) {
+    const m = T().modals;
+    const mk = (id, label) => `<button data-stab="${id}" class="px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer transition ${activeTab === id ? 'btn-peach' : 'bg-[#e8d5b3] border border-[#b58d60] text-[#4a3525]'}">${label}</button>`;
+    return `<div class="flex flex-wrap gap-1.5 pb-1 border-b border-[#dcc49e]">${mk('appearance', m.settingsTabAppearance)}${mk('save', m.settingsTabSave)}${mk('general', m.settingsTabGeneral)}</div>`;
+  }
+
+  function bindSettingsTabs() {
+    document.querySelectorAll('[data-stab]').forEach(b => b.addEventListener('click', () => openSettingsModal(b.dataset.stab)));
+  }
+
+  function openResetConfirmModal() {
+    const m = T().modals;
+    openModal('🌼', m.resetTitle, `<p class="text-xs">${m.resetBody}</p>`,
+      `<button id="btnCancelReset" class="px-3 py-1.5 rounded-xl bg-[#e8d5b3] border border-[#b58d60] font-bold text-xs cursor-pointer">${m.keepPlaying}</button>
+       <button id="btnDoReset" class="btn-peach px-3.5 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${m.confirmReset}</button>`);
+    document.getElementById('btnCancelReset').addEventListener('click', () => { AudioFX.ui(); openSettingsModal('general'); });
+    document.getElementById('btnDoReset').addEventListener('click', () => {
+      const kl = state.lang, kd = state.dressIdx, kg = state.gender, kh = state.houseStyle, km = state.mapLayout;
+      localStorage.removeItem(SAVE_KEY); localStorage.removeItem(OLD_SAVE_KEY);
+      IDBBackup.clear();
+      hadLocalSave = false;
+      state = createInitialState(kl, kd, kg, kh, km, false);
+      MAPS.farm = buildFarmMap(state.mapLayout);
+      resetPondFishShadows('farm');
+      cancelFishing();
+      syncPetNearPlayer();
+      applyStaticLabels(); updateHUD(); renderHotbar();
+      AudioFX.ui();
+      openStartSetupModal(true);
+    });
+  }
+
+  function openSettingsModal(tab = settingsTab) {
+    settingsTab = tab || 'appearance';
+    if (settingsTab === 'save') { AudioFX.ui(); openSaveCloudModal(); return; }
     AudioFX.ui();
     const m = T().modals;
-    const curGender = state.gender === 'male' ? 'male' : 'female';
-    const outfits = getOutfitList(curGender);
-    const tabsHtml = `
-      <div class="flex gap-1.5">
-        <button data-wtab="char" class="px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer ${wardrobeTab === 'char' ? 'btn-peach' : 'bg-[#e8d5b3] border border-[#b58d60] text-[#4a3525]'}">${m.wardrobeTabChar}</button>
-        <button data-wtab="house" class="px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer ${wardrobeTab === 'house' ? 'btn-peach' : 'bg-[#e8d5b3] border border-[#b58d60] text-[#4a3525]'}">${m.wardrobeTabHouse}</button>
-      </div>
-    `;
-    let contentHtml = '';
-    if (wardrobeTab === 'char') {
-      const cards = outfits.map((d, idx) => `
-        <button data-pickdress="${idx}" class="rounded-2xl p-2.5 text-left border-2 transition cursor-pointer flex items-center gap-2.5 ${idx === state.dressIdx ? 'bg-[#fff5e4] border-[#e07a5f] shadow-md' : 'bg-[#fffdf7] border-[#d6ba91] hover:border-[#c88c72]'}">
-          <div class="w-9 h-9 rounded-full flex items-center justify-center text-lg shrink-0 border-2 border-white" style="background:${d.skirt}; box-shadow:0 2px 6px rgba(0,0,0,0.12)">${d.preview}</div>
+    const prevScroll = document.getElementById('pvSettingsRoot') ? (document.getElementById('modalBody')?.scrollTop || 0) : 0;
+
+    if (settingsTab === 'appearance') {
+      const curGender = state.gender === 'male' ? 'male' : 'female';
+      const outfits = getOutfitList(curGender);
+      const outfitCards = outfits.map((d, idx) => `
+        <button data-pickdress="${idx}" class="rounded-xl p-2 text-left border-2 transition cursor-pointer flex items-center gap-2 ${idx === state.dressIdx ? 'bg-[#fff5e4] border-[#e07a5f] shadow-sm' : 'bg-[#fffdf7] border-[#d6ba91] hover:border-[#c88c72]'}">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-base shrink-0 border border-white" style="background:${d.skirt}">${d.preview}</div>
           <div class="min-w-0">
             <div class="font-bold text-xs text-[#4a3525] truncate">${L(d.name)} ${idx === state.dressIdx ? '✓' : ''}</div>
-            <div class="flex items-center gap-1 mt-1">
-              <span class="w-3 h-3 rounded-full border border-black/15" style="background:${d.skirt}"></span>
-              <span class="w-3 h-3 rounded-full border border-black/15" style="background:${d.flowerA}"></span>
-              <span class="w-3 h-3 rounded-full border border-black/15" style="background:${d.flowerB}"></span>
-              <span class="w-3 h-3 rounded-full border border-black/15" style="background:${d.ribbon}"></span>
+            <div class="flex items-center gap-1 mt-0.5">
+              <span class="w-2.5 h-2.5 rounded-full border border-black/15" style="background:${d.skirt}"></span>
+              <span class="w-2.5 h-2.5 rounded-full border border-black/15" style="background:${d.ribbon}"></span>
             </div>
           </div>
         </button>`).join('');
-      contentHtml = `
-        <div class="flex flex-col sm:flex-row gap-3 items-center sm:items-stretch">
-          <div class="flex flex-col items-center justify-center shrink-0">
-            <canvas id="wardrobeCharPreview" width="112" height="122" class="rounded-2xl border-2 border-[#c5a176] shadow-inner cursor-pointer"></canvas>
-            <span class="text-[10px] text-[#7e634a] mt-1">↻ ${m.setupSpinHint}</span>
-          </div>
-          <div class="flex-1 w-full space-y-2.5">
-            <div class="grid grid-cols-2 gap-2">
-              <button data-pickgender="female" class="py-1.5 px-3 rounded-xl font-bold text-xs border-2 cursor-pointer transition ${curGender === 'female' ? 'bg-[#ffe8e2] border-[#e07a5f] text-[#5c2c1d]' : 'bg-[#fffdf7] border-[#d6ba91] text-[#5c3c22]'}">${m.genderFemale} ${curGender === 'female' ? '✓' : ''}</button>
-              <button data-pickgender="male" class="py-1.5 px-3 rounded-xl font-bold text-xs border-2 cursor-pointer transition ${curGender === 'male' ? 'bg-[#e3f1fa] border-[#5f87b2] text-[#1f3b57]' : 'bg-[#fffdf7] border-[#d6ba91] text-[#5c3c22]'}">${m.genderMale} ${curGender === 'male' ? '✓' : ''}</button>
+
+      const houseCards = HOUSE_STYLES.map(hs => `
+        <button data-pickhouse="${hs.id}" class="rounded-xl p-2 text-left border-2 transition cursor-pointer flex flex-col gap-1 ${hs.id === state.houseStyle ? 'bg-[#fff5e4] border-[#e07a5f] shadow-sm' : 'bg-[#fffdf7] border-[#d6ba91] hover:border-[#c88c72]'}">
+          <canvas data-housepreview="${hs.id}" width="124" height="84" class="w-full h-auto rounded-lg border border-[#dcc39c]"></canvas>
+          <div class="font-bold text-[11px] text-[#4a3525] truncate">${hs.emoji} ${L(hs.name)} ${hs.id === state.houseStyle ? '✓' : ''}</div>
+        </button>`).join('');
+
+      const body = `
+        <div id="pvSettingsRoot" class="space-y-3">
+          ${renderSettingsTabsBar('appearance')}
+          <div class="rounded-2xl p-3 bg-[#fffaf0] border border-[#d6ba91] space-y-2.5">
+            <div class="font-bold text-xs text-[#5c3c22]">${m.wardrobeTabChar}</div>
+            <div class="flex flex-col sm:flex-row gap-3 items-center sm:items-stretch">
+              <div class="flex flex-col items-center justify-center shrink-0">
+                <canvas id="wardrobeCharPreview" width="102" height="112" class="rounded-2xl border-2 border-[#c5a176] shadow-inner cursor-pointer"></canvas>
+                <span class="text-[10px] text-[#7e634a] mt-1">↻ ${m.setupSpinHint}</span>
+              </div>
+              <div class="flex-1 w-full space-y-2">
+                <div class="grid grid-cols-2 gap-2">
+                  <button data-pickgender="female" class="py-1.5 px-3 rounded-xl font-bold text-xs border-2 cursor-pointer transition ${curGender === 'female' ? 'bg-[#ffe8e2] border-[#e07a5f] text-[#5c2c1d]' : 'bg-[#fffdf7] border-[#d6ba91] text-[#5c3c22]'}">${m.genderFemale} ${curGender === 'female' ? '✓' : ''}</button>
+                  <button data-pickgender="male" class="py-1.5 px-3 rounded-xl font-bold text-xs border-2 cursor-pointer transition ${curGender === 'male' ? 'bg-[#e3f1fa] border-[#5f87b2] text-[#1f3b57]' : 'bg-[#fffdf7] border-[#d6ba91] text-[#5c3c22]'}">${m.genderMale} ${curGender === 'male' ? '✓' : ''}</button>
+                </div>
+                <div class="grid grid-cols-2 gap-1.5">${outfitCards}</div>
+              </div>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${cards}</div>
+          </div>
+          <div class="rounded-2xl p-3 bg-[#fffaf0] border border-[#d6ba91] space-y-2">
+            <div class="font-bold text-xs text-[#5c3c22]">${m.wardrobeTabHouse}</div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">${houseCards}</div>
           </div>
         </div>`;
-    } else {
-      const hCards = HOUSE_STYLES.map(hs => `
-        <button data-pickhouse="${hs.id}" class="rounded-2xl p-2.5 text-left border-2 transition cursor-pointer flex flex-col gap-1.5 ${hs.id === state.houseStyle ? 'bg-[#fff5e4] border-[#e07a5f] shadow-md' : 'bg-[#fffdf7] border-[#d6ba91] hover:border-[#c88c72]'}">
-          <canvas data-housepreview="${hs.id}" width="150" height="106" class="w-full h-auto rounded-xl border border-[#d6ba91]"></canvas>
-          <div class="font-bold text-xs text-[#4a3525]">${hs.emoji} ${L(hs.name)} ${hs.id === state.houseStyle ? '✓' : ''}</div>
-          <div class="text-[11px] text-[#73563d] leading-snug">${L(hs.desc)}</div>
-        </button>`).join('');
-      contentHtml = `<div class="grid grid-cols-2 gap-2.5">${hCards}</div>`;
-    }
-    const footerSummary = wardrobeTab === 'char'
-      ? `${curGender === 'male' ? '👦' : '👧'} ${L(getDress().name)}`
-      : `${getHouseStyle().emoji} ${L(getHouseStyle().name)}`;
-    openModal('👗', m.dressTitle, `<div class="space-y-3"><p class="text-xs text-[#73563d]">${m.dressHint}</p>${tabsHtml}${contentHtml}</div>`,
-      `<span class="text-[11px] opacity-80">${footerSummary}</span><button id="btnDressDone" class="btn-peach px-4 py-1.5 rounded-xl text-xs font-bold cursor-pointer">${m.dressDone}</button>`);
 
-    document.querySelectorAll('[data-wtab]').forEach(b => b.addEventListener('click', () => openDressModal(b.dataset.wtab)));
-    const charCanvas = document.getElementById('wardrobeCharPreview');
-    if (charCanvas) {
-      renderCharacterPreviewCanvas(charCanvas, curGender, state.dressIdx, PREVIEW_DIRS[previewSpinDirIdx]);
-      charCanvas.addEventListener('click', () => {
-        previewSpinDirIdx = (previewSpinDirIdx + 1) % PREVIEW_DIRS.length;
-        AudioFX.ui();
+      const footerSummary = `${curGender === 'male' ? '👦' : '👧'} ${L(getDress().name)} · ${getHouseStyle().emoji} ${L(getHouseStyle().name)}`;
+      openModal('⚙️', m.settingsTitle, body,
+        `<span class="text-[11px] opacity-80 truncate">${footerSummary}</span><button id="btnDressDone" class="btn-peach px-4 py-1.5 rounded-xl text-xs font-bold cursor-pointer shrink-0">${m.dressDone}</button>`);
+      if (prevScroll > 0) document.getElementById('modalBody').scrollTop = prevScroll;
+      bindSettingsTabs();
+
+      const charCanvas = document.getElementById('wardrobeCharPreview');
+      if (charCanvas) {
         renderCharacterPreviewCanvas(charCanvas, curGender, state.dressIdx, PREVIEW_DIRS[previewSpinDirIdx]);
-      });
+        charCanvas.addEventListener('click', () => {
+          previewSpinDirIdx = (previewSpinDirIdx + 1) % PREVIEW_DIRS.length;
+          AudioFX.ui();
+          renderCharacterPreviewCanvas(charCanvas, curGender, state.dressIdx, PREVIEW_DIRS[previewSpinDirIdx]);
+        });
+      }
+      document.querySelectorAll('[data-housepreview]').forEach(cv => renderCottagePreviewCanvas(cv, cv.dataset.housepreview));
+      document.querySelectorAll('[data-pickgender]').forEach(b => b.addEventListener('click', () => {
+        state.gender = b.dataset.pickgender === 'male' ? 'male' : 'female';
+        state.dressIdx = state.dressIdx % getOutfitList(state.gender).length;
+        AudioFX.harvest(); saveState(true);
+        spawnParticles(state.player.x, state.player.y - 10, getDress().skirt, 10, 1.8, 3.5);
+        openSettingsModal('appearance');
+      }));
+      document.querySelectorAll('[data-pickdress]').forEach(b => b.addEventListener('click', () => {
+        state.dressIdx = Number(b.dataset.pickdress);
+        AudioFX.harvest(); saveState(true);
+        spawnParticles(state.player.x, state.player.y - 10, getDress().skirt, 10, 1.8, 3.5);
+        addFloatText(state.player.x, state.player.y - 26, T().floats.dressChanged(L(getDress().name)), '#fff5d6');
+        openSettingsModal('appearance');
+      }));
+      document.querySelectorAll('[data-pickhouse]').forEach(b => b.addEventListener('click', () => {
+        state.houseStyle = b.dataset.pickhouse;
+        AudioFX.harvest(); saveState(true);
+        const lay = getFarmLayout();
+        spawnParticles((lay.cottage.x + 2) * TILE, (lay.cottage.y + 1.5) * TILE, getHouseStyle().roof, 14, 2.0, 3.8);
+        addFloatText(state.player.x, state.player.y - 26, T().floats.houseChanged(L(getHouseStyle().name)), '#fff5d6');
+        openSettingsModal('appearance');
+      }));
+      document.getElementById('btnDressDone').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
+      return;
     }
-    document.querySelectorAll('[data-housepreview]').forEach(cv => renderCottagePreviewCanvas(cv, cv.dataset.housepreview));
-    document.querySelectorAll('[data-pickgender]').forEach(b => b.addEventListener('click', () => {
-      state.gender = b.dataset.pickgender === 'male' ? 'male' : 'female';
-      state.dressIdx = state.dressIdx % getOutfitList(state.gender).length;
-      AudioFX.harvest(); saveState(true);
-      spawnParticles(state.player.x, state.player.y - 10, getDress().skirt, 10, 1.8, 3.5);
-      openDressModal('char');
-    }));
-    document.querySelectorAll('[data-pickdress]').forEach(b => b.addEventListener('click', () => {
-      state.dressIdx = Number(b.dataset.pickdress);
-      AudioFX.harvest(); saveState(true);
-      spawnParticles(state.player.x, state.player.y - 10, getDress().skirt, 10, 1.8, 3.5);
-      addFloatText(state.player.x, state.player.y - 26, T().floats.dressChanged(L(getDress().name)), '#fff5d6');
-      openDressModal('char');
-    }));
-    document.querySelectorAll('[data-pickhouse]').forEach(b => b.addEventListener('click', () => {
-      state.houseStyle = b.dataset.pickhouse;
-      AudioFX.harvest(); saveState(true);
-      const lay = getFarmLayout();
-      spawnParticles((lay.cottage.x + 2) * TILE, (lay.cottage.y + 1.5) * TILE, getHouseStyle().roof, 14, 2.0, 3.8);
-      addFloatText(state.player.x, state.player.y - 26, T().floats.houseChanged(L(getHouseStyle().name)), '#fff5d6');
-      openDressModal('house');
-    }));
-    document.getElementById('btnDressDone').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
+
+    // Tab 3: General Preferences (Language, Sound, Touchpad, Help, New Farm Reset)
+    const touchVisible = mobileControlsEl && !mobileControlsEl.classList.contains('hidden');
+    const body = `
+      <div id="pvSettingsRoot" class="space-y-3 text-xs">
+        ${renderSettingsTabsBar('general')}
+        <div class="rounded-2xl p-3 bg-[#fffaf0] border border-[#d6ba91] space-y-2.5">
+          <div class="flex items-center justify-between gap-2 pb-2 border-b border-[#ead8ba]">
+            <span class="font-bold text-[#4a3525]">${m.prefLangTitle}</span>
+            <button id="btnPrefLang" class="px-3 py-1.5 rounded-xl bg-[#e8d5b3] border border-[#b58d60] font-bold text-xs text-[#4a3525] cursor-pointer">${m.prefLangBtn}</button>
+          </div>
+          <div class="flex items-center justify-between gap-2 pb-2 border-b border-[#ead8ba]">
+            <span class="font-bold text-[#4a3525]">${m.prefSoundTitle}</span>
+            <button id="btnPrefSound" class="px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer ${AudioFX.muted ? 'bg-[#e8d5b3] border border-[#b58d60] text-[#4a3525]' : 'btn-sage'}">${AudioFX.muted ? m.prefSoundOff : m.prefSoundOn}</button>
+          </div>
+          <div class="flex items-center justify-between gap-2 pb-2 border-b border-[#ead8ba]">
+            <span class="font-bold text-[#4a3525]">${m.prefTouchTitle}</span>
+            <button id="btnPrefTouch" class="px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer ${touchVisible ? 'btn-sage' : 'bg-[#e8d5b3] border border-[#b58d60] text-[#4a3525]'}">${touchVisible ? m.prefTouchOn : m.prefTouchOff}</button>
+          </div>
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-bold text-[#4a3525]">${m.prefHelpTitle}</span>
+            <button id="btnPrefHelp" class="px-3 py-1.5 rounded-xl bg-[#e8d5b3] border border-[#b58d60] font-bold text-xs text-[#4a3525] cursor-pointer">${m.prefHelpBtn}</button>
+          </div>
+        </div>
+        <div class="rounded-2xl p-3 bg-[#fff5f0] border border-[#e0b8a8] flex items-center justify-between gap-3">
+          <div>
+            <div class="font-bold text-[#7c3523]">${m.prefResetTitle}</div>
+            <div class="text-[11px] text-[#8a5543] mt-0.5">${m.prefResetDesc}</div>
+          </div>
+          <button id="btnPrefReset" class="btn-peach px-3.5 py-1.5 rounded-xl font-bold text-xs cursor-pointer shrink-0">${m.prefResetBtn}</button>
+        </div>
+      </div>`;
+    openModal('⚙️', m.settingsTitle, body,
+      `<span class="text-[11px] opacity-75">${L(getFarmLayout().name)}</span><button id="btnSettingsClose" class="btn-honey px-4 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${m.backToFarm}</button>`);
+    bindSettingsTabs();
+    document.getElementById('btnPrefLang').addEventListener('click', () => { toggleLanguage(); openSettingsModal('general'); });
+    document.getElementById('btnPrefSound').addEventListener('click', () => { toggleSound(); openSettingsModal('general'); });
+    document.getElementById('btnPrefTouch').addEventListener('click', () => {
+      AudioFX.ui();
+      setTouchPadVisible(mobileControlsEl.classList.contains('hidden'));
+      openSettingsModal('general');
+    });
+    document.getElementById('btnPrefHelp').addEventListener('click', openHelpModal);
+    document.getElementById('btnPrefReset').addEventListener('click', openResetConfirmModal);
+    document.getElementById('btnSettingsClose').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
   }
+
+  function openDressModal(tab) { openSettingsModal('appearance'); }
 
   // --- START-OF-GAME CHARACTER, COTTAGE & MAP LAYOUT SETUP WIZARD ---
   let setupDraft = { gender: 'female', dressIdx: 0, houseStyle: 'terracotta', mapLayout: 'pondRight', dirIdx: 0 };
@@ -4769,13 +4890,12 @@
     if (ti) ti.textContent = t.touchInteract;
     const ipwa = document.getElementById('btnInstallPwa');
     if (ipwa) ipwa.textContent = t.installPwa;
-    document.getElementById('uiLangLabel').textContent = t.langSwitch;
-    document.getElementById('uiDressLabel').textContent = t.dressBtn;
+    const setBtn = document.getElementById('uiSettingsBtn');
+    if (setBtn) setBtn.textContent = t.settingsBtn;
     document.getElementById('uiShopBtn').textContent = t.shopBtn;
     document.getElementById('uiRanchShopBtn').textContent = t.ranchShopBtn;
     document.getElementById('uiFishDexBtn').textContent = t.fishDexBtn;
     document.getElementById('uiPetBtn').textContent = t.petBtn;
-    document.getElementById('uiSaveBtn').textContent = t.saveBtn;
     document.getElementById('uiKitchenBtn').textContent = t.kitchenBtn;
     document.getElementById('uiSatchelBtn').textContent = t.satchelBtn;
     document.getElementById('uiForecastLabel').textContent = t.forecast;
@@ -4838,7 +4958,7 @@
     scheduleAutoSave();
   }
 
-  function toggleSound() { AudioFX.muted = !AudioFX.muted; document.getElementById('btnSound').textContent = AudioFX.muted ? '🔇' : '🔊'; }
+  function toggleSound() { AudioFX.muted = !AudioFX.muted; }
   function toggleLanguage() { state.lang = state.lang === 'zh' ? 'en' : 'zh'; AudioFX.ui(); saveState(true); applyStaticLabels(); updateHUD(); renderHotbar(); }
 
   document.getElementById('btnAreaToggle').addEventListener('click', () => switchArea(state.area === 'farm' ? 'pasture' : 'farm'));
@@ -4847,17 +4967,13 @@
   document.getElementById('btnRanchShopShortcut').addEventListener('click', () => openRanchShopModal());
   document.getElementById('btnFishDex').addEventListener('click', openFishDexModal);
   document.getElementById('btnPet').addEventListener('click', openPetModal);
-  document.getElementById('btnSaveCloud').addEventListener('click', openSaveCloudModal);
   document.getElementById('importSaveFile').addEventListener('change', (e) => {
     const f = e.target.files && e.target.files[0];
     if (f) handleImportFile(f);
   });
   document.getElementById('btnSatchel').addEventListener('click', () => openSatchelModal());
-  document.getElementById('btnDress').addEventListener('click', openDressModal);
-  document.getElementById('btnLang').addEventListener('click', toggleLanguage);
   document.getElementById('btnSleepQuick').addEventListener('click', openCottageModal);
-  document.getElementById('btnSound').addEventListener('click', toggleSound);
-  document.getElementById('btnHelp').addEventListener('click', openHelpModal);
+  document.getElementById('btnSettings').addEventListener('click', () => openSettingsModal('appearance'));
 
   // Mobile Touch Controls & Dedicated Fishing Touch Button
   const mobileControlsEl = document.getElementById('mobileControls');
@@ -4969,27 +5085,7 @@
     });
   }
 
-  document.getElementById('btnReset').addEventListener('click', () => {
-    const m = T().modals;
-    openModal('🌼', m.resetTitle, `<p class="text-xs">${m.resetBody}</p>`,
-      `<button id="btnCancelReset" class="px-3 py-1.5 rounded-xl bg-[#e8d5b3] border border-[#b58d60] font-bold text-xs cursor-pointer">${m.keepPlaying}</button>
-       <button id="btnDoReset" class="btn-peach px-3.5 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${m.confirmReset}</button>`);
-    document.getElementById('btnCancelReset').addEventListener('click', closeModal);
-    document.getElementById('btnDoReset').addEventListener('click', () => {
-      const kl = state.lang, kd = state.dressIdx, kg = state.gender, kh = state.houseStyle, km = state.mapLayout;
-      localStorage.removeItem(SAVE_KEY); localStorage.removeItem(OLD_SAVE_KEY);
-      IDBBackup.clear();
-      hadLocalSave = false;
-      state = createInitialState(kl, kd, kg, kh, km, false);
-      MAPS.farm = buildFarmMap(state.mapLayout);
-      resetPondFishShadows('farm');
-      cancelFishing();
-      syncPetNearPlayer();
-      applyStaticLabels(); updateHUD(); renderHotbar();
-      AudioFX.ui();
-      openStartSetupModal(true);
-    });
-  });
+  // Reset is triggered from Settings → Preferences via openResetConfirmModal()
 
   // =========================================================================
   // COLLISION, ANIMAL AI & UPDATE LOOP
