@@ -153,7 +153,7 @@
           <span>🥛</span><span id="uiRanchShopBtn">牧场铺</span>
         </button>
         <button id="btnFishDex" class="shrink-0 px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer">
-          <span>🐟</span><span id="uiFishDexBtn">钓鱼图鉴</span>
+          <span>📖</span><span id="uiFishDexBtn">图鉴</span>
         </button>
         <button id="btnPet" class="shrink-0 px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer">
           <span>🐾</span><span id="uiPetBtn">宠物</span>
@@ -646,120 +646,258 @@
   };
   const PANTRY_SHOP_ORDER = ['flour', 'sugar', 'butter', 'honey', 'egg', 'milk'];
 
-  // 10 COOKING RECIPES!
+  // 22 STORYBOOK COOKING RECIPES!
   const RECIPES = [
     {
-      id: 'salad', emoji: '🥗', name: { zh: '田园鲜蔬沙拉', en: 'Garden Salad' },
+      id: 'salad', emoji: '🥗', cat: 'savory', name: { zh: '田园鲜蔬沙拉', en: 'Garden Salad' },
       ingredients: { turnip: 1, radish: 1 }, sellPrice: 185, energy: 45,
       desc: { zh: '清脆爽口的农庄开胃沙拉。', en: 'Crisp farm-fresh appetizer salad.' }
     },
     {
-      id: 'omelet', emoji: '🍳', name: { zh: '太阳嫩煎蛋卷', en: 'Sunny Omelet' },
+      id: 'omelet', emoji: '🍳', cat: 'savory', name: { zh: '太阳嫩煎蛋卷', en: 'Sunny Omelet' },
       ingredients: { egg: 2, milk: 1 }, sellPrice: 260, energy: 55,
       desc: { zh: '奶香十足的软嫩黄金蛋卷。', en: 'Fluffy golden omelet whipped with fresh milk.' }
     },
     {
-      id: 'toast', emoji: '🍞', name: { zh: '蜂蜜黄油吐司', en: 'Honey Butter Toast' },
+      id: 'toast', emoji: '🍞', cat: 'sweet', name: { zh: '蜂蜜黄油吐司', en: 'Honey Butter Toast' },
       ingredients: { wheat: 1, butter: 1, honey: 1 }, sellPrice: 220, energy: 50,
       desc: { zh: '烤得外酥里软，淋上香甜百花蜜！', en: 'Warm golden toast glazed with butter & wild honey.' }
     },
     {
-      id: 'stew', emoji: '🍲', name: { zh: '奶油胡萝卜炖菜', en: 'Creamy Carrot Stew' },
+      id: 'stew', emoji: '🍲', cat: 'savory', name: { zh: '奶油胡萝卜炖菜', en: 'Creamy Carrot Stew' },
       ingredients: { carrot: 1, turnip: 1, butter: 1 }, sellPrice: 265, energy: 60,
       desc: { zh: '咕嘟咕嘟慢炖出的治愈暖胃汤菜。', en: 'Hearty comforting cottage vegetable stew.' }
     },
     {
-      id: 'cornSoup', emoji: '🥣', name: { zh: '番茄玉米浓汤', en: 'Tomato Corn Soup' },
+      id: 'tomatoPasta', emoji: '🍝', cat: 'savory', name: { zh: '鲜茄田园意面', en: 'Garden Tomato Pasta' },
+      ingredients: { wheat: 1, tomato: 1, butter: 1 }, sellPrice: 280, energy: 65,
+      desc: { zh: '手揉金黄面条裹满酸甜浓郁的鲜番茄酱！', en: 'Handmade golden pasta tossed in sweet garden tomato sauce!' }
+    },
+    {
+      id: 'cornSoup', emoji: '🥣', cat: 'savory', name: { zh: '番茄玉米浓汤', en: 'Tomato Corn Soup' },
       ingredients: { tomato: 1, corn: 1, milk: 1 }, sellPrice: 385, energy: 65,
       desc: { zh: '酸甜鲜香的田园浓汤，超受欢迎！', en: 'Velvety sweet-corn & garden tomato soup.' }
     },
     {
-      id: 'shortcake', emoji: '🍰', name: { zh: '草莓奶油小蛋糕', en: 'Strawberry Shortcake' },
+      id: 'honeyPancake', emoji: '🥞', cat: 'sweet', name: { zh: '蜂蜜鲜奶松饼', en: 'Fluffy Honey Pancakes' },
+      ingredients: { flour: 1, egg: 1, milk: 1, honey: 1 }, sellPrice: 310, energy: 72,
+      desc: { zh: '像云朵一样蓬松的鲜奶厚松饼，淋满金黄花蜜！', en: 'Cloud-soft milk pancakes stacked high with wild honey!' }
+    },
+    {
+      id: 'shortcake', emoji: '🍰', cat: 'sweet', name: { zh: '草莓奶油小蛋糕', en: 'Strawberry Shortcake' },
       ingredients: { strawberry: 1, flour: 1, egg: 1, sugar: 1 }, sellPrice: 295, energy: 70,
       desc: { zh: '下午茶人气第一的松软草莓蛋糕！', en: 'Light sponge cake layered with sweet strawberries.' }
     },
     {
-      id: 'blueberryPie', emoji: '🥧', name: { zh: '蓝莓酥皮派', en: 'Blueberry Pie' },
+      id: 'blueberryPie', emoji: '🥧', cat: 'sweet', name: { zh: '蓝莓酥皮派', en: 'Blueberry Pie' },
       ingredients: { blueberry: 2, flour: 1, butter: 1, sugar: 1 }, sellPrice: 325, energy: 75,
       desc: { zh: '切开会爆浆的紫宝石蓝莓派！', en: 'Flaky golden crust brimming with wild blueberries.' }
     },
     {
-      id: 'pudding', emoji: '🍮', name: { zh: '焦糖鸭蛋布丁', en: 'Caramel Egg Pudding' },
+      id: 'berryParfait', emoji: '🍨', cat: 'sweet', name: { zh: '双莓鲜奶圣代', en: 'Berry Milk Parfait' },
+      ingredients: { strawberry: 1, blueberry: 1, milk: 1, sugar: 1 }, sellPrice: 390, energy: 80,
+      desc: { zh: '草莓与蓝莓层层叠入冰凉鲜奶酪，清爽解暑！', en: 'Layered strawberry & blueberry cream parfait!' }
+    },
+    {
+      id: 'pudding', emoji: '🍮', cat: 'sweet', name: { zh: '焦糖鸭蛋布丁', en: 'Caramel Egg Pudding' },
       ingredients: { duckEgg: 1, milk: 1, sugar: 1, honey: 1 }, sellPrice: 365, energy: 75,
       desc: { zh: '用鸭蛋做的丝滑浓郁焦糖布丁。', en: 'Silky rich custard made with pasture duck eggs.' }
     },
     {
-      id: 'pumpkinSoup', emoji: '🎃', name: { zh: '黄金南瓜浓汤', en: 'Golden Pumpkin Soup' },
+      id: 'pumpkinSoup', emoji: '🎃', cat: 'savory', name: { zh: '黄金南瓜浓汤', en: 'Golden Pumpkin Soup' },
       ingredients: { pumpkin: 1, milk: 1, butter: 1 }, sellPrice: 590, energy: 85,
       desc: { zh: '秋日童话般的金黄丝滑南瓜汤！', en: 'Rich velvety storybook autumn pumpkin soup.' }
     },
     {
-      id: 'herbGrilledFish', emoji: '🐟', name: { zh: '香煎香草鱼排', en: 'Herb Grilled Fish' },
+      id: 'pumpkinPie', emoji: '🥧', cat: 'sweet', name: { zh: '肉桂蜂蜜南瓜派', en: 'Spiced Pumpkin Pie' },
+      ingredients: { pumpkin: 1, flour: 1, egg: 1, honey: 1 }, sellPrice: 640, energy: 92,
+      desc: { zh: '刚出炉就满屋飘香的秋日暖心蜂蜜南瓜派！', en: 'Warm golden autumn pumpkin pie baked with wildflower honey!' }
+    },
+    {
+      id: 'sakuraSushi', emoji: '🍣', cat: 'seafood', name: { zh: '樱花鲜鱼寿司', en: 'Valley Fish Sushi' },
+      ingredients: { wheat: 1, anyFish: 1 }, sellPrice: 245, energy: 60,
+      desc: { zh: '清甜谷物配荷花池现钓鲜鱼，一口一个鲜美！', en: 'Fresh pond catch neatly pressed over sweet valley grains!' }
+    },
+    {
+      id: 'herbGrilledFish', emoji: '🐟', cat: 'seafood', name: { zh: '香煎香草鱼排', en: 'Herb Grilled Fish' },
       ingredients: { anyFish: 1, herbVeggie: 1 }, sellPrice: 265, energy: 65,
       desc: { zh: '外焦里嫩的荷花池鲜鱼排，佐以脆甜鲜蔬。', en: 'Golden pan-seared pond fillet with garden veggies.' }
     },
     {
-      id: 'fishChowder', emoji: '🍲', name: { zh: '海鲜浓汤', en: "Fisherman's Chowder" },
-      ingredients: { seafood: 1, milk: 1, corn: 1 }, sellPrice: 430, energy: 85,
-      desc: { zh: '小龙虾或鲜鱼与鲜奶甜玉米慢熬的招牌浓汤！', en: 'Creamy signature chowder with fresh catch, milk & sweet corn!' }
+      id: 'butterCrayfish', emoji: '🦞', cat: 'seafood', name: { zh: '黄油蒜香虾蟹', en: 'Garlic Butter Shellfish' },
+      ingredients: { shellfish: 1, butter: 1 }, sellPrice: 290, energy: 68,
+      desc: { zh: '小龙虾、樱花甜虾或枫叶蟹裹上浓香黄油滋滋煎香！', en: 'Sizzling crayfish, sakura shrimp, or maple crab glazed in butter!' }
     },
     {
-      id: 'starTart', emoji: '✨', name: { zh: '星光水果塔', en: 'Starlight Fruit Tart' },
+      id: 'braisedCatfish', emoji: '🍲', cat: 'seafood', name: { zh: '鲜蔬焖鱼煲', en: 'Braised Pond Fish Pot' },
+      ingredients: { anyFish: 1, carrot: 1, turnip: 1 }, sellPrice: 340, energy: 76,
+      desc: { zh: '整尾河鲜与胡萝卜芜菁小火慢焖，汤汁奶白鲜甜！', en: 'Whole pond fish simmered gently with sweet root vegetables!' }
+    },
+    {
+      id: 'fishChowder', emoji: '🥣', cat: 'seafood', name: { zh: '海鲜浓汤', en: "Fisherman's Chowder" },
+      ingredients: { seafood: 1, milk: 1, corn: 1 }, sellPrice: 430, energy: 85,
+      desc: { zh: '虾蟹或鲜鱼与鲜奶甜玉米慢熬的招牌浓汤！', en: 'Creamy signature chowder with fresh catch, milk & sweet corn!' }
+    },
+    {
+      id: 'steamedCrab', emoji: '🦀', cat: 'seafood', name: { zh: '清蒸金蟹鲜蛋羹', en: 'Steamed Crab Custard' },
+      ingredients: { autumnCrab: 1, egg: 1, milk: 1 }, sellPrice: 520, energy: 88,
+      desc: { zh: '嫩滑鲜奶蒸蛋上铺满秋日枫叶蟹肉，鲜掉眉毛！', en: 'Silky savory egg custard crowned with sweet autumn crab!' }
+    },
+    {
+      id: 'grilledEelBowl', emoji: '🍱', cat: 'seafood', name: { zh: '蜜汁照烧鳗鱼饭', en: 'Honey-Glazed Eel Don' },
+      ingredients: { starryEel: 1, wheat: 1, honey: 1 }, sellPrice: 680, energy: 95,
+      desc: { zh: '星河鳗鱼刷上百花蜜炭火炙烤，油润焦香的珍馐！', en: 'Char-grilled starlight eel glazed with wildflower honey!' }
+    },
+    {
+      id: 'starTart', emoji: '✨', cat: 'sweet', name: { zh: '星光水果塔', en: 'Starlight Fruit Tart' },
       ingredients: { starfruit: 1, strawberry: 1, flour: 1, honey: 1 }, sellPrice: 1220, energy: 100,
       desc: { zh: '闪耀山谷星光的梦幻甜品，天价珍品！', en: 'Dazzling signature valley tart worth a fortune!' }
+    },
+    {
+      id: 'imperialFeast', emoji: '👑', cat: 'seafood', name: { zh: '山谷海陆盛宴', en: 'Grand Valley Feast' },
+      ingredients: { rareFish: 1, starfruit: 1, duckEgg: 1, butter: 1 }, sellPrice: 1480, energy: 100,
+      desc: { zh: '汇聚山谷稀有鱼获与星光杨桃的顶级传说料理！', en: 'Legendary banquet uniting rare pond catch & golden starfruit!' }
     }
   ];
   const RECIPE_MAP = Object.fromEntries(RECIPES.map(r => [r.id, r]));
 
-  // 6 STORYBOOK POND FISH!
+  // 14 STORYBOOK POND & STREAM FISH!
   const FISH = {
     riverPerch: {
-      id: 'riverPerch', name: { zh: '河鲈', en: 'River Perch' }, emoji: '🐟',
-      sellPrice: 48, energy: 22, minKg: 0.4, maxKg: 1.8, speed: 0.56, rarity: 36,
+      id: 'riverPerch', shape: 'classic', tier: 'common',
+      name: { zh: '河鲈', en: 'River Perch' }, emoji: '🐟',
+      sellPrice: 48, energy: 22, minKg: 0.4, maxKg: 1.8, speed: 0.56, rarity: 34,
       body: '#7fb892', belly: '#e6f4ea', fin: '#4e8a64', stripe: '#3f7353',
+      when: { zh: '四季 · 全天 · 任意天气', en: 'All Seasons · All Day · Any Weather' },
       hint: { zh: '全天常见 · 荷花池里悠闲游动的小河鲈', en: 'Common all day · Peaceful pond perch' }
     },
     crayfish: {
-      id: 'crayfish', name: { zh: '小龙虾', en: 'Crayfish' }, emoji: '🦞',
-      sellPrice: 58, energy: 24, minKg: 0.15, maxKg: 0.65, speed: 0.50, rarity: 28,
+      id: 'crayfish', shape: 'crayfish', tier: 'common',
+      name: { zh: '小龙虾', en: 'Crayfish' }, emoji: '🦞',
+      sellPrice: 58, energy: 24, minKg: 0.15, maxKg: 0.65, speed: 0.50, rarity: 26,
       body: '#e06358', belly: '#f7b2a6', fin: '#b83c32', stripe: '#992d25',
-      hint: { zh: '全天较常见 · 做海鲜浓汤的鲜美食材', en: 'Fairly common all day · Delicious in chowder' }
+      when: { zh: '四季 · 全天 · 任意天气', en: 'All Seasons · All Day · Any Weather' },
+      hint: { zh: '全天较常见 · 做海鲜浓汤和黄油虾蟹的鲜美食材', en: 'Fairly common all day · Delicious in chowder & butter skillet' }
+    },
+    pondLoach: {
+      id: 'pondLoach', shape: 'eel', tier: 'common',
+      name: { zh: '溪水泥鳅', en: 'Pond Loach' }, emoji: '🪱',
+      sellPrice: 64, energy: 24, minKg: 0.12, maxKg: 0.48, speed: 0.62, rarity: 22,
+      body: '#9a8466', belly: '#e6d8be', fin: '#705c43', stripe: '#594732',
+      when: { zh: '四季 · 傍晚(16:00+)或多云/雨天', en: 'All Seasons · Evening (4 PM+) or Cloudy/Rainy' },
+      hint: { zh: '多云、细雨或傍晚活跃 · 爱钻进池底泥沙的小泥鳅', en: 'Cloudy, Rainy or Evening · Playful whiskered creek loach' }
+    },
+    goldfish: {
+      id: 'goldfish', shape: 'goldfish', tier: 'common',
+      name: { zh: '琉金小金鱼', en: 'Ryukin Goldfish' }, emoji: '🐠',
+      sellPrice: 78, energy: 25, minKg: 0.18, maxKg: 0.72, speed: 0.60, rarity: 24,
+      body: '#ff8a4c', belly: '#fff5e4', fin: '#ff5d47', stripe: '#ffffff',
+      when: { zh: '四季 · 白天 · 晴天/多云', en: 'All Seasons · Daytime · Sunny/Cloudy' },
+      hint: { zh: '晴天或多云白天出没 · 拖着纱裙尾鳍的圆滚滚小金鱼', en: 'Sunny or Cloudy days · Plump veil-tail ornamental goldfish' }
+    },
+    sakuraShrimp: {
+      id: 'sakuraShrimp', shape: 'shrimp', tier: 'uncommon',
+      name: { zh: '樱花甜虾', en: 'Sakura Shrimp' }, emoji: '🦐',
+      sellPrice: 95, energy: 26, minKg: 0.08, maxKg: 0.32, speed: 0.65, rarity: 22,
+      body: '#ffb5c5', belly: '#fff0f5', fin: '#f27894', stripe: '#ff85a2',
+      when: { zh: '春季或晴天 · 全天', en: 'Spring or Sunny Days · All Day' },
+      hint: { zh: '春季或晴天出没 · 粉嫩透亮的池塘甜虾，做寿司和黄油虾超香', en: 'Spring or Sunny days · Translucent pink sweet shrimp' }
     },
     koi: {
-      id: 'koi', name: { zh: '锦鲤', en: 'Koi' }, emoji: '🎏',
-      sellPrice: 135, energy: 30, minKg: 1.2, maxKg: 4.5, speed: 0.78, rarity: 22,
+      id: 'koi', shape: 'koi', tier: 'uncommon',
+      name: { zh: '锦鲤', en: 'Koi' }, emoji: '🎏',
+      sellPrice: 135, energy: 30, minKg: 1.2, maxKg: 4.5, speed: 0.78, rarity: 20,
       body: '#fffaf0', belly: '#ffe8d6', fin: '#f4845f', stripe: '#e64c3c',
+      when: { zh: '四季 · 晴天或微风天', en: 'All Seasons · Sunny or Breezy' },
       hint: { zh: '晴天或微风天出没 · 带来好运的花斑锦鲤', en: 'Sunny or Breezy days · Lucky patterned pond koi' }
     },
     rainbowTrout: {
-      id: 'rainbowTrout', name: { zh: '彩虹鳟鱼', en: 'Rainbow Trout' }, emoji: '🌈',
-      sellPrice: 148, energy: 32, minKg: 0.8, maxKg: 3.2, speed: 0.82, rarity: 20,
+      id: 'rainbowTrout', shape: 'classic', tier: 'uncommon',
+      name: { zh: '彩虹鳟鱼', en: 'Rainbow Trout' }, emoji: '🌈',
+      sellPrice: 148, energy: 32, minKg: 0.8, maxKg: 3.2, speed: 0.82, rarity: 19,
       body: '#7ec4cf', belly: '#f7e1d7', fin: '#f29cb8', stripe: '#c77dff',
+      when: { zh: '春/秋季或雨天', en: 'Spring, Autumn or Rainy Days' },
       hint: { zh: '春/秋季或雨天出没 · 鳞片泛着彩虹光泽', en: 'Spring, Autumn or Rainy days · Shimmering rainbow scales' }
     },
+    catfish: {
+      id: 'catfish', shape: 'catfish', tier: 'uncommon',
+      name: { zh: '胖须鲶鱼', en: 'Whiskered Catfish' }, emoji: '🐡',
+      sellPrice: 165, energy: 34, minKg: 1.8, maxKg: 5.6, speed: 0.76, rarity: 18,
+      body: '#6f859e', belly: '#d8e3ed', fin: '#4d6178', stripe: '#3f5166',
+      when: { zh: '雨天或傍晚/夜晚(18:00+)', en: 'Rainy Days or Evening/Night (6 PM+)' },
+      hint: { zh: '雨天或 18:00 后出没 · 长着长长胡须的憨厚大鲶鱼', en: 'Rainy or after 6 PM · Plump slate-blue catfish with long barbels' }
+    },
+    lotusTurtle: {
+      id: 'lotusTurtle', shape: 'turtle', tier: 'rare',
+      name: { zh: '荷叶小龟', en: 'Lotus Terrapin' }, emoji: '🐢',
+      sellPrice: 185, energy: 34, minKg: 0.6, maxKg: 2.1, speed: 0.58, rarity: 15,
+      body: '#5ca36c', belly: '#d9ebb8', fin: '#3d784c', stripe: '#88c992',
+      when: { zh: '夏季或晴天午后(11:00–17:00)', en: 'Summer or Sunny Afternoons (11 AM–5 PM)' },
+      hint: { zh: '夏季或晴天午后晒太阳时出没 · 壳像小荷叶一样翠绿可爱', en: 'Summer or sunny afternoons · Emerald-shelled pond turtle' }
+    },
+    icefish: {
+      id: 'icefish', shape: 'crystal', tier: 'rare',
+      name: { zh: '冰晶银鱼', en: 'Crystal Icefish' }, emoji: '❄️',
+      sellPrice: 195, energy: 35, minKg: 0.25, maxKg: 0.95, speed: 0.86, rarity: 18,
+      body: '#c8eefc', belly: '#ffffff', fin: '#7cc8e8', stripe: '#e0f7ff',
+      when: { zh: '冬季或雪天/多云清晨(6:00–10:00)', en: 'Winter / Snowy or Cloudy Mornings (6–10 AM)' },
+      hint: { zh: '冬季或清晨冷水中出没 · 通体如水晶般透明闪亮', en: 'Winter or crisp mornings · Crystalline translucent silver icefish' }
+    },
+    autumnCrab: {
+      id: 'autumnCrab', shape: 'crab', tier: 'rare',
+      name: { zh: '枫叶大闸蟹', en: 'Maple Mitten Crab' }, emoji: '🦀',
+      sellPrice: 215, energy: 36, minKg: 0.35, maxKg: 1.15, speed: 0.74, rarity: 17,
+      body: '#e37b3b', belly: '#fae0b8', fin: '#b84c20', stripe: '#ffd166',
+      when: { zh: '秋季或微风天', en: 'Autumn or Breezy Days' },
+      hint: { zh: '秋季或微风天出没 · 蟹黄饱满，清蒸蟹蛋羹的专属主材！', en: 'Autumn or Breezy days · Prized golden crab for Steamed Crab Custard!' }
+    },
     moonJelly: {
-      id: 'moonJelly', name: { zh: '月光水母', en: 'Moon Jelly' }, emoji: '🪼',
-      sellPrice: 230, energy: 35, minKg: 0.3, maxKg: 1.2, speed: 0.72, rarity: 24,
+      id: 'moonJelly', shape: 'jelly', tier: 'rare',
+      name: { zh: '月光水母', en: 'Moon Jelly' }, emoji: '🪼',
+      sellPrice: 230, energy: 35, minKg: 0.3, maxKg: 1.2, speed: 0.72, rarity: 20,
       body: '#b8e0ff', belly: '#e2cfea', fin: '#80ed99', stripe: '#ffffff',
+      when: { zh: '四季 · 仅夜晚(19:00后)', en: 'All Seasons · Night Only (7 PM+)' },
       hint: { zh: '仅夜晚 (19:00后) 出没 · 散发温柔月光的透明水母', en: 'Night only (7 PM+) · Glowing translucent moon jellyfish' }
     },
+    starryEel: {
+      id: 'starryEel', shape: 'starEel', tier: 'legendary',
+      name: { zh: '星河鳗鱼', en: 'Starlight Eel' }, emoji: '🌟',
+      sellPrice: 360, energy: 42, minKg: 1.4, maxKg: 4.8, speed: 1.04, rarity: 10,
+      body: '#4b5599', belly: '#8f9be0', fin: '#ffd166', stripe: '#fff3b0',
+      when: { zh: '四季 · 夜晚(19:00+)或雨天', en: 'All Seasons · Night (7 PM+) or Rainy' },
+      hint: { zh: '夜色或雨天稀有出没 · 背上点缀星芒，做照烧鳗鱼饭的极品！', en: 'Rare at night or in rain · Star-speckled eel for Honey-Glazed Eel Don!' }
+    },
     goldenCarp: {
-      id: 'goldenCarp', name: { zh: '黄金鲤鱼', en: 'Golden Carp' }, emoji: '✨',
+      id: 'goldenCarp', shape: 'golden', tier: 'legendary',
+      name: { zh: '黄金鲤鱼', en: 'Golden Carp' }, emoji: '✨',
       sellPrice: 430, energy: 45, minKg: 2.0, maxKg: 6.8, speed: 1.12, rarity: 6,
       body: '#ffd147', belly: '#fff7bd', fin: '#f59e0b', stripe: '#e07a16',
+      when: { zh: '四季 · 全天极稀有', en: 'All Seasons · Very Rare All Day' },
       hint: { zh: '全天极稀有 · 游动敏捷的传说金色大鲤鱼！', en: 'Very rare all day · Nimble legendary golden carp!' }
     }
   };
-  const FISH_ORDER = ['riverPerch', 'crayfish', 'koi', 'rainbowTrout', 'moonJelly', 'goldenCarp'];
+  const FISH_ORDER = [
+    'riverPerch', 'crayfish', 'pondLoach', 'goldfish', 'sakuraShrimp',
+    'koi', 'rainbowTrout', 'catfish', 'lotusTurtle', 'icefish',
+    'autumnCrab', 'moonJelly', 'starryEel', 'goldenCarp'
+  ];
 
   const TAG_INGREDIENTS = {
     anyFish: {
       emoji: '🐟', name: { zh: '任意鱼类', en: 'Any Fish' },
-      ids: ['riverPerch', 'crayfish', 'koi', 'rainbowTrout', 'moonJelly', 'goldenCarp']
+      ids: [...FISH_ORDER]
     },
     seafood: {
-      emoji: '🦞', name: { zh: '小龙虾或鱼类', en: 'Crayfish / Fish' },
-      ids: ['crayfish', 'riverPerch', 'koi', 'rainbowTrout', 'moonJelly', 'goldenCarp']
+      emoji: '🦞', name: { zh: '虾蟹或鱼类', en: 'Shellfish / Fish' },
+      ids: ['crayfish', 'sakuraShrimp', 'autumnCrab', ...FISH_ORDER.filter(id => !['crayfish', 'sakuraShrimp', 'autumnCrab'].includes(id))]
+    },
+    shellfish: {
+      emoji: '🦐', name: { zh: '虾蟹类', en: 'Shrimp / Crab / Crayfish' },
+      ids: ['crayfish', 'sakuraShrimp', 'autumnCrab']
+    },
+    rareFish: {
+      emoji: '✨', name: { zh: '稀有鱼类', en: 'Rare Fish' },
+      ids: ['koi', 'rainbowTrout', 'catfish', 'lotusTurtle', 'icefish', 'autumnCrab', 'moonJelly', 'starryEel', 'goldenCarp']
     },
     herbVeggie: {
       emoji: '🍅', name: { zh: '萝卜或小番茄', en: 'Radish / Tomato' },
@@ -803,7 +941,7 @@
       dressBtn: '换装',
       shopBtn: '花种铺',
       ranchShopBtn: '牧场铺',
-      fishDexBtn: '钓鱼图鉴',
+      fishDexBtn: '图鉴',
       petBtn: '宠物',
       saveBtn: '存档',
       settingsBtn: '设置',
@@ -932,7 +1070,7 @@
         millieQuote: '米莉：“牛羊鸡鸭只要喂饱牧草，每天清晨都会送上新鲜好礼哦！”',
         upg: {
           kitchen: '温馨田园厨房升级', kitchenOwned: '温馨田园厨房（已建成）',
-          kitchenD: '解锁小屋厨房！可用自己种的蔬果、牧场蛋奶或购买的食材按 10 种菜谱烹饪美味料理！',
+          kitchenD: '解锁小屋厨房！可用自己种的蔬果、牧场蛋奶、池塘鲜鱼或购买的食材按 22 种菜谱烹饪美味料理！',
           hoe2: '红铜锄头 (Lv.2)', hoe3: '精铁锄头 (Lv.3)', hoeMax: '精铁锄头 (满级)',
           hoe2d: '一锄头翻耕前方 3 格田土！', hoe3d: '一锄头翻耕 3×3 一大片！', hoeMaxd: '已升到最高级！',
           can2: '红铜水壶 (Lv.2)', can3: '精铁水壶 (Lv.3)', canMax: '精铁水壶 (满级)',
@@ -1075,12 +1213,49 @@
               <ul class="space-y-1">
                 <li>在<strong>米莉的牧场铺</strong>领养鸡鸭羊牛、买牧草饲料和面粉/黄油/白糖/蜂蜜。</li>
                 <li>点击草料槽或谷仓喂饱动物，次日清晨产出鸡蛋、鸭蛋、羊毛、鲜奶！</li>
-                <li>在<strong>皮普的花种铺</strong>升级<strong>温馨厨房 (250g)</strong> 后，即可按 10 种菜谱烹饪美味料理！</li>
+                <li>在<strong>皮普的花种铺</strong>升级<strong>温馨厨房 (250g)</strong> 后，即可按 22 种菜谱烹饪美味料理！</li>
+                <li>池塘可钓 14 种四季鱼虾蟹，点顶部 <strong>📖 图鉴</strong> 可查看所有鱼类、菜谱、作物与动物详情！</li>
               </ul>
             </div>
           </div>
         `,
-        fishDexTitle: '荷花池钓鱼图鉴',
+        fishDexTitle: '口袋山谷图鉴',
+        almanacTitle: '口袋山谷图鉴',
+        almanacProgress: (u, t) => `总收集进度：${u} / ${t}`,
+        almanacTabFish: (u, t) => `🐟 鱼类 (${u}/${t})`,
+        almanacTabRecipes: (u, t) => `🍳 菜谱 (${u}/${t})`,
+        almanacTabCrops: (u, t) => `🌱 作物 (${u}/${t})`,
+        almanacTabRanch: (u, t) => `🐮 牧场与宠 (${u}/${t})`,
+        almanacClickHint: '点击任意卡片可查看详细介绍与获取方式 ✨',
+        almanacBack: '← 返回图鉴列表',
+        almanacSpawn: '出没条件',
+        almanacIngredients: '所需食材',
+        almanacCookedCount: (n) => `已烹制 ${n} 次`,
+        almanacNotCooked: '尚未烹制过',
+        almanacHarvestedCount: (n) => `累计收获 ${n}`,
+        almanacNotHarvested: '尚未收获过',
+        almanacSeedPrice: '种子价',
+        almanacSellPrice: '售价',
+        almanacEnergy: '恢复体力',
+        almanacGrowDays: '成熟周期',
+        daysGrow: (d) => `${d}天成熟`,
+        regrow: (d) => `每${d}天复采`,
+        almanacBonusSeason: '应季加成 (+20%)',
+        almanacRanchAnimals: '🐮 阳光牧场动物',
+        almanacPets: '🐾 随行农场萌宠',
+        almanacOwned: (n) => `当前饲养 ${n} 只`,
+        almanacNotOwned: '暂未领养（去牧场铺看看）',
+        almanacPetActive: '当前随行伙伴 ♥',
+        almanacPetWait: '可在小屋旁宠物窝免费领养',
+        almanacGoKitchen: '🍳 去厨房做菜',
+        almanacGoSeeds: '🧺 去买种子',
+        almanacCookNow: '🍳 立即烹制 ×1',
+        almanacNeedKitchenShort: '需先升级温馨厨房',
+        almanacTier: { common: '常见', uncommon: '少见', rare: '稀有', legendary: '传说' },
+        kitchenCatAll: '🍽️ 全部 (22)',
+        kitchenCatSavory: '🍲 田园主菜',
+        kitchenCatSeafood: '🐟 鲜鱼海鲜',
+        kitchenCatSweet: '🍰 甜品烘焙',
         fishDexSub: (u, t) => `已点亮 ${u} / ${t} 种水彩鱼类`,
         fishCaughtTitle: '🎣 钓到大鱼啦！',
         newRecord: '🏆 打破最高重量纪录！',
@@ -1151,7 +1326,7 @@
       dressBtn: 'Dress',
       shopBtn: 'Seeds',
       ranchShopBtn: 'Ranch Shop',
-      fishDexBtn: 'Fish Index',
+      fishDexBtn: 'Almanac',
       petBtn: 'Pet',
       saveBtn: 'Save',
       settingsBtn: 'Settings',
@@ -1280,7 +1455,7 @@
         millieQuote: 'Millie: "Keep your cows, sheep, chickens & ducks fed for fresh morning goodies!"',
         upg: {
           kitchen: 'Cozy Cottage Kitchen Upgrade', kitchenOwned: 'Cozy Cottage Kitchen (Built)',
-          kitchenD: 'Unlocks home cooking! Use harvested crops, ranch eggs/milk, or bought pantry staples across 10 recipes!',
+          kitchenD: 'Unlocks home cooking! Use harvested crops, ranch eggs/milk, pond fish, or pantry staples across 22 recipes!',
           hoe2: 'Copper Hoe (Lv.2)', hoe3: 'Iron Hoe (Lv.3)', hoeMax: 'Iron Hoe (MAX)',
           hoe2d: 'Till 3 tiles in a row!', hoe3d: 'Till a huge 3×3 patch!', hoeMaxd: 'Fully upgraded!',
           can2: 'Copper Watering Can (Lv.2)', can3: 'Iron Watering Can (Lv.3)', canMax: 'Iron Watering Can (MAX)',
@@ -1423,12 +1598,49 @@
               <ul class="space-y-1">
                 <li>Visit <strong>Millie's Ranch Shop</strong> to adopt Chickens, Ducks, Sheep & Cows, and buy Feed & Pantry Staples.</li>
                 <li>Feed animals at the Trough/Barn so they drop fresh Eggs, Milk & Wool each morning!</li>
-                <li>Upgrade your <strong>Cottage Kitchen (250g)</strong> at Pip's Shop to cook 10 recipes!</li>
+                <li>Upgrade your <strong>Cottage Kitchen (250g)</strong> at Pip's Shop to cook 22 cozy recipes!</li>
+                <li>Catch 14 seasonal pond fish & shellfish, and click <strong>📖 Almanac</strong> to inspect every entry!</li>
               </ul>
             </div>
           </div>
         `,
-        fishDexTitle: 'Lotus Pond Fish Index',
+        fishDexTitle: 'Pocket Valley Almanac',
+        almanacTitle: 'Pocket Valley Almanac',
+        almanacProgress: (u, t) => `Collection Progress: ${u} / ${t}`,
+        almanacTabFish: (u, t) => `🐟 Fish (${u}/${t})`,
+        almanacTabRecipes: (u, t) => `🍳 Recipes (${u}/${t})`,
+        almanacTabCrops: (u, t) => `🌱 Crops (${u}/${t})`,
+        almanacTabRanch: (u, t) => `🐮 Ranch & Pets (${u}/${t})`,
+        almanacClickHint: 'Click any card to view full details, tips & stats ✨',
+        almanacBack: '← Back to Almanac',
+        almanacSpawn: 'Habitat & Time',
+        almanacIngredients: 'Ingredients',
+        almanacCookedCount: (n) => `Cooked ${n}×`,
+        almanacNotCooked: 'Not cooked yet',
+        almanacHarvestedCount: (n) => `Harvested ${n}`,
+        almanacNotHarvested: 'Not harvested yet',
+        almanacSeedPrice: 'Seed Price',
+        almanacSellPrice: 'Sell Price',
+        almanacEnergy: 'Energy',
+        almanacGrowDays: 'Growth Time',
+        daysGrow: (d) => `${d}d grow`,
+        regrow: (d) => `Regrows ${d}d`,
+        almanacBonusSeason: 'Bonus Season (+20%)',
+        almanacRanchAnimals: '🐮 Sunny Pasture Animals',
+        almanacPets: '🐾 Farm Pet Companions',
+        almanacOwned: (n) => `Raising ${n}`,
+        almanacNotOwned: 'Not adopted yet (visit Ranch Shop)',
+        almanacPetActive: 'Current Companion ♥',
+        almanacPetWait: 'Adopt free at the pet bed by your cottage',
+        almanacGoKitchen: '🍳 Go to Kitchen',
+        almanacGoSeeds: '🧺 Buy Seeds',
+        almanacCookNow: '🍳 Cook ×1 Now',
+        almanacNeedKitchenShort: 'Upgrade Kitchen first',
+        almanacTier: { common: 'Common', uncommon: 'Uncommon', rare: 'Rare', legendary: 'Legendary' },
+        kitchenCatAll: '🍽️ All (22)',
+        kitchenCatSavory: '🍲 Savory',
+        kitchenCatSeafood: '🐟 Seafood',
+        kitchenCatSweet: '🍰 Sweets',
         fishDexSub: (u, t) => `Discovered ${u} / ${t} watercolor pond species`,
         fishCaughtTitle: '🎣 Lovely Catch!',
         newRecord: '🏆 New Weight Record!',
@@ -1705,6 +1917,8 @@
       totalCooked: 0,
       totalFishCaught: 0,
       fishDex: {},      // fishId -> { count, maxWeight }
+      cropDex: {},      // cropId -> count harvested
+      recipeDex: {},    // recipeId -> count cooked
       wood: 0,
       stone: 0,
       energy: 100,
@@ -1770,6 +1984,15 @@
     const hs = HOUSE_STYLE_MAP[parsed.houseStyle] ? parsed.houseStyle : 'terracotta';
     const ml = FARM_LAYOUTS[parsed.mapLayout] ? parsed.mapLayout : 'pondRight';
     const base = createInitialState(parsed.lang || 'zh', parsed.dressIdx || 0, g, hs, ml, true);
+    const cropDex = { ...(parsed.cropDex || {}) };
+    const recipeDex = { ...(parsed.recipeDex || {}) };
+    for (const [k, cnt] of Object.entries(parsed.satchel || {})) {
+      const cid = k.split('_')[0];
+      if (CROPS[cid] && cnt > 0 && !cropDex[cid]) cropDex[cid] = cnt;
+    }
+    for (const [rid, cnt] of Object.entries(parsed.dishes || {})) {
+      if (RECIPE_MAP[rid] && cnt > 0 && !recipeDex[rid]) recipeDex[rid] = cnt;
+    }
     return {
       ...base,
       ...parsed,
@@ -1782,6 +2005,8 @@
       pantry: { ...(parsed.pantry || {}) },
       dishes: { ...(parsed.dishes || {}) },
       fishDex: { ...(parsed.fishDex || {}) },
+      cropDex,
+      recipeDex,
       totalFishCaught: typeof parsed.totalFishCaught === 'number' ? parsed.totalFishCaught : 0,
       pet: { ...base.pet, ...(parsed.pet || {}) },
       animals: Array.isArray(parsed.animals) ? parsed.animals : base.animals,
@@ -3200,20 +3425,36 @@
   }
 
   // =========================================================================
-  // LOTUS POND FISHING SYSTEM (6 Species, Mini-Game, Fish Index & Art)
+  // LOTUS POND FISHING SYSTEM (14 Species, Mini-Game, Almanac & Art)
   // =========================================================================
   function pickPondFish() {
     const season = getSeason().id;
-    const isNight = state.timeMinutes >= 19 * 60;
+    const mins = state.timeMinutes;
+    const isMorning = mins < 10 * 60;
+    const isAfternoon = mins >= 11 * 60 && mins < 17 * 60;
+    const isEvening = mins >= 16 * 60;
+    const isLateEvening = mins >= 18 * 60;
+    const isNight = mins >= 19 * 60;
+    const isDay = !isNight;
     const isRain = state.weather === 'rainy';
-    const isSunnyOrBreezy = state.weather === 'sunny' || state.weather === 'breezy';
+    const isCloudy = state.weather === 'cloudy';
+    const isSunny = state.weather === 'sunny';
+    const isBreezy = state.weather === 'breezy';
 
     const pool = [];
     for (const fid of FISH_ORDER) {
       const f = FISH[fid];
-      if (fid === 'moonJelly' && !isNight) continue;
-      if (fid === 'koi' && !isSunnyOrBreezy) continue;
+      if (fid === 'pondLoach' && !(isEvening || isCloudy || isRain)) continue;
+      if (fid === 'goldfish' && !(isDay && (isSunny || isCloudy))) continue;
+      if (fid === 'sakuraShrimp' && !(season === 'spring' || isSunny)) continue;
+      if (fid === 'koi' && !(isSunny || isBreezy)) continue;
       if (fid === 'rainbowTrout' && !(season === 'spring' || season === 'autumn' || isRain)) continue;
+      if (fid === 'catfish' && !(isRain || isLateEvening)) continue;
+      if (fid === 'lotusTurtle' && !(season === 'summer' || (isSunny && isAfternoon))) continue;
+      if (fid === 'icefish' && !(season === 'winter' || (isCloudy && isMorning))) continue;
+      if (fid === 'autumnCrab' && !(season === 'autumn' || isBreezy)) continue;
+      if (fid === 'moonJelly' && !isNight) continue;
+      if (fid === 'starryEel' && !(isNight || isRain)) continue;
       pool.push({ id: fid, w: f.rarity });
     }
     const totalW = pool.reduce((s, p) => s + p.w, 0);
@@ -3251,7 +3492,7 @@
     fishing.fishId = pickPondFish();
     fishing.barPos = 0.42;
     fishing.barVel = 0;
-    fishing.barHeight = fishing.fishId === 'goldenCarp' ? 0.24 : 0.28;
+    fishing.barHeight = (fishing.fishId === 'goldenCarp' || fishing.fishId === 'starryEel') ? 0.24 : 0.28;
     fishing.fishPos = 0.48;
     fishing.fishTarget = 0.2 + Math.random() * 0.6;
     fishing.fishWait = 0.4;
@@ -3371,68 +3612,179 @@
     }
   }
 
-  // Hand-drawn watercolor fish artist (used on Catch Card & Fish Index mini-canvases!)
+  // Hand-drawn watercolor fish artist (14 unique species silhouettes, scalable for cards & detail views!)
   function drawFishArtwork(c, fish, w, h, silhouette = false) {
     c.clearRect(0, 0, w, h);
     c.save();
     c.translate(w / 2, h / 2);
+    const sc = Math.min(w / 72, h / 48);
+    c.scale(sc, sc);
     const inkCol = silhouette ? '#7a6958' : '#4a3525';
     const bodyCol = silhouette ? '#9c8b78' : fish.body;
     const finCol = silhouette ? '#877664' : fish.fin;
     const bellyCol = silhouette ? '#9c8b78' : fish.belly;
     const stripeCol = silhouette ? '#877664' : fish.stripe;
+    const shape = fish.shape || fish.id;
 
-    if (fish.id === 'moonJelly') {
-      // Translucent glowing storybook jellyfish!
+    if (shape === 'jelly' || fish.id === 'moonJelly') {
       if (!silhouette) {
-        const g = c.createRadialGradient(0, -4, 3, 0, 0, w * 0.42);
+        const g = c.createRadialGradient(0, -4, 3, 0, 0, 28);
         g.addColorStop(0, 'rgba(184, 224, 255, 0.55)'); g.addColorStop(1, 'rgba(226, 207, 234, 0)');
-        c.fillStyle = g; c.beginPath(); c.arc(0, 0, w * 0.42, 0, Math.PI * 2); c.fill();
+        c.fillStyle = g; c.beginPath(); c.arc(0, 0, 28, 0, Math.PI * 2); c.fill();
       }
       c.strokeStyle = finCol; c.lineWidth = 2.2;
       for (const ox of [-10, -3, 4, 11]) {
-        c.beginPath(); c.moveTo(ox, 2); c.quadraticCurveTo(ox - 4, 11, ox + 2, 20); c.stroke();
+        c.beginPath(); c.moveTo(ox, 2); c.quadraticCurveTo(ox - 4, 11, ox + 2, 19); c.stroke();
       }
       c.fillStyle = bodyCol; c.strokeStyle = inkCol; c.lineWidth = 1.6;
-      c.beginPath(); c.arc(0, 2, 17, Math.PI, 0); c.quadraticCurveTo(0, 8, -17, 2); c.fill(); c.stroke();
+      c.beginPath(); c.arc(0, 2, 16, Math.PI, 0); c.quadraticCurveTo(0, 8, -16, 2); c.fill(); c.stroke();
       if (!silhouette) {
         c.fillStyle = 'rgba(255,255,255,0.65)';
         c.beginPath(); c.ellipse(-5, -5, 5, 3, -0.3, 0, Math.PI * 2); c.fill();
       }
-    } else if (fish.id === 'crayfish') {
+    } else if (shape === 'crayfish') {
       c.fillStyle = bodyCol; c.strokeStyle = inkCol; c.lineWidth = 1.5;
-      // Tail fan & segmented body
       c.beginPath(); c.ellipse(-18, 2, 8, 5, -0.2, 0, Math.PI * 2); c.fill(); c.stroke();
       c.beginPath(); c.ellipse(-4, 0, 14, 8, 0, 0, Math.PI * 2); c.fill(); c.stroke();
       c.beginPath(); c.ellipse(10, -1, 9, 7, 0, 0, Math.PI * 2); c.fill(); c.stroke();
-      // Cute pincers
       c.fillStyle = finCol;
       c.beginPath(); c.ellipse(22, -9, 6.5, 3.8, -0.4, 0, Math.PI * 2); c.fill(); c.stroke();
       c.beginPath(); c.ellipse(22, 8, 6.5, 3.8, 0.4, 0, Math.PI * 2); c.fill(); c.stroke();
       if (!silhouette) { c.fillStyle = '#2d1c10'; c.beginPath(); c.arc(14, -4, 1.8, 0, Math.PI * 2); c.fill(); }
+    } else if (shape === 'shrimp') {
+      // Cute curved translucent sakura sweet shrimp
+      c.strokeStyle = finCol; c.lineWidth = 1.3;
+      c.beginPath(); c.moveTo(14, -4); c.quadraticCurveTo(24, -14, 28, -10); c.moveTo(14, -1); c.quadraticCurveTo(26, -6, 29, 0); c.stroke();
+      c.fillStyle = finCol; c.strokeStyle = inkCol; c.lineWidth = 1.3;
+      c.beginPath(); c.moveTo(-16, 8); c.lineTo(-26, 4); c.lineTo(-24, 14); c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = bodyCol;
+      for (const [sx, sy, rx, ry, rot] of [[-12, 6, 6.5, 5, 0.5], [-4, 1, 7.5, 6, 0.2], [5, -3, 8, 6.5, -0.15], [14, -2, 7.5, 6, 0.1]]) {
+        c.beginPath(); c.ellipse(sx, sy, rx, ry, rot, 0, Math.PI * 2); c.fill(); c.stroke();
+      }
+      if (!silhouette) {
+        c.fillStyle = '#2d1c10'; c.beginPath(); c.arc(17, -4, 1.8, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#ffffff'; c.beginPath(); c.arc(17.6, -4.6, 0.7, 0, Math.PI * 2); c.fill();
+      }
+    } else if (shape === 'crab') {
+      // Plump maple mitten crab with raised claws & little legs
+      c.strokeStyle = finCol; c.lineWidth = 2.2;
+      for (const ly of [-3, 3, 9]) {
+        c.beginPath(); c.moveTo(-11, ly); c.lineTo(-22, ly + 4); c.moveTo(11, ly); c.lineTo(22, ly + 4); c.stroke();
+      }
+      c.fillStyle = finCol; c.strokeStyle = inkCol; c.lineWidth = 1.4;
+      c.beginPath(); c.ellipse(-18, -11, 6.5, 5, -0.5, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.beginPath(); c.ellipse(18, -11, 6.5, 5, 0.5, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.fillStyle = bodyCol;
+      c.beginPath(); c.ellipse(0, 2, 16, 11.5, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+      if (!silhouette) {
+        c.fillStyle = stripeCol; c.beginPath(); c.ellipse(0, 0, 7, 4.5, 0, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#2d1c10';
+        c.beginPath(); c.arc(-6, -8, 2.2, 0, Math.PI * 2); c.arc(6, -8, 2.2, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#ffffff';
+        c.beginPath(); c.arc(-5.4, -8.6, 0.8, 0, Math.PI * 2); c.arc(6.6, -8.6, 0.8, 0, Math.PI * 2); c.fill();
+      }
+    } else if (shape === 'turtle') {
+      // Cute emerald lotus pond turtle
+      c.fillStyle = bellyCol; c.strokeStyle = inkCol; c.lineWidth = 1.4;
+      c.beginPath(); c.ellipse(-12, 8, 5, 3.2, -0.3, 0, Math.PI * 2); c.ellipse(10, 8, 5, 3.2, 0.3, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.beginPath(); c.ellipse(18, 0, 7.5, 5.8, -0.1, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.fillStyle = bodyCol;
+      c.beginPath(); c.arc(-2, 4, 16, Math.PI, 0); c.quadraticCurveTo(-2, 9, -18, 4); c.closePath(); c.fill(); c.stroke();
+      if (!silhouette) {
+        c.strokeStyle = stripeCol; c.lineWidth = 1.4;
+        c.beginPath(); c.arc(-2, -1, 7, 0, Math.PI * 2); c.stroke();
+        c.fillStyle = '#ff9ebb'; c.beginPath(); c.arc(-2, -13, 3.2, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#2d1c10'; c.beginPath(); c.arc(21, -1.5, 1.8, 0, Math.PI * 2); c.fill();
+      }
+    } else if (shape === 'goldfish') {
+      // Plump veil-tail Ryukin goldfish
+      c.fillStyle = finCol; c.strokeStyle = inkCol; c.lineWidth = 1.4;
+      c.beginPath(); c.moveTo(-10, 0); c.quadraticCurveTo(-24, -18, -30, -8); c.quadraticCurveTo(-21, 0, -30, 10); c.quadraticCurveTo(-22, 18, -10, 2); c.closePath(); c.fill(); c.stroke();
+      c.beginPath(); c.ellipse(0, -13, 9, 5.5, -0.2, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.fillStyle = bodyCol;
+      c.beginPath(); c.ellipse(4, 1, 16.5, 13.5, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+      if (!silhouette) {
+        c.fillStyle = bellyCol; c.beginPath(); c.ellipse(5, 6, 11, 6, 0, 0, Math.PI * 2); c.fill();
+        c.fillStyle = stripeCol; c.beginPath(); c.ellipse(-2, -3, 5, 4, 0.2, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#2d1c10'; c.beginPath(); c.arc(13, -3, 2.5, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#ffffff'; c.beginPath(); c.arc(13.8, -3.8, 1, 0, Math.PI * 2); c.fill();
+      }
+    } else if (shape === 'catfish') {
+      // Plump whiskered catfish
+      c.fillStyle = finCol; c.strokeStyle = inkCol; c.lineWidth = 1.5;
+      c.beginPath(); c.moveTo(-15, 0); c.lineTo(-28, -9); c.quadraticCurveTo(-23, 0, -28, 9); c.closePath(); c.fill(); c.stroke();
+      c.beginPath(); c.ellipse(-4, -10, 9, 4.2, -0.1, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.fillStyle = bodyCol;
+      c.beginPath(); c.ellipse(2, 1, 21, 11.5, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+      // Long signature catfish barbels!
+      c.strokeStyle = inkCol; c.lineWidth = 1.4;
+      c.beginPath();
+      c.moveTo(21, 1); c.quadraticCurveTo(28, -4, 31, 2);
+      c.moveTo(20, 4); c.quadraticCurveTo(27, 8, 30, 12);
+      c.stroke();
+      if (!silhouette) {
+        c.fillStyle = bellyCol; c.beginPath(); c.ellipse(3, 5, 15, 5, 0, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#2d1c10'; c.beginPath(); c.arc(14, -2.5, 2.2, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#ffffff'; c.beginPath(); c.arc(14.7, -3.1, 0.8, 0, Math.PI * 2); c.fill();
+      }
+    } else if (shape === 'eel' || shape === 'starEel') {
+      // Graceful undulating creek loach / starry eel
+      if (!silhouette && shape === 'starEel') {
+        const g = c.createRadialGradient(0, 0, 4, 0, 0, 30);
+        g.addColorStop(0, 'rgba(255, 224, 118, 0.42)'); g.addColorStop(1, 'rgba(75, 85, 153, 0)');
+        c.fillStyle = g; c.beginPath(); c.arc(0, 0, 30, 0, Math.PI * 2); c.fill();
+      }
+      c.lineCap = 'round';
+      c.strokeStyle = inkCol; c.lineWidth = 12.5;
+      c.beginPath(); c.moveTo(-25, 4); c.bezierCurveTo(-12, -12, 4, 14, 21, -2); c.stroke();
+      c.strokeStyle = bodyCol; c.lineWidth = 9.5;
+      c.beginPath(); c.moveTo(-25, 4); c.bezierCurveTo(-12, -12, 4, 14, 21, -2); c.stroke();
+      c.lineCap = 'butt';
+      if (!silhouette) {
+        if (shape === 'starEel') {
+          c.fillStyle = finCol;
+          for (const [sx, sy] of [[-14, -2], [-4, 1], [6, 5], [14, 1]]) {
+            c.beginPath(); c.arc(sx, sy, 1.8, 0, Math.PI * 2); c.fill();
+          }
+        }
+        c.fillStyle = '#2d1c10'; c.beginPath(); c.arc(21, -3.5, 1.8, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#ffffff'; c.beginPath(); c.arc(21.6, -4, 0.7, 0, Math.PI * 2); c.fill();
+      }
+    } else if (shape === 'crystal') {
+      // Slender shimmering winter crystal icefish
+      c.fillStyle = finCol; c.strokeStyle = inkCol; c.lineWidth = 1.4;
+      c.beginPath(); c.moveTo(-16, 0); c.lineTo(-29, -9); c.lineTo(-23, 0); c.lineTo(-29, 9); c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = bodyCol;
+      c.beginPath(); c.moveTo(-18, 0); c.quadraticCurveTo(2, -11, 24, 0); c.quadraticCurveTo(2, 11, -18, 0); c.closePath(); c.fill(); c.stroke();
+      if (!silhouette) {
+        c.fillStyle = '#ffffff'; c.globalAlpha = 0.72;
+        c.beginPath(); c.moveTo(-6, -2); c.lineTo(4, -5); c.lineTo(12, -1); c.lineTo(2, 1); c.closePath(); c.fill();
+        c.globalAlpha = 1;
+        c.fillStyle = '#2b5876'; c.beginPath(); c.arc(15, -1.5, 2, 0, Math.PI * 2); c.fill();
+      }
     } else {
       // Classic plump watercolor fish (River Perch, Koi, Rainbow Trout, Golden Carp)
+      if (!silhouette && shape === 'golden') {
+        const g = c.createRadialGradient(2, 0, 4, 2, 0, 29);
+        g.addColorStop(0, 'rgba(255, 224, 102, 0.5)'); g.addColorStop(1, 'rgba(255, 224, 102, 0)');
+        c.fillStyle = g; c.beginPath(); c.arc(2, 0, 29, 0, Math.PI * 2); c.fill();
+      }
       c.fillStyle = finCol; c.strokeStyle = inkCol; c.lineWidth = 1.5;
-      // Tail fin
       c.beginPath(); c.moveTo(-14, 0); c.lineTo(-27, -11); c.quadraticCurveTo(-22, 0, -27, 11); c.closePath(); c.fill(); c.stroke();
-      // Dorsal fin
       c.beginPath(); c.ellipse(-2, -11, 10, 5, -0.15, 0, Math.PI * 2); c.fill(); c.stroke();
-      // Body
       c.fillStyle = bodyCol;
       c.beginPath(); c.ellipse(2, 0, 21, 12.5, 0, 0, Math.PI * 2); c.fill(); c.stroke();
       if (!silhouette) {
         c.fillStyle = bellyCol;
         c.beginPath(); c.ellipse(3, 4.5, 14, 5.5, 0, 0, Math.PI * 2); c.fill();
-        // Pattern stripes / koi spots
         c.fillStyle = stripeCol;
-        if (fish.id === 'koi') {
+        if (shape === 'koi') {
           c.beginPath(); c.ellipse(-5, -4, 6, 4, 0.3, 0, Math.PI * 2); c.ellipse(8, -2, 5, 3.5, -0.2, 0, Math.PI * 2); c.fill();
         } else {
           c.globalAlpha = 0.6;
           c.beginPath(); c.ellipse(-5, -2, 2.5, 7, 0.2, 0, Math.PI * 2); c.ellipse(2, -2, 2.5, 8, 0.2, 0, Math.PI * 2); c.ellipse(9, -2, 2.2, 6, 0.2, 0, Math.PI * 2); c.fill();
           c.globalAlpha = 1;
         }
-        // Sparkling eye
         c.fillStyle = '#2d1c10'; c.beginPath(); c.arc(14, -3, 2.3, 0, Math.PI * 2); c.fill();
         c.fillStyle = '#ffffff'; c.beginPath(); c.arc(14.8, -3.7, 0.9, 0, Math.PI * 2); c.fill();
       }
@@ -3460,53 +3812,334 @@
       </div>
     `;
     openModal('🎣', m.fishCaughtTitle, body,
-      `<button id="btnOpenDexAfterCatch" class="text-xs font-bold text-[#9c4a34] underline cursor-pointer">🐟 ${T().fishDexBtn}</button>
+      `<button id="btnOpenDexAfterCatch" class="text-xs font-bold text-[#9c4a34] underline cursor-pointer">📖 ${T().fishDexBtn}</button>
        <button id="btnCloseCatch" class="btn-peach px-4 py-1.5 rounded-xl text-xs font-bold cursor-pointer">${m.fishKeepBtn}</button>`);
 
     const art = document.getElementById('catchFishArt');
     if (art) drawFishArtwork(art.getContext('2d'), f, 120, 72, false);
     document.getElementById('btnCloseCatch').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
-    document.getElementById('btnOpenDexAfterCatch').addEventListener('click', () => openFishDexModal());
+    document.getElementById('btnOpenDexAfterCatch').addEventListener('click', () => openAlmanacModal('fish', fid));
   }
 
-  function openFishDexModal() {
+  // --- ILLUSTRATED ALMANAC / ENCYCLOPEDIA (Fish, Recipes, Crops, Ranch & Pets with Click-in Detail Pages!) ---
+  let almanacTab = 'fish';
+
+  function getAlmanacCounts() {
+    const fishU = FISH_ORDER.filter(id => (state.fishDex?.[id]?.count || 0) > 0).length;
+    const recU = RECIPES.filter(r => (state.recipeDex?.[r.id] || state.dishes?.[r.id] || 0) > 0).length;
+    const cropU = CROP_ORDER.filter(id => (state.cropDex?.[id] || 0) > 0).length;
+    const aniU = ANIMAL_ORDER.filter(t => state.animals.some(a => a.type === t)).length;
+    const petU = state.pet?.type ? 1 : 0;
+    const ranchU = aniU + petU;
+    const ranchT = ANIMAL_ORDER.length + PET_ORDER.length;
+    return {
+      fishU, fishT: FISH_ORDER.length,
+      recU, recT: RECIPES.length,
+      cropU, cropT: CROP_ORDER.length,
+      ranchU, ranchT,
+      totalU: fishU + recU + cropU + ranchU,
+      totalT: FISH_ORDER.length + RECIPES.length + CROP_ORDER.length + ranchT
+    };
+  }
+
+  function openAlmanacModal(tab = almanacTab, detailId = null) {
+    almanacTab = tab || 'fish';
     AudioFX.ui();
     const m = T().modals;
-    const unlocked = FISH_ORDER.filter(fid => (state.fishDex[fid]?.count || 0) > 0).length;
-    const cards = FISH_ORDER.map(fid => {
-      const f = FISH[fid], rec = state.fishDex[fid];
-      const caught = (rec?.count || 0) > 0;
-      return `
-        <div class="rounded-2xl p-2.5 bg-[#fffdf7] border border-[#d6ba91] flex items-center gap-2.5">
-          <div class="rounded-xl p-1 ${caught ? 'bg-[#e8f5fa] border border-[#b0d7e6]' : 'bg-[#ede3d2] border border-[#d2c0a5]'} shrink-0">
-            <canvas id="dexArt_${fid}" width="72" height="48"></canvas>
+    const cnt = getAlmanacCounts();
+    const pct = Math.round((cnt.totalU / Math.max(1, cnt.totalT)) * 100);
+    const tierBadge = (tier) => {
+      const styles = {
+        common: 'bg-[#eee4d3] text-[#6d5136] border-[#cfb996]',
+        uncommon: 'bg-[#e3f4e8] text-[#2d6a3e] border-[#96cfa6]',
+        rare: 'bg-[#e6f0fc] text-[#2b588c] border-[#9bc0ea]',
+        legendary: 'bg-[#fff2cc] text-[#9c5a09] border-[#e8bc55]'
+      };
+      return `<span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold border ${styles[tier] || styles.common}">${m.almanacTier[tier] || tier}</span>`;
+    };
+
+    const tabsHtml = `
+      <div class="space-y-2">
+        <div class="flex items-center justify-between gap-2 text-[11px] font-bold text-[#6e4f35]">
+          <span>${m.almanacProgress(cnt.totalU, cnt.totalT)} (${pct}%)</span>
+          <div class="w-32 sm:w-44 h-2 bg-[#e5d5b7] rounded-full overflow-hidden border border-[#bfa078]">
+            <div class="h-full bg-[#e07a5f] transition-all" style="width:${pct}%"></div>
           </div>
-          <div class="min-w-0 flex-1">
-            <div class="font-bold text-xs sm:text-sm text-[#4a3525] flex items-center justify-between gap-1">
-              <span>${caught ? `${f.emoji} ${L(f.name)}` : '❓ ???'}</span>
-              ${caught ? `<span class="text-[11px] text-amber-800 num-tabular">🪙 ${f.sellPrice}g</span>` : ''}
+        </div>
+        <div class="flex flex-wrap gap-1.5 pb-1.5 border-b border-[#dcc49e]">
+          <button data-atab="fish" class="px-2.5 py-1.5 rounded-xl font-bold text-xs cursor-pointer ${almanacTab === 'fish' ? 'btn-peach' : 'bg-[#e8d5b3] border border-[#b58d60] text-[#4a3525]'}">${m.almanacTabFish(cnt.fishU, cnt.fishT)}</button>
+          <button data-atab="recipes" class="px-2.5 py-1.5 rounded-xl font-bold text-xs cursor-pointer ${almanacTab === 'recipes' ? 'btn-peach' : 'bg-[#e8d5b3] border border-[#b58d60] text-[#4a3525]'}">${m.almanacTabRecipes(cnt.recU, cnt.recT)}</button>
+          <button data-atab="crops" class="px-2.5 py-1.5 rounded-xl font-bold text-xs cursor-pointer ${almanacTab === 'crops' ? 'btn-peach' : 'bg-[#e8d5b3] border border-[#b58d60] text-[#4a3525]'}">${m.almanacTabCrops(cnt.cropU, cnt.cropT)}</button>
+          <button data-atab="ranch" class="px-2.5 py-1.5 rounded-xl font-bold text-xs cursor-pointer ${almanacTab === 'ranch' ? 'btn-peach' : 'bg-[#e8d5b3] border border-[#b58d60] text-[#4a3525]'}">${m.almanacTabRanch(cnt.ranchU, cnt.ranchT)}</button>
+        </div>
+      </div>`;
+
+    let contentHtml = '';
+    let footerLeft = `<span class="text-[11px] opacity-80">📖 ${m.almanacClickHint}</span>`;
+
+    // --- DETAIL VIEW WHEN CLICKING ANY CARD ---
+    if (detailId) {
+      footerLeft = `<button id="btnAlmanacBack" class="px-3 py-1.5 rounded-xl bg-[#e8d5b3] border border-[#b58d60] font-bold text-xs text-[#4a3525] cursor-pointer">${m.almanacBack}</button>`;
+
+      if (almanacTab === 'fish' && FISH[detailId]) {
+        const f = FISH[detailId], rec = state.fishDex?.[detailId], caught = (rec?.count || 0) > 0;
+        const usedIn = RECIPES.filter(r => Object.keys(r.ingredients).some(ing =>
+          ing === detailId || (TAG_INGREDIENTS[ing] && TAG_INGREDIENTS[ing].ids.includes(detailId))
+        ));
+        contentHtml = `
+          <div class="rounded-2xl p-4 bg-[#fffdf7] border border-[#d6ba91] space-y-3">
+            <div class="flex flex-col sm:flex-row items-center gap-4">
+              <div class="rounded-2xl p-2 ${caught ? 'bg-[#e8f5fa] border-2 border-[#9ecce0]' : 'bg-[#ede3d2] border-2 border-[#cbb798]'} shrink-0">
+                <canvas id="almanacDetailFishCv" width="150" height="96"></canvas>
+              </div>
+              <div class="flex-1 text-center sm:text-left space-y-1.5">
+                <div class="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+                  <span class="font-extrabold text-base text-[#4a3525]">${caught ? `${f.emoji} ${L(f.name)}` : `❓ ${L(f.name)}`}</span>
+                  ${tierBadge(f.tier)}
+                </div>
+                <p class="text-xs text-[#6d5136] leading-relaxed">${L(f.hint)}</p>
+                <div class="inline-block text-[11px] font-bold text-[#2b5876] bg-[#e6f3fa] border border-[#b4d7eb] px-2.5 py-1 rounded-lg">🕒 ${m.almanacSpawn}：${L(f.when)}</div>
+              </div>
             </div>
-            <p class="text-[11px] text-[#75583e] leading-snug mt-0.5">${caught ? L(f.hint) : m.undiscovered}</p>
-            ${caught ? `<div class="text-[10px] font-semibold text-[#5c4028] mt-1 flex gap-2.5 num-tabular">
-              <span>${m.caughtCount}: ${rec.count}</span>
-              <span>⚖️ ${m.bestWeight}: ${rec.maxWeight.toFixed(2)} kg</span>
-            </div>` : ''}
-          </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+              <div class="rounded-xl p-2 bg-[#fbf2df] border border-[#dcc39c]"><div class="text-[10px] opacity-75">${m.almanacSellPrice}</div><strong class="num-tabular text-amber-900">🪙 ${f.sellPrice}g / ⭐${Math.round(f.sellPrice * 1.5)}g</strong></div>
+              <div class="rounded-xl p-2 bg-[#fbf2df] border border-[#dcc39c]"><div class="text-[10px] opacity-75">${m.almanacEnergy}</div><strong class="num-tabular text-emerald-800">🍀 +${f.energy}</strong></div>
+              <div class="rounded-xl p-2 bg-[#fbf2df] border border-[#dcc39c]"><div class="text-[10px] opacity-75">${m.caughtCount}</div><strong class="num-tabular">${rec?.count || 0}</strong></div>
+              <div class="rounded-xl p-2 bg-[#fbf2df] border border-[#dcc39c]"><div class="text-[10px] opacity-75">${m.bestWeight}</div><strong class="num-tabular">${caught ? `${(rec.maxWeight || 0).toFixed(2)} kg` : `${f.minKg}–${f.maxKg} kg`}</strong></div>
+            </div>
+            ${usedIn.length > 0 ? `<div class="text-xs space-y-1"><div class="font-bold text-[#5c3c22]">🍳 ${state.lang === 'zh' ? '可用于烹饪以下菜谱' : 'Used in Recipes'}:</div><div class="flex flex-wrap gap-1.5">${usedIn.map(r => `<button data-jumprec="${r.id}" class="px-2 py-1 rounded-lg bg-[#fff4de] border border-[#d6ba91] text-[11px] font-semibold text-[#4a3525] cursor-pointer hover:border-[#e07a5f]">${r.emoji} ${L(r.name)}</button>`).join('')}</div></div>` : ''}
+          </div>`;
+      } else if (almanacTab === 'recipes' && RECIPE_MAP[detailId]) {
+        const r = RECIPE_MAP[detailId];
+        const cookedN = state.recipeDex?.[r.id] || state.dishes?.[r.id] || 0;
+        const canCook = state.kitchenUnlocked && canCookRecipe(r);
+        const ingChips = Object.entries(r.ingredients).map(([ingId, req]) => {
+          const meta = getItemMeta(ingId), have = getAvailableIngredientCount(ingId), ok = have >= req;
+          return `<span class="px-2 py-1 rounded-xl text-xs font-semibold border ${ok ? 'bg-emerald-50 border-emerald-400 text-emerald-900' : 'bg-rose-50 border-rose-300 text-rose-800'}">${meta.emoji} ${L(meta.name)} ${have}/${req}</span>`;
+        }).join(' ');
+        contentHtml = `
+          <div class="rounded-2xl p-4 bg-[#fffdf7] border border-[#d6ba91] space-y-3">
+            <div class="flex items-center gap-3.5">
+              <div class="w-16 h-16 rounded-2xl bg-[#fff3d6] border-2 border-[#dfb675] flex items-center justify-center text-4xl shrink-0">${r.emoji}</div>
+              <div class="space-y-1">
+                <div class="font-extrabold text-base text-[#4a3525]">${L(r.name)}</div>
+                <p class="text-xs text-[#6d5136] leading-relaxed">${L(r.desc)}</p>
+                <div class="text-[11px] font-bold ${cookedN > 0 ? 'text-emerald-700' : 'text-[#8c6b4d]'}">${cookedN > 0 ? `✓ ${m.almanacCookedCount(cookedN)}` : m.almanacNotCooked}</div>
+              </div>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-center text-xs">
+              <div class="rounded-xl p-2 bg-[#fbf2df] border border-[#dcc39c]"><div class="text-[10px] opacity-75">${m.almanacSellPrice}</div><strong class="num-tabular text-amber-900">🪙 ${r.sellPrice}g</strong></div>
+              <div class="rounded-xl p-2 bg-[#fbf2df] border border-[#dcc39c]"><div class="text-[10px] opacity-75">${m.almanacEnergy}</div><strong class="num-tabular text-emerald-800">🍀 +${r.energy}</strong></div>
+              <div class="rounded-xl p-2 bg-[#fbf2df] border border-[#dcc39c]"><div class="text-[10px] opacity-75">${state.lang === 'zh' ? '花篮现有' : 'In Basket'}</div><strong class="num-tabular">${state.dishes?.[r.id] || 0}</strong></div>
+            </div>
+            <div class="space-y-1.5">
+              <div class="font-bold text-xs text-[#5c3c22]">🧺 ${m.almanacIngredients}:</div>
+              <div class="flex flex-wrap gap-1.5">${ingChips}</div>
+            </div>
+            <div class="flex flex-wrap gap-2 pt-1">
+              ${state.kitchenUnlocked
+                ? `<button id="btnAlmanacCookNow" ${canCook ? '' : 'disabled'} class="btn-peach px-4 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${canCook ? m.almanacCookNow : m.missingIng}</button>`
+                : `<span class="text-[11px] font-semibold text-amber-800 bg-amber-50 border border-amber-300 px-2.5 py-1 rounded-lg">🏡 ${m.almanacNeedKitchenShort}</span>`}
+              <button id="btnAlmanacGoKitchen" class="btn-sage px-3.5 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${m.almanacGoKitchen}</button>
+            </div>
+          </div>`;
+      } else if (almanacTab === 'crops' && CROPS[detailId]) {
+        const c = CROPS[detailId], harv = state.cropDex?.[c.id] || 0;
+        const bonusSeasons = SEASONS.filter(s => s.bonus.includes(c.id)).map(s => `${s.icon} ${L(s.name)}`).join(' · ');
+        const usedIn = RECIPES.filter(r => Object.keys(r.ingredients).some(ing =>
+          ing === c.id || (TAG_INGREDIENTS[ing] && TAG_INGREDIENTS[ing].ids.includes(c.id))
+        ));
+        contentHtml = `
+          <div class="rounded-2xl p-4 bg-[#fffdf7] border border-[#d6ba91] space-y-3">
+            <div class="flex items-center gap-3.5">
+              <div class="w-16 h-16 rounded-2xl bg-[#eef7e6] border-2 border-[#a8cf8e] flex items-center justify-center text-4xl shrink-0">${c.emoji}</div>
+              <div class="space-y-1">
+                <div class="font-extrabold text-base text-[#4a3525]">${L(c.name)}</div>
+                <p class="text-xs text-[#6d5136] leading-relaxed">${L(c.desc)}</p>
+                <div class="text-[11px] font-bold ${harv > 0 ? 'text-emerald-700' : 'text-[#8c6b4d]'}">${harv > 0 ? `✓ ${m.almanacHarvestedCount(harv)}` : m.almanacNotHarvested}</div>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+              <div class="rounded-xl p-2 bg-[#fbf2df] border border-[#dcc39c]"><div class="text-[10px] opacity-75">${m.almanacSeedPrice}</div><strong class="num-tabular">🌱 ${c.seedPrice}g</strong></div>
+              <div class="rounded-xl p-2 bg-[#fbf2df] border border-[#dcc39c]"><div class="text-[10px] opacity-75">${m.almanacSellPrice}</div><strong class="num-tabular text-amber-900">🪙 ${c.sellPrice}g</strong></div>
+              <div class="rounded-xl p-2 bg-[#fbf2df] border border-[#dcc39c]"><div class="text-[10px] opacity-75">${m.almanacGrowDays}</div><strong class="num-tabular">${m.daysGrow(c.days)}${c.regrow ? ` · ${m.regrow(c.regrow)}` : ''}</strong></div>
+              <div class="rounded-xl p-2 bg-[#fbf2df] border border-[#dcc39c]"><div class="text-[10px] opacity-75">${m.almanacEnergy}</div><strong class="num-tabular text-emerald-800">🍀 +${c.energy}</strong></div>
+            </div>
+            <div class="text-xs bg-[#f7efe0] border border-[#dcc39c] rounded-xl px-3 py-2"><strong>${m.almanacBonusSeason}：</strong>${bonusSeasons}</div>
+            ${usedIn.length > 0 ? `<div class="text-xs space-y-1"><div class="font-bold text-[#5c3c22]">🍳 ${state.lang === 'zh' ? '可用于烹饪以下菜谱' : 'Used in Recipes'}:</div><div class="flex flex-wrap gap-1.5">${usedIn.map(r => `<button data-jumprec="${r.id}" class="px-2 py-1 rounded-lg bg-[#fff4de] border border-[#d6ba91] text-[11px] font-semibold text-[#4a3525] cursor-pointer hover:border-[#e07a5f]">${r.emoji} ${L(r.name)}</button>`).join('')}</div></div>` : ''}
+            <div><button id="btnAlmanacGoSeeds" class="btn-sage px-3.5 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${m.almanacGoSeeds}</button></div>
+          </div>`;
+      } else if (almanacTab === 'ranch') {
+        if (ANIMALS[detailId]) {
+          const a = ANIMALS[detailId], prod = ITEMS[a.product], owned = state.animals.filter(x => x.type === a.id).length;
+          contentHtml = `
+            <div class="rounded-2xl p-4 bg-[#fffdf7] border border-[#d6ba91] space-y-3">
+              <div class="flex items-center gap-3.5">
+                <div class="w-16 h-16 rounded-2xl bg-[#fff3d6] border-2 border-[#dfb675] flex items-center justify-center text-4xl shrink-0">${a.emoji}</div>
+                <div class="space-y-1">
+                  <div class="font-extrabold text-base text-[#4a3525]">${L(a.name)}</div>
+                  <p class="text-xs text-[#6d5136] leading-relaxed">${L(a.desc)}</p>
+                  <div class="text-[11px] font-bold ${owned > 0 ? 'text-emerald-700' : 'text-[#8c6b4d]'}">${owned > 0 ? `✓ ${m.almanacOwned(owned)}` : m.almanacNotOwned}</div>
+                </div>
+              </div>
+              <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                <div class="rounded-xl p-2 bg-[#fbf2df] border border-[#dcc39c]"><div class="text-[10px] opacity-75">${state.lang === 'zh' ? '领养价' : 'Adopt Price'}</div><strong>🪙 ${a.price}g</strong></div>
+                <div class="rounded-xl p-2 bg-[#fbf2df] border border-[#dcc39c]"><div class="text-[10px] opacity-75">${state.lang === 'zh' ? '每日产出' : 'Daily Drop'}</div><strong>${prod.emoji} ${L(prod.name)}</strong></div>
+                <div class="rounded-xl p-2 bg-[#fbf2df] border border-[#dcc39c]"><div class="text-[10px] opacity-75">${m.almanacSellPrice}</div><strong>🪙 ${prod.sellPrice}g</strong></div>
+              </div>
+            </div>`;
+        } else if (PETS[detailId]) {
+          const p = PETS[detailId], isCur = state.pet?.type === p.id;
+          contentHtml = `
+            <div class="rounded-2xl p-4 bg-[#fffdf7] border border-[#d6ba91] space-y-3">
+              <div class="flex items-center gap-3.5">
+                <div class="w-16 h-16 rounded-2xl bg-[#ffeef2] border-2 border-[#ebb4c2] flex items-center justify-center text-4xl shrink-0">${p.emoji}</div>
+                <div class="space-y-1">
+                  <div class="font-extrabold text-base text-[#4a3525]">${L(p.name)}</div>
+                  <p class="text-xs text-[#6d5136] leading-relaxed">${L(p.desc)}</p>
+                  <div class="text-[11px] font-bold ${isCur ? 'text-rose-600' : 'text-[#8c6b4d]'}">${isCur ? `${m.almanacPetActive} (${m.petAffection}: ♥${state.pet.affection || 0})` : m.almanacPetWait}</div>
+                </div>
+              </div>
+            </div>`;
+        }
+      }
+    } else if (almanacTab === 'fish') {
+      const cards = FISH_ORDER.map(fid => {
+        const f = FISH[fid], rec = state.fishDex?.[fid], caught = (rec?.count || 0) > 0;
+        return `
+          <button data-adetail="${fid}" class="rounded-2xl p-2.5 text-left transition cursor-pointer flex items-center gap-2.5 border ${caught ? 'bg-[#fffdf7] border-[#d6ba91] hover:border-[#e07a5f]' : 'bg-[#f8f0e2] border-[#dcc7a7] hover:border-[#b8976a]'}">
+            <div class="rounded-xl p-1 ${caught ? 'bg-[#e8f5fa] border border-[#b0d7e6]' : 'bg-[#ede3d2] border border-[#d2c0a5]'} shrink-0">
+              <canvas id="dexArt_${fid}" width="72" height="48"></canvas>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="font-bold text-xs text-[#4a3525] flex items-center justify-between gap-1">
+                <span class="truncate">${caught ? `${f.emoji} ${L(f.name)}` : '❓ ???'}</span>
+                ${tierBadge(f.tier)}
+              </div>
+              <p class="text-[10.5px] text-[#75583e] leading-snug mt-0.5 truncate">${caught ? L(f.when) : L(f.when)}</p>
+              <div class="text-[10px] font-semibold text-[#5c4028] mt-1 flex items-center justify-between num-tabular">
+                <span>${caught ? `${m.caughtCount}: ${rec.count} · ⚖️${(rec.maxWeight || 0).toFixed(2)}kg` : m.undiscovered.split('—')[0]}</span>
+                ${caught ? `<span class="text-amber-800">🪙${f.sellPrice}g</span>` : ''}
+              </div>
+            </div>
+          </button>`;
+      }).join('');
+      contentHtml = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${cards}</div>`;
+    } else if (almanacTab === 'recipes') {
+      const cards = RECIPES.map(r => {
+        const cookedN = state.recipeDex?.[r.id] || state.dishes?.[r.id] || 0;
+        const canCook = state.kitchenUnlocked && canCookRecipe(r);
+        const ingIcons = Object.entries(r.ingredients).map(([ingId, req]) => {
+          const meta = getItemMeta(ingId);
+          return `${meta ? meta.emoji : ''}${req > 1 ? `×${req}` : ''}`;
+        }).join(' ');
+        return `
+          <button data-adetail="${r.id}" class="rounded-2xl p-2.5 text-left transition cursor-pointer flex items-center gap-2.5 border ${cookedN > 0 ? 'bg-[#fffdf7] border-[#d6ba91] hover:border-[#e07a5f]' : 'bg-[#f8f0e2] border-[#dcc7a7] hover:border-[#b8976a]'}">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-2xl shrink-0 border ${cookedN > 0 ? 'bg-[#fff3d6] border-[#dfb675]' : 'bg-[#ede3d2] border-[#d2c0a5] opacity-80'}">${r.emoji}</div>
+            <div class="min-w-0 flex-1">
+              <div class="font-bold text-xs text-[#4a3525] flex items-center justify-between gap-1">
+                <span class="truncate">${L(r.name)} ${cookedN > 0 ? '✓' : ''}</span>
+                <span class="text-[11px] text-amber-800 num-tabular shrink-0">🪙${r.sellPrice}g</span>
+              </div>
+              <div class="text-[10.5px] text-[#75583e] mt-0.5 truncate">${ingIcons} · 🍀+${r.energy}</div>
+              <div class="text-[10px] font-semibold mt-0.5 ${canCook ? 'text-emerald-700' : 'text-[#826449]'}">${cookedN > 0 ? m.almanacCookedCount(cookedN) : (canCook ? `✨ ${m.almanacCookNow}` : m.almanacNotCooked)}</div>
+            </div>
+          </button>`;
+      }).join('');
+      contentHtml = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${cards}</div>`;
+    } else if (almanacTab === 'crops') {
+      const cards = CROP_ORDER.map(cid => {
+        const c = CROPS[cid], harv = state.cropDex?.[cid] || 0;
+        const bIcons = SEASONS.filter(s => s.bonus.includes(cid)).map(s => s.icon).join('');
+        return `
+          <button data-adetail="${cid}" class="rounded-2xl p-2.5 text-left transition cursor-pointer flex items-center gap-2.5 border ${harv > 0 ? 'bg-[#fffdf7] border-[#d6ba91] hover:border-[#e07a5f]' : 'bg-[#f8f0e2] border-[#dcc7a7] hover:border-[#b8976a]'}">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-2xl shrink-0 border ${harv > 0 ? 'bg-[#eef7e6] border-[#a8cf8e]' : 'bg-[#ede3d2] border-[#d2c0a5]'}">${c.emoji}</div>
+            <div class="min-w-0 flex-1">
+              <div class="font-bold text-xs text-[#4a3525] flex items-center justify-between gap-1">
+                <span>${L(c.name)} ${harv > 0 ? '✓' : ''}</span>
+                <span class="text-[11px] text-amber-800 num-tabular">🪙${c.sellPrice}g</span>
+              </div>
+              <div class="text-[10.5px] text-[#75583e] mt-0.5">${m.daysGrow(c.days)}${c.regrow ? ` · ${m.regrow(c.regrow)}` : ''} · ${bIcons}</div>
+              <div class="text-[10px] font-semibold text-[#5c4028] mt-0.5">${harv > 0 ? m.almanacHarvestedCount(harv) : m.almanacNotHarvested}</div>
+            </div>
+          </button>`;
+      }).join('');
+      contentHtml = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${cards}</div>`;
+    } else {
+      const aCards = ANIMAL_ORDER.map(aid => {
+        const a = ANIMALS[aid], prod = ITEMS[a.product], owned = state.animals.filter(x => x.type === aid).length;
+        return `
+          <button data-adetail="${aid}" class="rounded-2xl p-2.5 text-left transition cursor-pointer flex items-center gap-2.5 border ${owned > 0 ? 'bg-[#fffdf7] border-[#d6ba91] hover:border-[#e07a5f]' : 'bg-[#f8f0e2] border-[#dcc7a7] hover:border-[#b8976a]'}">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-2xl shrink-0 border bg-[#fff3d6] border-[#dfb675]">${a.emoji}</div>
+            <div class="min-w-0 flex-1">
+              <div class="font-bold text-xs text-[#4a3525]">${L(a.name)} ${owned > 0 ? `(${owned})` : ''}</div>
+              <div class="text-[10.5px] text-[#75583e] mt-0.5">${prod.emoji} ${L(prod.name)} · 🪙${prod.sellPrice}g</div>
+            </div>
+          </button>`;
+      }).join('');
+      const pCards = PET_ORDER.map(pid => {
+        const p = PETS[pid], active = state.pet?.type === pid;
+        return `
+          <button data-adetail="${pid}" class="rounded-2xl p-2.5 text-left transition cursor-pointer flex items-center gap-2.5 border ${active ? 'bg-[#fff5f7] border-[#e07a5f]' : 'bg-[#fffdf7] border-[#d6ba91] hover:border-[#e07a5f]'}">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-2xl shrink-0 border bg-[#ffeef2] border-[#ebb4c2]">${p.emoji}</div>
+            <div class="min-w-0 flex-1">
+              <div class="font-bold text-xs text-[#4a3525]">${L(p.name)} ${active ? '♥' : ''}</div>
+              <div class="text-[10.5px] text-[#75583e] mt-0.5 truncate">${active ? m.almanacPetActive : m.almanacPetWait}</div>
+            </div>
+          </button>`;
+      }).join('');
+      contentHtml = `
+        <div class="space-y-2.5">
+          <div class="font-bold text-xs text-[#5c3c22]">${m.almanacRanchAnimals}</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${aCards}</div>
+          <div class="font-bold text-xs text-[#5c3c22] pt-1">${m.almanacPets}</div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">${pCards}</div>
         </div>`;
-    }).join('');
+    }
 
-    openModal('🐟', m.fishDexTitle,
-      `<div class="text-xs font-semibold text-[#6e4f35] mb-1">${m.fishDexSub(unlocked, FISH_ORDER.length)}</div>
-       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${cards}</div>`,
-      `<span class="text-xs opacity-75">🎣 ${T().tools.rod} (Key 4)</span>
-       <button id="btnCloseDex" class="btn-peach px-4 py-1.5 rounded-xl text-xs font-bold cursor-pointer">${m.backToFarm}</button>`);
+    openModal('📖', m.almanacTitle, `<div class="space-y-3">${tabsHtml}${contentHtml}</div>`,
+      `${footerLeft}<button id="btnCloseDex" class="btn-peach px-4 py-1.5 rounded-xl text-xs font-bold cursor-pointer shrink-0">${m.backToFarm}</button>`);
 
-    for (const fid of FISH_ORDER) {
-      const c = document.getElementById(`dexArt_${fid}`);
-      if (c) drawFishArtwork(c.getContext('2d'), FISH[fid], 72, 48, !((state.fishDex[fid]?.count || 0) > 0));
+    document.querySelectorAll('[data-atab]').forEach(b => b.addEventListener('click', () => openAlmanacModal(b.dataset.atab, null)));
+    document.querySelectorAll('[data-adetail]').forEach(b => b.addEventListener('click', () => openAlmanacModal(almanacTab, b.dataset.adetail)));
+    document.querySelectorAll('[data-jumprec]').forEach(b => b.addEventListener('click', () => openAlmanacModal('recipes', b.dataset.jumprec)));
+
+    if (!detailId && almanacTab === 'fish') {
+      for (const fid of FISH_ORDER) {
+        const c = document.getElementById(`dexArt_${fid}`);
+        if (c) drawFishArtwork(c.getContext('2d'), FISH[fid], 72, 48, !((state.fishDex?.[fid]?.count || 0) > 0));
+      }
+    }
+    const detailFishCv = document.getElementById('almanacDetailFishCv');
+    if (detailFishCv && FISH[detailId]) {
+      drawFishArtwork(detailFishCv.getContext('2d'), FISH[detailId], 150, 96, !((state.fishDex?.[detailId]?.count || 0) > 0));
+    }
+    const backBtn = document.getElementById('btnAlmanacBack');
+    if (backBtn) backBtn.addEventListener('click', () => openAlmanacModal(almanacTab, null));
+    const goKit = document.getElementById('btnAlmanacGoKitchen');
+    if (goKit) goKit.addEventListener('click', () => openKitchenModal());
+    const goSeeds = document.getElementById('btnAlmanacGoSeeds');
+    if (goSeeds) goSeeds.addEventListener('click', () => openShopModal('seeds'));
+    const cookNow = document.getElementById('btnAlmanacCookNow');
+    if (cookNow && RECIPE_MAP[detailId]) {
+      cookNow.addEventListener('click', () => {
+        const r = RECIPE_MAP[detailId];
+        if (!state.kitchenUnlocked || !canCookRecipe(r)) { AudioFX.error(); return; }
+        for (const [ing, qty] of Object.entries(r.ingredients)) consumeIngredient(ing, qty);
+        state.dishes[r.id] = (state.dishes[r.id] || 0) + 1;
+        state.recipeDex = state.recipeDex || {};
+        state.recipeDex[r.id] = (state.recipeDex[r.id] || 0) + 1;
+        state.totalCooked += 1;
+        AudioFX.cook();
+        addFloatText(state.player.x, state.player.y - 26, T().floats.cookedDish(r.emoji, L(r.name)), '#fef08a');
+        updateHUD();
+        openAlmanacModal('recipes', detailId);
+      });
     }
     document.getElementById('btnCloseDex').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
   }
+
+  function openFishDexModal() { openAlmanacModal('fish'); }
 
   // =========================================================================
   // PASTURE ANIMAL CARE (Feed, Pet, Collect Drops)
@@ -3734,6 +4367,8 @@
       state.satchel[key] = (state.satchel[key] || 0) + 1;
     }
     state.totalHarvested += qty;
+    state.cropDex = state.cropDex || {};
+    state.cropDex[crop.id] = (state.cropDex[crop.id] || 0) + qty;
     if (crop.regrow > 0) td.crop.daysGrown = crop.days - crop.regrow;
     else td.crop = null;
     AudioFX.harvest();
@@ -4124,8 +4759,10 @@
     }));
   }
 
-  // --- KITCHEN / COOKING RECIPES MODAL ---
-  function openKitchenModal() {
+  // --- KITCHEN / COOKING RECIPES MODAL (22 Recipes + Category Filters) ---
+  let kitchenCat = 'all';
+  function openKitchenModal(cat = kitchenCat) {
+    kitchenCat = cat || 'all';
     AudioFX.ui();
     const m = T().modals;
     if (!state.kitchenUnlocked) {
@@ -4135,13 +4772,24 @@
            <div class="font-bold text-base text-[#4a3525]">${m.kitchenLockedTitle}</div>
            <p class="text-xs text-[#75583e] max-w-[400px] mx-auto leading-relaxed">${m.kitchenLockedDesc}</p>
          </div>`,
-        `<span class="text-xs font-bold text-amber-900">${m.yourGold}: 🪙 ${state.gold}g</span>
+        `<button id="btnKitchenPreviewDex" class="text-xs font-bold text-[#9c4a34] underline cursor-pointer">📖 ${T().fishDexBtn}</button>
          <button id="btnGoUpgradeKitchen" class="btn-peach px-3.5 py-1.5 rounded-xl text-xs font-bold cursor-pointer">${m.goBuyKitchen}</button>`);
       document.getElementById('btnGoUpgradeKitchen').addEventListener('click', () => openShopModal('upgrades'));
+      document.getElementById('btnKitchenPreviewDex').addEventListener('click', () => openAlmanacModal('recipes'));
       return;
     }
 
-    const cards = RECIPES.map(r => {
+    const prevScroll = document.getElementById('pvKitchenRoot') ? (document.getElementById('modalBody')?.scrollTop || 0) : 0;
+    const filtered = kitchenCat === 'all' ? RECIPES : RECIPES.filter(r => r.cat === kitchenCat);
+    const catTabs = `
+      <div class="flex flex-wrap gap-1.5 pb-1.5 border-b border-[#dcc49e]">
+        <button data-kcat="all" class="px-2.5 py-1 rounded-xl font-bold text-xs cursor-pointer ${kitchenCat === 'all' ? 'btn-peach' : 'bg-[#e8d5b3] border border-[#b58d60] text-[#4a3525]'}">${m.kitchenCatAll}</button>
+        <button data-kcat="savory" class="px-2.5 py-1 rounded-xl font-bold text-xs cursor-pointer ${kitchenCat === 'savory' ? 'btn-peach' : 'bg-[#e8d5b3] border border-[#b58d60] text-[#4a3525]'}">${m.kitchenCatSavory}</button>
+        <button data-kcat="seafood" class="px-2.5 py-1 rounded-xl font-bold text-xs cursor-pointer ${kitchenCat === 'seafood' ? 'btn-peach' : 'bg-[#e8d5b3] border border-[#b58d60] text-[#4a3525]'}">${m.kitchenCatSeafood}</button>
+        <button data-kcat="sweet" class="px-2.5 py-1 rounded-xl font-bold text-xs cursor-pointer ${kitchenCat === 'sweet' ? 'btn-peach' : 'bg-[#e8d5b3] border border-[#b58d60] text-[#4a3525]'}">${m.kitchenCatSweet}</button>
+      </div>`;
+
+    const cards = filtered.map(r => {
       const cookable = canCookRecipe(r);
       const owned = state.dishes[r.id] || 0;
       const ingChips = Object.entries(r.ingredients).map(([ingId, req]) => {
@@ -4172,21 +4820,29 @@
     }).join('');
 
     openModal('🍳', m.kitchenTitle,
-      `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${cards}</div>`,
-      `<button id="btnKitchenToPantry" class="text-xs font-bold text-[#9c4a34] underline cursor-pointer">${m.openPantryLink}</button>
+      `<div id="pvKitchenRoot" class="space-y-2.5">${catTabs}<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${cards}</div></div>`,
+      `<div class="flex items-center gap-3">
+         <button id="btnKitchenToPantry" class="text-xs font-bold text-[#9c4a34] underline cursor-pointer">${m.openPantryLink}</button>
+         <button id="btnKitchenToDex" class="text-xs font-bold text-[#5c3c22] underline cursor-pointer">📖 ${T().fishDexBtn}</button>
+       </div>
        <span class="text-xs font-bold text-amber-900">${m.yourGold}: 🪙 ${state.gold}g</span>`);
+    if (prevScroll > 0) document.getElementById('modalBody').scrollTop = prevScroll;
 
+    document.querySelectorAll('[data-kcat]').forEach(b => b.addEventListener('click', () => openKitchenModal(b.dataset.kcat)));
     document.getElementById('btnKitchenToPantry').addEventListener('click', () => openRanchShopModal('pantry'));
+    document.getElementById('btnKitchenToDex').addEventListener('click', () => openAlmanacModal('recipes'));
     document.querySelectorAll('[data-cook]').forEach(b => b.addEventListener('click', () => {
       const r = RECIPE_MAP[b.dataset.cook];
       if (!r || !canCookRecipe(r)) { AudioFX.error(); return; }
       for (const [ing, qty] of Object.entries(r.ingredients)) consumeIngredient(ing, qty);
       state.dishes[r.id] = (state.dishes[r.id] || 0) + 1;
+      state.recipeDex = state.recipeDex || {};
+      state.recipeDex[r.id] = (state.recipeDex[r.id] || 0) + 1;
       state.totalCooked += 1;
       AudioFX.cook();
       addFloatText(state.player.x, state.player.y - 26, T().floats.cookedDish(r.emoji, L(r.name)), '#fef08a');
       updateHUD();
-      openKitchenModal();
+      openKitchenModal(kitchenCat);
     }));
   }
 
