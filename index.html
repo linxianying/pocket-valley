@@ -610,6 +610,47 @@
   };
   const CROP_ORDER = ['turnip', 'wheat', 'radish', 'carrot', 'tomato', 'corn', 'strawberry', 'blueberry', 'pumpkin', 'starfruit'];
 
+  // 4 RARE MYTHIC MUTANT PLANTS (Small-probability harvest surprises!)
+  const SUPREME_PLANTS = {
+    crystalRose: {
+      id: 'crystalRose', emoji: '🌹', shape: 'rose', tier: 'mythic', isSupreme: true,
+      name: { zh: '琉璃水晶玫瑰', en: 'Crystal Rose' },
+      sellPrice: 620, energy: 55,
+      color: '#ff8fb8', accent: '#ffe4f2', leaf: '#6cc9a4', glow: 'rgba(255, 143, 184, 0.45)',
+      parents: ['strawberry', 'blueberry', 'radish'],
+      fromText: { zh: '收获草莓 / 蓝莓 / 樱桃萝卜时极小概率变异伴生', en: 'Rare mutation when harvesting Strawberry, Blueberry, or Radish' },
+      desc: { zh: '花瓣宛如粉色琉璃折射晨露星光，是极品花露羹与仙鲤刺身的珍稀配材！', en: 'Translucent rose petals refracting morning starlight—prized for mythic dishes!' }
+    },
+    goldenWheatCrown: {
+      id: 'goldenWheatCrown', emoji: '👑', shape: 'wheatCrown', tier: 'mythic', isSupreme: true,
+      name: { zh: '鎏金麦穗王', en: 'Golden Wheat Crown' },
+      sellPrice: 560, energy: 50,
+      color: '#ffd147', accent: '#fff7c2', leaf: '#7ac766', glow: 'rgba(255, 209, 71, 0.48)',
+      parents: ['wheat', 'corn', 'turnip'],
+      fromText: { zh: '收获小麦 / 甜玉米 / 芜菁时极小概率变异伴生', en: 'Rare mutation when harvesting Wheat, Corn, or Turnip' },
+      desc: { zh: '宛如皇冠般沉甸甸的纯金麦穗，散发暖阳与蜂蜜交织的奇异香气！', en: 'A radiant golden sheaf shaped like a crown, glowing with warm sunbeams!' }
+    },
+    moonlightBerry: {
+      id: 'moonlightBerry', emoji: '🌙', shape: 'moonBerry', tier: 'mythic', isSupreme: true,
+      name: { zh: '月光幻莓', en: 'Moonlight Dewberry' },
+      sellPrice: 680, energy: 60,
+      color: '#9e8cff', accent: '#e0f2ff', leaf: '#52b89a', glow: 'rgba(158, 140, 255, 0.48)',
+      parents: ['tomato', 'carrot', 'blueberry'],
+      fromText: { zh: '收获小番茄 / 胡萝卜 / 蓝莓时极小概率变异伴生', en: 'Rare mutation when harvesting Tomato, Carrot, or Blueberry' },
+      desc: { zh: '在银色月华中凝结出的莹蓝浆果，轻咬一口满嘴清甜花露！', en: 'Luminous twilight berries infused with silver moonlight & sweet dew!' }
+    },
+    astralLotus: {
+      id: 'astralLotus', emoji: '🪷', shape: 'astralLotus', tier: 'mythic', isSupreme: true,
+      name: { zh: '星辰雪莲', en: 'Astral Snow Lotus' },
+      sellPrice: 980, energy: 75,
+      color: '#b8e8ff', accent: '#fff4d6', leaf: '#75d4bd', glow: 'rgba(147, 217, 255, 0.52)',
+      parents: ['pumpkin', 'starfruit'],
+      fromText: { zh: '收获南瓜 / 杨桃（或雨雪夜间收割）时极小概率变异伴生', en: 'Rare mutation from Pumpkin / Starfruit (or rainy/snowy/night harvests)' },
+      desc: { zh: '传闻百年一遇的山谷灵莲，花心闪烁星芒，可烹制终极奇迹料理！', en: 'A once-in-a-century valley spirit lotus blooming with stardust!' }
+    }
+  };
+  const SUPREME_PLANT_ORDER = ['crystalRose', 'goldenWheatCrown', 'moonlightBerry', 'astralLotus'];
+
   // 4 PASTURE ANIMALS!
   const ANIMALS = {
     chicken: {
@@ -757,11 +798,36 @@
       id: 'imperialFeast', emoji: '👑', cat: 'seafood', name: { zh: '山谷海陆盛宴', en: 'Grand Valley Feast' },
       ingredients: { rareFish: 1, starfruit: 1, duckEgg: 1, butter: 1 }, sellPrice: 1480, energy: 100,
       desc: { zh: '汇聚山谷稀有鱼获与星光杨桃的顶级传说料理！', en: 'Legendary banquet uniting rare pond catch & golden starfruit!' }
+    },
+    // 4 MYTHIC / SUPREME RECIPES (Crafted from rare Mythic Fish & Mutant Plants!)
+    {
+      id: 'lotusCrystalTea', emoji: '🪷', cat: 'supreme', tier: 'mythic', isSupreme: true,
+      name: { zh: '星辰琉璃花露羹', en: 'Astral Blossom Elixir' },
+      ingredients: { supremePlant: 1, milk: 1, honey: 1 }, sellPrice: 1680, energy: 135,
+      desc: { zh: '以极品变异奇珍凝露入盏，佐以鲜奶百花蜜，入口如梦似幻的宫廷甜品！', en: 'Dreamy royal elixir infused with rare mutant blossoms, fresh milk & wild honey!' }
+    },
+    {
+      id: 'phoenixImperialPot', emoji: '🔥', cat: 'supreme', tier: 'mythic', isSupreme: true,
+      name: { zh: '凤羽玉露佛跳墙', en: 'Phoenix Imperial Pot' },
+      ingredients: { supremeFish: 1, pumpkin: 1, duckEgg: 1, butter: 1 }, sellPrice: 2260, energy: 145,
+      desc: { zh: '极品灵鱼配金南瓜与鸭蛋文火慢煨，掀盖瞬间金光四溢的御膳珍品！', en: 'Rare mythic fish slow-simmered with golden pumpkin & duck egg into liquid gold!' }
+    },
+    {
+      id: 'celestialSashimi', emoji: '🌈', cat: 'supreme', tier: 'mythic', isSupreme: true,
+      name: { zh: '霓裳仙鲤御膳刺身', en: 'Celestial Royal Sashimi' },
+      ingredients: { supremeFish: 1, supremePlant: 1, honey: 1 }, sellPrice: 2480, energy: 150,
+      desc: { zh: '罕见极品灵鱼与变异仙草冰镇摆盘，晶莹剔透如星河化雪！', en: 'Exquisite mythic fish plated with rare mutant botanicals—shimmering like starlight!' }
+    },
+    {
+      id: 'valleyMiracleFeast', emoji: '✨', cat: 'supreme', tier: 'mythic', isSupreme: true,
+      name: { zh: '口袋山谷奇迹满汉席', en: 'Pocket Valley Miracle Feast' },
+      ingredients: { supremeFish: 1, supremePlant: 1, starfruit: 1, butter: 1 }, sellPrice: 3880, energy: 200,
+      desc: { zh: '汇聚极品鱼、极品变异植物与星光杨桃的终极山谷奇迹料理！', en: 'The ultimate once-in-a-lifetime miracle banquet uniting mythic fish, flora & starfruit!' }
     }
   ];
   const RECIPE_MAP = Object.fromEntries(RECIPES.map(r => [r.id, r]));
 
-  // 14 STORYBOOK POND & STREAM FISH!
+  // 17 STORYBOOK POND & STREAM FISH (14 Regular + 3 Ultra-Rare Mythic Fish!)
   const FISH = {
     riverPerch: {
       id: 'riverPerch', shape: 'classic', tier: 'common',
@@ -874,22 +940,51 @@
       body: '#ffd147', belly: '#fff7bd', fin: '#f59e0b', stripe: '#e07a16',
       when: { zh: '四季 · 全天极稀有', en: 'All Seasons · Very Rare All Day' },
       hint: { zh: '全天极稀有 · 游动敏捷的传说金色大鲤鱼！', en: 'Very rare all day · Nimble legendary golden carp!' }
+    },
+    // 3 ULTRA-RARE MYTHIC FISH (Small-probability miraculous catches!)
+    celestialKoi: {
+      id: 'celestialKoi', shape: 'celestialKoi', tier: 'mythic', isSupreme: true,
+      name: { zh: '霓裳仙鲤', en: 'Celestial Rainbow Koi' }, emoji: '🌈',
+      sellPrice: 920, energy: 65, minKg: 3.2, maxKg: 8.8, speed: 1.18, rarity: 2.0,
+      body: '#ffd6e8', belly: '#fffbe6', fin: '#a5b4fc', stripe: '#fb7185',
+      when: { zh: '四季 · 晴天/微风 · 极小概率奇遇', en: 'All Seasons · Sunny/Breezy · Ultra-Rare Mythic' },
+      hint: { zh: '荷花池极小概率现身的虹彩灵鲤，尾鳍如仙袂流云，可烹制极品御膳！', en: 'Ultra-rare iridescent koi with flowing cloud fins—key to Supreme Dishes!' }
+    },
+    crystalDragonfish: {
+      id: 'crystalDragonfish', shape: 'dragonfish', tier: 'mythic', isSupreme: true,
+      name: { zh: '冰晶龙鱼', en: 'Crystal Dragonfish' }, emoji: '💎',
+      sellPrice: 1080, energy: 70, minKg: 2.6, maxKg: 7.4, speed: 1.22, rarity: 1.8,
+      body: '#9ee7ff', belly: '#f0f9ff', fin: '#a78bfa', stripe: '#e0f2fe',
+      when: { zh: '雨天 / 雪天 / 夜晚(18:00+) · 极小概率奇遇', en: 'Rainy / Snowy / Night (6 PM+) · Ultra-Rare Mythic' },
+      hint: { zh: '雨雪夜色中极小概率浮出水面的水晶灵鱼，通体折射月光蓝焰！', en: 'Ultra-rare crystalline dragonfish shimmering with sapphire moonlight!' }
+    },
+    phoenixArowana: {
+      id: 'phoenixArowana', shape: 'phoenix', tier: 'mythic', isSupreme: true,
+      name: { zh: '凤羽金龙', en: 'Phoenix Arowana' }, emoji: '🔥',
+      sellPrice: 1250, energy: 80, minKg: 4.0, maxKg: 10.6, speed: 1.26, rarity: 1.6,
+      body: '#ff7043', belly: '#ffe082', fin: '#ffca28', stripe: '#d84315',
+      when: { zh: '四季 · 傍晚(16:00+)或晴天 · 极小概率奇遇', en: 'All Seasons · Evening (4 PM+) or Sunny · Ultra-Rare Mythic' },
+      hint: { zh: '传闻只为有缘农夫现身的绯红金龙鱼，鳞如凤羽流金，价值连城！', en: 'Mythic crimson-gold arowana with phoenix-plume fins—a true valley miracle!' }
     }
   };
   const FISH_ORDER = [
     'riverPerch', 'crayfish', 'pondLoach', 'goldfish', 'sakuraShrimp',
     'koi', 'rainbowTrout', 'catfish', 'lotusTurtle', 'icefish',
-    'autumnCrab', 'moonJelly', 'starryEel', 'goldenCarp'
+    'autumnCrab', 'moonJelly', 'starryEel', 'goldenCarp',
+    'celestialKoi', 'crystalDragonfish', 'phoenixArowana'
   ];
+
+  const REGULAR_FISH_IDS = FISH_ORDER.filter(id => !FISH[id].isSupreme);
+  const SUPREME_FISH_IDS = FISH_ORDER.filter(id => FISH[id].isSupreme);
 
   const TAG_INGREDIENTS = {
     anyFish: {
       emoji: '🐟', name: { zh: '任意鱼类', en: 'Any Fish' },
-      ids: [...FISH_ORDER]
+      ids: [...REGULAR_FISH_IDS]
     },
     seafood: {
       emoji: '🦞', name: { zh: '虾蟹或鱼类', en: 'Shellfish / Fish' },
-      ids: ['crayfish', 'sakuraShrimp', 'autumnCrab', ...FISH_ORDER.filter(id => !['crayfish', 'sakuraShrimp', 'autumnCrab'].includes(id))]
+      ids: ['crayfish', 'sakuraShrimp', 'autumnCrab', ...REGULAR_FISH_IDS.filter(id => !['crayfish', 'sakuraShrimp', 'autumnCrab'].includes(id))]
     },
     shellfish: {
       emoji: '🦐', name: { zh: '虾蟹类', en: 'Shrimp / Crab / Crayfish' },
@@ -898,6 +993,14 @@
     rareFish: {
       emoji: '✨', name: { zh: '稀有鱼类', en: 'Rare Fish' },
       ids: ['koi', 'rainbowTrout', 'catfish', 'lotusTurtle', 'icefish', 'autumnCrab', 'moonJelly', 'starryEel', 'goldenCarp']
+    },
+    supremeFish: {
+      emoji: '🌈', name: { zh: '极品灵鱼', en: 'Mythic Fish' },
+      ids: [...SUPREME_FISH_IDS]
+    },
+    supremePlant: {
+      emoji: '🪷', name: { zh: '极品植物', en: 'Mythic Plant' },
+      ids: [...SUPREME_PLANT_ORDER]
     },
     herbVeggie: {
       emoji: '🍅', name: { zh: '萝卜或小番茄', en: 'Radish / Tomato' },
@@ -1213,8 +1316,8 @@
               <ul class="space-y-1">
                 <li>在<strong>米莉的牧场铺</strong>领养鸡鸭羊牛、买牧草饲料和面粉/黄油/白糖/蜂蜜。</li>
                 <li>点击草料槽或谷仓喂饱动物，次日清晨产出鸡蛋、鸭蛋、羊毛、鲜奶！</li>
-                <li>在<strong>皮普的花种铺</strong>升级<strong>温馨厨房 (250g)</strong> 后，即可按 22 种菜谱烹饪美味料理！</li>
-                <li>池塘可钓 14 种四季鱼虾蟹，点顶部 <strong>📖 图鉴</strong> 可查看所有鱼类、菜谱、作物与动物详情！</li>
+                <li>在<strong>皮普的花种铺</strong>升级<strong>温馨厨房 (250g)</strong> 后，即可按 26 种菜谱烹饪美味料理（含 4 道极品御膳）！</li>
+                <li>池塘可钓 17 种鱼虾蟹（含小概率极品灵鱼），种田收获还有机会变异出极品奇珍植物，奇遇出现时可<strong>拍照纪念与分享</strong>！</li>
               </ul>
             </div>
           </div>
@@ -1224,7 +1327,7 @@
         almanacProgress: (u, t) => `总收集进度：${u} / ${t}`,
         almanacTabFish: (u, t) => `🐟 鱼类 (${u}/${t})`,
         almanacTabRecipes: (u, t) => `🍳 菜谱 (${u}/${t})`,
-        almanacTabCrops: (u, t) => `🌱 作物 (${u}/${t})`,
+        almanacTabCrops: (u, t) => `🌱 植物 (${u}/${t})`,
         almanacTabRanch: (u, t) => `🐮 牧场与宠 (${u}/${t})`,
         almanacClickHint: '点击任意卡片可查看详细介绍与获取方式 ✨',
         almanacBack: '← 返回图鉴列表',
@@ -1241,6 +1344,11 @@
         daysGrow: (d) => `${d}天成熟`,
         regrow: (d) => `每${d}天复采`,
         almanacBonusSeason: '应季加成 (+20%)',
+        almanacFarmCrops: '🌱 农庄作物 (10)',
+        almanacSupremePlants: '✨ 极品变异奇珍 (小概率伴生 · 4)',
+        almanacMutationFrom: '变异来源',
+        almanacFoundCount: (n) => `累计奇遇 ${n} 次`,
+        almanacNotFoundYet: '尚未偶遇（收获成熟作物时极小概率触发！）',
         almanacRanchAnimals: '🐮 阳光牧场动物',
         almanacPets: '🐾 随行农场萌宠',
         almanacOwned: (n) => `当前饲养 ${n} 只`,
@@ -1251,11 +1359,29 @@
         almanacGoSeeds: '🧺 去买种子',
         almanacCookNow: '🍳 立即烹制 ×1',
         almanacNeedKitchenShort: '需先升级温馨厨房',
-        almanacTier: { common: '常见', uncommon: '少见', rare: '稀有', legendary: '传说' },
-        kitchenCatAll: '🍽️ 全部 (22)',
+        almanacPhotoBtn: '📸 拍照分享纪念卡',
+        almanacTier: { common: '常见', uncommon: '少见', rare: '稀有', legendary: '传说', mythic: '极品' },
+        kitchenCatAll: '🍽️ 全部 (26)',
         kitchenCatSavory: '🍲 田园主菜',
         kitchenCatSeafood: '🐟 鲜鱼海鲜',
         kitchenCatSweet: '🍰 甜品烘焙',
+        kitchenCatSupreme: '👑 极品料理',
+        supremeTitleFish: '✨ 极品灵鱼奇遇！',
+        supremeTitlePlant: '🌸 极品植物变异奇观！',
+        supremeTitleDish: '👑 极品料理出炉！',
+        supremeTitleMiracle: '✨ 大厨灵光一闪 · 极品大成功！',
+        supremeSubFish: '荷花池泛起七彩涟漪，你竟然钓到了极小概率现身的极品灵鱼！',
+        supremeSubPlant: '田间金光闪烁，收获时竟伴生出一株百年难遇的极品变异奇珍！',
+        supremeSubDish: '满屋飘散梦幻香气，一道传说级山谷极品料理闪耀出炉！',
+        supremeSubMiracle: '烹饪触发极小概率大厨奇迹，额外收获一份极品佳肴！',
+        photoSaveBtn: '📸 保存纪念照 (PNG)',
+        photoCopyBtn: '📋 复制分享文案',
+        photoShareBtn: '📤 分享给好友',
+        photoResnapBtn: '📷 再拍一张',
+        photoSavedMsg: '✅ 纪念拍立得照片已保存！',
+        photoCopiedMsg: '✅ 已复制分享文案（支持的浏览器已同时复制图片）！',
+        photoSharedMsg: '✅ 分享成功！',
+        photoShareFallback: '📋 已自动复制分享文案并下载照片，快发给好友炫耀吧！',
         fishDexSub: (u, t) => `已点亮 ${u} / ${t} 种水彩鱼类`,
         fishCaughtTitle: '🎣 钓到大鱼啦！',
         newRecord: '🏆 打破最高重量纪录！',
@@ -1598,8 +1724,8 @@
               <ul class="space-y-1">
                 <li>Visit <strong>Millie's Ranch Shop</strong> to adopt Chickens, Ducks, Sheep & Cows, and buy Feed & Pantry Staples.</li>
                 <li>Feed animals at the Trough/Barn so they drop fresh Eggs, Milk & Wool each morning!</li>
-                <li>Upgrade your <strong>Cottage Kitchen (250g)</strong> at Pip's Shop to cook 22 cozy recipes!</li>
-                <li>Catch 14 seasonal pond fish & shellfish, and click <strong>📖 Almanac</strong> to inspect every entry!</li>
+                <li>Upgrade your <strong>Cottage Kitchen (250g)</strong> at Pip's Shop to cook 26 recipes (including 4 Supreme Dishes)!</li>
+                <li>Catch 17 fish (incl. ultra-rare Mythic fish) & discover rare mutant plants on harvest—snap & share Polaroid photos!</li>
               </ul>
             </div>
           </div>
@@ -1609,7 +1735,7 @@
         almanacProgress: (u, t) => `Collection Progress: ${u} / ${t}`,
         almanacTabFish: (u, t) => `🐟 Fish (${u}/${t})`,
         almanacTabRecipes: (u, t) => `🍳 Recipes (${u}/${t})`,
-        almanacTabCrops: (u, t) => `🌱 Crops (${u}/${t})`,
+        almanacTabCrops: (u, t) => `🌱 Flora (${u}/${t})`,
         almanacTabRanch: (u, t) => `🐮 Ranch & Pets (${u}/${t})`,
         almanacClickHint: 'Click any card to view full details, tips & stats ✨',
         almanacBack: '← Back to Almanac',
@@ -1626,6 +1752,11 @@
         daysGrow: (d) => `${d}d grow`,
         regrow: (d) => `Regrows ${d}d`,
         almanacBonusSeason: 'Bonus Season (+20%)',
+        almanacFarmCrops: '🌱 Farm Crops (10)',
+        almanacSupremePlants: '✨ Mythic Mutant Flora (Ultra-Rare · 4)',
+        almanacMutationFrom: 'Mutation Source',
+        almanacFoundCount: (n) => `Discovered ${n}×`,
+        almanacNotFoundYet: 'Not discovered yet (ultra-rare miracle on harvest!)',
         almanacRanchAnimals: '🐮 Sunny Pasture Animals',
         almanacPets: '🐾 Farm Pet Companions',
         almanacOwned: (n) => `Raising ${n}`,
@@ -1636,11 +1767,29 @@
         almanacGoSeeds: '🧺 Buy Seeds',
         almanacCookNow: '🍳 Cook ×1 Now',
         almanacNeedKitchenShort: 'Upgrade Kitchen first',
-        almanacTier: { common: 'Common', uncommon: 'Uncommon', rare: 'Rare', legendary: 'Legendary' },
-        kitchenCatAll: '🍽️ All (22)',
+        almanacPhotoBtn: '📸 Snap & Share Photo Card',
+        almanacTier: { common: 'Common', uncommon: 'Uncommon', rare: 'Rare', legendary: 'Legendary', mythic: 'Mythic' },
+        kitchenCatAll: '🍽️ All (26)',
         kitchenCatSavory: '🍲 Savory',
         kitchenCatSeafood: '🐟 Seafood',
         kitchenCatSweet: '🍰 Sweets',
+        kitchenCatSupreme: '👑 Supreme',
+        supremeTitleFish: '✨ Mythic Catch Miracle!',
+        supremeTitlePlant: '🌸 Mythic Botanical Mutation!',
+        supremeTitleDish: '👑 Supreme Dish Crafted!',
+        supremeTitleMiracle: "✨ Chef's Miracle Proc!",
+        supremeSubFish: 'Rainbow ripples shimmer across the pond—you hooked an ultra-rare Mythic Fish!',
+        supremeSubPlant: 'Golden stardust burst from the soil—a miraculous Mythic Plant sprouted on harvest!',
+        supremeSubDish: 'Heavenly aroma fills your cottage—a legendary Supreme Valley Dish is served!',
+        supremeSubMiracle: 'A rare spark of culinary magic doubled your dish with mythic perfection!',
+        photoSaveBtn: '📸 Save Photo (PNG)',
+        photoCopyBtn: '📋 Copy Share Note',
+        photoShareBtn: '📤 Share Moment',
+        photoResnapBtn: '📷 Snap Again',
+        photoSavedMsg: '✅ Polaroid keepsake saved as PNG!',
+        photoCopiedMsg: '✅ Share text copied (and photo copied where supported)!',
+        photoSharedMsg: '✅ Shared successfully!',
+        photoShareFallback: '📋 Share note copied & Polaroid downloaded—ready to share!',
         fishDexSub: (u, t) => `Discovered ${u} / ${t} watercolor pond species`,
         fishCaughtTitle: '🎣 Lovely Catch!',
         newRecord: '🏆 New Weight Record!',
@@ -1748,7 +1897,9 @@
     error() { this.tone(200, 0.09, 'triangle', 0.06, 150); },
     ui() { this.tone(660, 0.04, 'sine', 0.05, 780); },
     morning() { [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => this.tone(f, 0.24, 'sine', 0.08, null, i * 0.09)); },
-    place() { this.tone(300, 0.08, 'triangle', 0.09, 390); }
+    place() { this.tone(300, 0.08, 'triangle', 0.09, 390); },
+    shutter() { this.noise(0.045, 0.14, 2800); this.tone(920, 0.035, 'square', 0.05, 420, 0.01); this.noise(0.03, 0.10, 1600); },
+    mythic() { [523.25, 659.25, 783.99, 987.77, 1318.5, 1567.98].forEach((f, i) => this.tone(f, 0.28, 'sine', 0.10, f * 1.01, i * 0.075)); }
   };
 
   // =========================================================================
@@ -1918,7 +2069,9 @@
       totalFishCaught: 0,
       fishDex: {},      // fishId -> { count, maxWeight }
       cropDex: {},      // cropId -> count harvested
+      plantDex: {},     // supremePlantId -> count discovered
       recipeDex: {},    // recipeId -> count cooked
+      supremeMoments: [], // recent mythic photo keepsake records
       wood: 0,
       stone: 0,
       energy: 100,
@@ -1985,10 +2138,12 @@
     const ml = FARM_LAYOUTS[parsed.mapLayout] ? parsed.mapLayout : 'pondRight';
     const base = createInitialState(parsed.lang || 'zh', parsed.dressIdx || 0, g, hs, ml, true);
     const cropDex = { ...(parsed.cropDex || {}) };
+    const plantDex = { ...(parsed.plantDex || {}) };
     const recipeDex = { ...(parsed.recipeDex || {}) };
     for (const [k, cnt] of Object.entries(parsed.satchel || {})) {
       const cid = k.split('_')[0];
       if (CROPS[cid] && cnt > 0 && !cropDex[cid]) cropDex[cid] = cnt;
+      if (SUPREME_PLANTS[cid] && cnt > 0 && !plantDex[cid]) plantDex[cid] = cnt;
     }
     for (const [rid, cnt] of Object.entries(parsed.dishes || {})) {
       if (RECIPE_MAP[rid] && cnt > 0 && !recipeDex[rid]) recipeDex[rid] = cnt;
@@ -2006,7 +2161,9 @@
       dishes: { ...(parsed.dishes || {}) },
       fishDex: { ...(parsed.fishDex || {}) },
       cropDex,
+      plantDex,
       recipeDex,
+      supremeMoments: Array.isArray(parsed.supremeMoments) ? parsed.supremeMoments.slice(0, 30) : [],
       totalFishCaught: typeof parsed.totalFishCaught === 'number' ? parsed.totalFishCaught : 0,
       pet: { ...base.pet, ...(parsed.pet || {}) },
       animals: Array.isArray(parsed.animals) ? parsed.animals : base.animals,
@@ -2563,6 +2720,7 @@
 
   function getItemMeta(id) {
     if (CROPS[id]) return { ...CROPS[id], source: 'crop' };
+    if (SUPREME_PLANTS[id]) return { ...SUPREME_PLANTS[id], source: 'supremePlant' };
     if (FISH[id]) return { ...FISH[id], source: 'fish' };
     if (ITEMS[id]) return { ...ITEMS[id], source: ITEMS[id].kind };
     if (RECIPE_MAP[id]) return { ...RECIPE_MAP[id], source: 'dish' };
@@ -2574,6 +2732,11 @@
     if (CROPS[id]) {
       let val = CROPS[id].sellPrice;
       if (getSeason().bonus.includes(id)) val = Math.round(val * 1.2);
+      if (quality === 1) val = Math.round(val * 1.5);
+      return val;
+    }
+    if (SUPREME_PLANTS[id]) {
+      let val = SUPREME_PLANTS[id].sellPrice;
       if (quality === 1) val = Math.round(val * 1.5);
       return val;
     }
@@ -3425,7 +3588,7 @@
   }
 
   // =========================================================================
-  // LOTUS POND FISHING SYSTEM (14 Species, Mini-Game, Almanac & Art)
+  // LOTUS POND FISHING SYSTEM (17 Species incl. 3 Ultra-Rare Mythic Fish!)
   // =========================================================================
   function pickPondFish() {
     const season = getSeason().id;
@@ -3437,9 +3600,11 @@
     const isNight = mins >= 19 * 60;
     const isDay = !isNight;
     const isRain = state.weather === 'rainy';
+    const isSnow = state.weather === 'snowy';
     const isCloudy = state.weather === 'cloudy';
     const isSunny = state.weather === 'sunny';
     const isBreezy = state.weather === 'breezy';
+    const luckyMult = state.luckyCharm ? 1.45 : 1.0;
 
     const pool = [];
     for (const fid of FISH_ORDER) {
@@ -3451,11 +3616,15 @@
       if (fid === 'rainbowTrout' && !(season === 'spring' || season === 'autumn' || isRain)) continue;
       if (fid === 'catfish' && !(isRain || isLateEvening)) continue;
       if (fid === 'lotusTurtle' && !(season === 'summer' || (isSunny && isAfternoon))) continue;
-      if (fid === 'icefish' && !(season === 'winter' || (isCloudy && isMorning))) continue;
+      if (fid === 'icefish' && !(season === 'winter' || isSnow || (isCloudy && isMorning))) continue;
       if (fid === 'autumnCrab' && !(season === 'autumn' || isBreezy)) continue;
       if (fid === 'moonJelly' && !isNight) continue;
       if (fid === 'starryEel' && !(isNight || isRain)) continue;
-      pool.push({ id: fid, w: f.rarity });
+      if (fid === 'celestialKoi' && !(isSunny || isBreezy)) continue;
+      if (fid === 'crystalDragonfish' && !(isRain || isSnow || isLateEvening)) continue;
+      if (fid === 'phoenixArowana' && !(isEvening || isSunny)) continue;
+      const w = f.isSupreme ? f.rarity * luckyMult : f.rarity;
+      pool.push({ id: fid, w });
     }
     const totalW = pool.reduce((s, p) => s + p.w, 0);
     let r = Math.random() * totalW;
@@ -3492,14 +3661,15 @@
     fishing.fishId = pickPondFish();
     fishing.barPos = 0.42;
     fishing.barVel = 0;
-    fishing.barHeight = (fishing.fishId === 'goldenCarp' || fishing.fishId === 'starryEel') ? 0.24 : 0.28;
+    const f = FISH[fishing.fishId];
+    fishing.barHeight = f?.isSupreme ? 0.22 : (fishing.fishId === 'goldenCarp' || fishing.fishId === 'starryEel') ? 0.24 : 0.28;
     fishing.fishPos = 0.48;
     fishing.fishTarget = 0.2 + Math.random() * 0.6;
     fishing.fishWait = 0.4;
     fishing.progress = 0.30;
     fishing.hold = true;
     AudioFX.water();
-    spawnParticles(fishing.bobberX, fishing.bobberY, '#fff9c4', 12, 1.9, 3);
+    spawnParticles(fishing.bobberX, fishing.bobberY, f?.isSupreme ? '#ffd6e8' : '#fff9c4', f?.isSupreme ? 18 : 12, 1.9, 3.2);
   }
 
   function finishFishCatch() {
@@ -3509,7 +3679,7 @@
 
     const weight = Number((fish.minKg + Math.random() * (fish.maxKg - fish.minKg)).toFixed(2));
     const goldChance = state.luckyCharm ? 0.38 : 0.18;
-    const quality = (weight > fish.minKg + (fish.maxKg - fish.minKg) * 0.8 || Math.random() < goldChance) ? 1 : 0;
+    const quality = (fish.isSupreme || weight > fish.minKg + (fish.maxKg - fish.minKg) * 0.8 || Math.random() < goldChance) ? 1 : 0;
 
     const key = `${fid}_${quality}`;
     state.satchel[key] = (state.satchel[key] || 0) + 1;
@@ -3521,6 +3691,17 @@
       count: (prev.count || 0) + 1,
       maxWeight: Math.max(prev.maxWeight || 0, weight)
     };
+
+    if (fish.isSupreme) {
+      AudioFX.mythic();
+      spawnParticles(state.player.x, state.player.y - 16, '#ffd147', 22, 2.8, 4.2);
+      spawnParticles(state.player.x, state.player.y - 16, '#ff8fb8', 16, 2.5, 3.6);
+      saveState(true);
+      updateHUD();
+      recordSupremeMoment({ kind: 'fish', id: fid, weight, quality, isNewRecord });
+      openSupremeMomentModal({ kind: 'fish', id: fid, weight, quality, isNewRecord });
+      return;
+    }
 
     AudioFX.fishCatch();
     saveState(true);
@@ -3762,6 +3943,90 @@
         c.globalAlpha = 1;
         c.fillStyle = '#2b5876'; c.beginPath(); c.arc(15, -1.5, 2, 0, Math.PI * 2); c.fill();
       }
+    } else if (shape === 'celestialKoi') {
+      // Mythic Celestial Rainbow Koi with flowing pastel cloud fins & golden halo
+      if (!silhouette) {
+        const g = c.createRadialGradient(0, 0, 5, 0, 0, 34);
+        g.addColorStop(0, 'rgba(255, 224, 130, 0.55)'); g.addColorStop(0.6, 'rgba(244, 143, 177, 0.32)'); g.addColorStop(1, 'rgba(165, 180, 252, 0)');
+        c.fillStyle = g; c.beginPath(); c.arc(0, 0, 34, 0, Math.PI * 2); c.fill();
+      }
+      c.strokeStyle = inkCol; c.lineWidth = 1.4;
+      // Flowing ribbon tail
+      c.fillStyle = silhouette ? finCol : '#c4b5fd';
+      c.beginPath(); c.moveTo(-12, 0); c.bezierCurveTo(-24, -17, -33, -10, -28, -2); c.bezierCurveTo(-34, 8, -24, 18, -12, 4); c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = silhouette ? finCol : '#fbcfe8';
+      c.beginPath(); c.ellipse(-1, -12, 12, 5.5, -0.18, 0, Math.PI * 2); c.fill(); c.stroke();
+      // Iridescent rainbow-pastel body
+      if (!silhouette) {
+        const bg = c.createLinearGradient(-16, -10, 22, 10);
+        bg.addColorStop(0, '#ffd6e8'); bg.addColorStop(0.5, '#fff7cc'); bg.addColorStop(1, '#bae6fd');
+        c.fillStyle = bg;
+      } else c.fillStyle = bodyCol;
+      c.beginPath(); c.ellipse(3, 0, 20, 11.5, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+      if (!silhouette) {
+        c.fillStyle = '#fb7185'; c.beginPath(); c.ellipse(-4, -3.5, 5.5, 3.5, 0.25, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#a78bfa'; c.beginPath(); c.ellipse(7, -2.5, 4.5, 3, -0.2, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#f59e0b';
+        for (const [sx, sy] of [[-18, -12], [10, -14], [-12, 13], [19, 10]]) {
+          c.beginPath(); c.arc(sx, sy, 1.5, 0, Math.PI * 2); c.fill();
+        }
+        c.fillStyle = '#2d1c10'; c.beginPath(); c.arc(14.5, -2.5, 2.2, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#ffffff'; c.beginPath(); c.arc(15.2, -3.2, 0.85, 0, Math.PI * 2); c.fill();
+      }
+    } else if (shape === 'dragonfish') {
+      // Mythic Crystal Dragonfish with translucent ice facets & twin whiskers
+      if (!silhouette) {
+        const g = c.createRadialGradient(2, 0, 4, 2, 0, 33);
+        g.addColorStop(0, 'rgba(125, 211, 252, 0.52)'); g.addColorStop(0.6, 'rgba(167, 139, 250, 0.28)'); g.addColorStop(1, 'rgba(125, 211, 252, 0)');
+        c.fillStyle = g; c.beginPath(); c.arc(2, 0, 33, 0, Math.PI * 2); c.fill();
+      }
+      c.strokeStyle = inkCol; c.lineWidth = 1.4;
+      c.fillStyle = finCol;
+      c.beginPath(); c.moveTo(-16, 0); c.lineTo(-31, -12); c.lineTo(-24, 0); c.lineTo(-31, 12); c.closePath(); c.fill(); c.stroke();
+      c.beginPath(); c.moveTo(-10, -7); c.lineTo(-2, -16); c.lineTo(8, -8); c.closePath(); c.fill(); c.stroke();
+      if (!silhouette) {
+        const dg = c.createLinearGradient(-20, -8, 25, 8);
+        dg.addColorStop(0, '#a5f3fc'); dg.addColorStop(0.55, '#e0f2fe'); dg.addColorStop(1, '#c4b5fd');
+        c.fillStyle = dg;
+      } else c.fillStyle = bodyCol;
+      c.beginPath(); c.moveTo(-19, 1); c.quadraticCurveTo(2, -12, 24, -2); c.quadraticCurveTo(6, 12, -19, 1); c.closePath(); c.fill(); c.stroke();
+      // Crystal dragon barbels
+      c.strokeStyle = silhouette ? inkCol : '#38bdf8'; c.lineWidth = 1.5;
+      c.beginPath(); c.moveTo(22, 1); c.quadraticCurveTo(29, 7, 24, 13); c.moveTo(20, 3); c.quadraticCurveTo(26, 11, 18, 14); c.stroke();
+      if (!silhouette) {
+        c.fillStyle = '#ffffff'; c.globalAlpha = 0.8;
+        c.beginPath(); c.moveTo(-4, -3); c.lineTo(5, -6); c.lineTo(12, -1); c.lineTo(2, 1); c.closePath(); c.fill();
+        c.globalAlpha = 1;
+        c.fillStyle = '#312e81'; c.beginPath(); c.arc(16, -2.5, 2.2, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#ffffff'; c.beginPath(); c.arc(16.7, -3.2, 0.85, 0, Math.PI * 2); c.fill();
+      }
+    } else if (shape === 'phoenix') {
+      // Mythic Phoenix Arowana with flaming golden-crimson plume tail
+      if (!silhouette) {
+        const g = c.createRadialGradient(0, 0, 5, 0, 0, 34);
+        g.addColorStop(0, 'rgba(255, 202, 40, 0.56)'); g.addColorStop(0.55, 'rgba(255, 112, 67, 0.30)'); g.addColorStop(1, 'rgba(255, 112, 67, 0)');
+        c.fillStyle = g; c.beginPath(); c.arc(0, 0, 34, 0, Math.PI * 2); c.fill();
+      }
+      c.strokeStyle = inkCol; c.lineWidth = 1.4;
+      // Flame feather tail
+      c.fillStyle = silhouette ? finCol : '#ffca28';
+      c.beginPath(); c.moveTo(-14, 0); c.quadraticCurveTo(-26, -18, -32, -9); c.quadraticCurveTo(-24, -2, -31, 0); c.quadraticCurveTo(-24, 4, -32, 12); c.quadraticCurveTo(-22, 16, -14, 3); c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = silhouette ? finCol : '#ff7043';
+      c.beginPath(); c.moveTo(-8, -8); c.quadraticCurveTo(2, -18, 12, -8); c.closePath(); c.fill(); c.stroke();
+      if (!silhouette) {
+        const pg = c.createLinearGradient(-18, -9, 25, 9);
+        pg.addColorStop(0, '#ef4444'); pg.addColorStop(0.5, '#fb923c'); pg.addColorStop(1, '#fde047');
+        c.fillStyle = pg;
+      } else c.fillStyle = bodyCol;
+      c.beginPath(); c.moveTo(-18, 1); c.quadraticCurveTo(3, -12, 24, -1); c.quadraticCurveTo(4, 12, -18, 1); c.closePath(); c.fill(); c.stroke();
+      if (!silhouette) {
+        c.fillStyle = '#fef08a';
+        for (const [sx, sy] of [[-16, -14], [15, -13], [-8, 14], [21, 9]]) {
+          c.beginPath(); c.arc(sx, sy, 1.5, 0, Math.PI * 2); c.fill();
+        }
+        c.fillStyle = '#2d1c10'; c.beginPath(); c.arc(16.5, -2.2, 2.2, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#ffffff'; c.beginPath(); c.arc(17.2, -3, 0.85, 0, Math.PI * 2); c.fill();
+      }
     } else {
       // Classic plump watercolor fish (River Perch, Koi, Rainbow Trout, Golden Carp)
       if (!silhouette && shape === 'golden') {
@@ -3792,6 +4057,421 @@
     c.restore();
   }
 
+  // Hand-drawn watercolor artist for the 4 Mythic Mutant Plants!
+  function drawPlantArtwork(c, plant, w, h, silhouette = false) {
+    c.clearRect(0, 0, w, h);
+    c.save();
+    c.translate(w / 2, h / 2);
+    const sc = Math.min(w / 72, h / 48);
+    c.scale(sc, sc);
+    const ink = silhouette ? '#7b6855' : '#4a3525';
+    const col = silhouette ? '#9e8e7c' : plant.color;
+    const acc = silhouette ? '#b8a895' : plant.accent;
+    const leaf = silhouette ? '#877664' : plant.leaf;
+
+    if (!silhouette) {
+      const g = c.createRadialGradient(0, -2, 4, 0, -2, 28);
+      g.addColorStop(0, plant.glow || 'rgba(255, 224, 130, 0.45)');
+      g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      c.fillStyle = g; c.beginPath(); c.arc(0, -2, 28, 0, Math.PI * 2); c.fill();
+    }
+
+    c.strokeStyle = ink; c.lineWidth = 1.4;
+    if (plant.shape === 'rose') {
+      // Crystal Rose
+      c.beginPath(); c.moveTo(0, 18); c.quadraticCurveTo(2, 8, 0, 2); c.stroke();
+      c.fillStyle = leaf;
+      c.beginPath(); c.ellipse(-7, 10, 6.5, 3, -0.4, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.beginPath(); c.ellipse(7, 12, 6, 2.8, 0.4, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.fillStyle = col;
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * Math.PI * 2;
+        c.beginPath(); c.ellipse(Math.cos(a) * 6, -4 + Math.sin(a) * 4.8, 6.5, 5, a, 0, Math.PI * 2); c.fill(); c.stroke();
+      }
+      c.fillStyle = acc;
+      c.beginPath(); c.arc(0, -4, 5.5, 0, Math.PI * 2); c.fill(); c.stroke();
+    } else if (plant.shape === 'wheatCrown') {
+      // Golden Wheat Crown
+      c.fillStyle = leaf;
+      c.beginPath(); c.ellipse(-10, 12, 8, 3, -0.35, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.beginPath(); c.ellipse(10, 12, 8, 3, 0.35, 0, Math.PI * 2); c.fill(); c.stroke();
+      for (const [ang, ox] of [[-0.42, -9], [0, 0], [0.42, 9]]) {
+        c.save(); c.translate(ox, 12); c.rotate(ang);
+        c.beginPath(); c.moveTo(0, 0); c.lineTo(0, -24); c.stroke();
+        c.fillStyle = col;
+        for (let k = 0; k < 4; k++) {
+          c.beginPath(); c.ellipse(-3, -9 - k * 4.5, 3.2, 2.2, -0.4, 0, Math.PI * 2); c.fill(); c.stroke();
+          c.beginPath(); c.ellipse(3, -10.5 - k * 4.5, 3.2, 2.2, 0.4, 0, Math.PI * 2); c.fill(); c.stroke();
+        }
+        c.restore();
+      }
+      if (!silhouette) {
+        c.fillStyle = acc; c.beginPath(); c.arc(0, -16, 2.5, 0, Math.PI * 2); c.fill();
+      }
+    } else if (plant.shape === 'moonBerry') {
+      // Moonlight Dewberry cluster + crescent leaf
+      c.fillStyle = leaf;
+      c.beginPath(); c.ellipse(-8, -9, 8, 4, -0.35, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.beginPath(); c.ellipse(8, -9, 8, 4, 0.35, 0, Math.PI * 2); c.fill(); c.stroke();
+      const berries = [[-7, 1], [7, 1], [0, -2], [-4, 9], [4, 9], [0, 13]];
+      for (const [bx, by] of berries) {
+        c.fillStyle = col; c.beginPath(); c.arc(bx, by, 5.2, 0, Math.PI * 2); c.fill(); c.stroke();
+        if (!silhouette) {
+          c.fillStyle = acc; c.beginPath(); c.arc(bx - 1.6, by - 1.6, 1.7, 0, Math.PI * 2); c.fill();
+        }
+      }
+    } else {
+      // Astral Snow Lotus
+      c.fillStyle = leaf;
+      c.beginPath(); c.ellipse(0, 12, 19, 5.5, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+      const petals = [[-13, 3, -0.55], [13, 3, 0.55], [-8, -2, -0.3], [8, -2, 0.3], [0, -5, 0]];
+      for (const [px, py, rot] of petals) {
+        c.save(); c.translate(px, py); c.rotate(rot);
+        c.fillStyle = col;
+        c.beginPath(); c.ellipse(0, 0, 5.5, 11.5, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+        c.restore();
+      }
+      c.fillStyle = acc;
+      c.beginPath(); c.arc(0, 1, 5, 0, Math.PI * 2); c.fill(); c.stroke();
+    }
+    if (!silhouette) {
+      c.fillStyle = '#fff9c4';
+      for (const [sx, sy] of [[-18, -12], [17, -11], [15, 11]]) {
+        c.beginPath(); c.arc(sx, sy, 1.5, 0, Math.PI * 2); c.fill();
+      }
+    }
+    c.restore();
+  }
+
+  // =========================================================================
+  // SUPREME MOMENT KEEPSAKE: POLAROID PHOTO GENERATOR & SHARE MODAL!
+  // =========================================================================
+  function recordSupremeMoment(entry) {
+    state.supremeMoments = state.supremeMoments || [];
+    state.supremeMoments.unshift({
+      ...entry,
+      day: state.day,
+      season: state.season,
+      weather: state.weather,
+      ts: Date.now()
+    });
+    if (state.supremeMoments.length > 30) state.supremeMoments.length = 30;
+  }
+
+  function getMomentMeta(moment) {
+    const m = T().modals;
+    if (moment.kind === 'fish' && FISH[moment.id]) {
+      const f = FISH[moment.id];
+      const val = getSellValue(f.id, moment.quality ?? 1);
+      return {
+        title: f.isSupreme ? m.supremeTitleFish : m.fishCaughtTitle,
+        sub: f.isSupreme ? m.supremeSubFish : L(f.hint),
+        itemName: `${f.emoji} ${L(f.name)}`,
+        badge: f.isSupreme ? (state.lang === 'zh' ? '✨ 极品灵鱼 · MYTHIC' : '✨ MYTHIC CATCH') : (state.lang === 'zh' ? '🎣 荷花池纪念' : '🎣 POND TROPHY'),
+        statLine: `${moment.weight ? `⚖️ ${Number(moment.weight).toFixed(2)} kg · ` : ''}🪙 ${val}g · 🍀 +${f.energy}`,
+        quote: L(f.hint),
+        almanacTab: 'fish',
+        almanacId: f.id,
+        accentA: '#ff8fb8', accentB: '#fbbf24',
+        raw: f
+      };
+    }
+    if (moment.kind === 'plant' && SUPREME_PLANTS[moment.id]) {
+      const p = SUPREME_PLANTS[moment.id];
+      const val = getSellValue(p.id, moment.quality ?? 1);
+      return {
+        title: m.supremeTitlePlant,
+        sub: m.supremeSubPlant,
+        itemName: `${p.emoji} ${L(p.name)}`,
+        badge: state.lang === 'zh' ? '🌸 极品植物 · MYTHIC' : '🌸 MYTHIC FLORA',
+        statLine: `🪙 ${val}g · 🍀 +${p.energy}`,
+        quote: L(p.desc),
+        almanacTab: 'crops',
+        almanacId: `plant:${p.id}`,
+        accentA: '#a78bfa', accentB: '#f472b6',
+        raw: p
+      };
+    }
+    const r = RECIPE_MAP[moment.id] || RECIPES[0];
+    const isMiracle = !!moment.miracle;
+    return {
+      title: isMiracle ? m.supremeTitleMiracle : m.supremeTitleDish,
+      sub: isMiracle ? m.supremeSubMiracle : m.supremeSubDish,
+      itemName: `${r.emoji} ${L(r.name)}`,
+      badge: isMiracle ? (state.lang === 'zh' ? '✨ 大厨奇迹 · MIRACLE' : "✨ CHEF'S MIRACLE") : (state.lang === 'zh' ? '👑 极品料理 · SUPREME' : '👑 SUPREME DISH'),
+      statLine: `🪙 ${r.sellPrice}g · 🍀 +${r.energy}${isMiracle ? (state.lang === 'zh' ? ' · 额外赠送 +1 份!' : ' · Bonus +1 Dish!') : ''}`,
+      quote: L(r.desc),
+      almanacTab: 'recipes',
+      almanacId: r.id,
+      accentA: '#f59e0b', accentB: '#fb7185',
+      raw: r
+    };
+  }
+
+  function renderSupremePhotoCard(cv, moment) {
+    if (!cv) return;
+    const W = cv.width, H = cv.height;
+    const c = cv.getContext('2d');
+    const info = getMomentMeta(moment);
+    const sObj = SEASONS[moment.season ?? state.season] || getSeason();
+    const wIcon = { sunny: '☀️', cloudy: '☁️', breezy: '🍃', rainy: '🌧️', snowy: '❄️' }[moment.weather || state.weather] || '☀️';
+    const dayNum = moment.day || state.day;
+
+    // 1. Warm storybook watercolor postcard background
+    const bg = c.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, '#fffaf0');
+    bg.addColorStop(0.55, '#fdf2dc');
+    bg.addColorStop(1, '#fce7f3');
+    c.fillStyle = bg;
+    c.fillRect(0, 0, W, H);
+
+    // Subtle pastel bokeh sparkles
+    for (const [bx, by, br, col] of [
+      [80, 60, 70, 'rgba(255,214,232,0.35)'], [630, 85, 85, 'rgba(254,240,138,0.35)'],
+      [580, 410, 95, 'rgba(186,230,253,0.32)'], [140, 420, 75, 'rgba(196,181,253,0.28)']
+    ]) {
+      const rg = c.createRadialGradient(bx, by, 4, bx, by, br);
+      rg.addColorStop(0, col); rg.addColorStop(1, 'rgba(255,255,255,0)');
+      c.fillStyle = rg; c.beginPath(); c.arc(bx, by, br, 0, Math.PI * 2); c.fill();
+    }
+
+    // Outer storybook postcard double border
+    c.strokeStyle = '#c9a374'; c.lineWidth = 4;
+    c.strokeRect(14, 14, W - 28, H - 28);
+    c.strokeStyle = '#e8cfab'; c.lineWidth = 1.5;
+    c.strokeRect(22, 22, W - 44, H - 44);
+
+    // Top banner header
+    c.fillStyle = '#5c3c22';
+    c.font = 'bold 21px "Nunito", "PingFang SC", "Microsoft YaHei", sans-serif';
+    c.textAlign = 'left';
+    c.fillText(state.lang === 'zh' ? '🌼 口袋山谷 · 极品奇遇纪念照' : '🌼 Pocket Valley · Mythic Keepsake', 40, 56);
+
+    // Date & weather postmark pill on top right
+    const stampTxt = state.lang === 'zh'
+      ? `${sObj.icon} ${L(sObj.name)} · 第 ${dayNum} 天 ${wIcon}`
+      : `${sObj.icon} ${L(sObj.name)} · Day ${dayNum} ${wIcon}`;
+    c.fillStyle = '#fff5e1'; c.strokeStyle = '#d4ad7a'; c.lineWidth = 1.8;
+    c.beginPath(); c.roundRect(W - 252, 32, 212, 32, 16); c.fill(); c.stroke();
+    c.fillStyle = '#6d4c30'; c.font = 'bold 13px "Nunito", "PingFang SC", sans-serif';
+    c.textAlign = 'center';
+    c.fillText(stampTxt, W - 146, 53);
+
+    // 2. Left Polaroid Frame: Live Snapshot of the Farm / Pond / Cottage!
+    c.save();
+    c.translate(186, 248);
+    c.rotate(-0.032);
+    c.shadowColor = 'rgba(74, 53, 37, 0.22)'; c.shadowBlur = 16; c.shadowOffsetY = 6;
+    c.fillStyle = '#ffffff';
+    c.beginPath(); c.roundRect(-146, -148, 292, 296, 12); c.fill();
+    c.shadowColor = 'transparent';
+    c.strokeStyle = '#e5d4bb'; c.lineWidth = 1.5; c.stroke();
+
+    // Crop live game canvas centered on player!
+    try {
+      const srcW = canvas.width, srcH = canvas.height;
+      const cropW = Math.min(srcW, 560), cropH = Math.min(srcH, 420);
+      const px = Math.max(0, Math.min(srcW - cropW, (state.player?.x || srcW / 2) - cropW / 2));
+      const py = Math.max(0, Math.min(srcH - cropH, (state.player?.y || srcH / 2) - cropH / 2));
+      c.save();
+      c.beginPath(); c.roundRect(-132, -134, 264, 216, 6); c.clip();
+      c.drawImage(canvas, px, py, cropW, cropH, -132, -134, 264, 216);
+      c.restore();
+      c.strokeStyle = '#d9c3a3'; c.lineWidth = 1.5;
+      c.strokeRect(-132, -134, 264, 216);
+    } catch (e) {}
+
+    // Polaroid caption strip
+    c.fillStyle = '#5c4028';
+    c.font = 'bold 15px "Nunito", "PingFang SC", sans-serif';
+    c.textAlign = 'center';
+    c.fillText(state.lang === 'zh' ? '✨ 珍贵的山谷奇遇瞬间 ✨' : '✨ Precious Valley Moment ✨', 0, 114);
+    c.fillStyle = '#8b6a4b';
+    c.font = '12px "Nunito", "PingFang SC", sans-serif';
+    c.fillText(L(getHouseStyle().name) + ' · ' + L(getDress().name), 0, 134);
+
+    // Decorative pastel washi tape at top of Polaroid
+    c.fillStyle = 'rgba(244, 162, 97, 0.55)';
+    c.fillRect(-44, -158, 88, 20);
+    c.restore();
+
+    // 3. Right Showcase Card: HD Mythic Subject Artwork + Stats + Badge
+    const rx = 360, ry = 88, rw = 320, rh = 312;
+    c.fillStyle = '#fffdf9';
+    c.strokeStyle = '#dfb574'; c.lineWidth = 2.5;
+    c.beginPath(); c.roundRect(rx, ry, rw, rh, 20); c.fill(); c.stroke();
+
+    // Iridescent rarity badge pill
+    const pillG = c.createLinearGradient(rx + 60, ry + 18, rx + rw - 60, ry + 44);
+    pillG.addColorStop(0, info.accentA); pillG.addColorStop(1, info.accentB);
+    c.fillStyle = pillG;
+    c.beginPath(); c.roundRect(rx + 56, ry + 16, rw - 112, 26, 13); c.fill();
+    c.fillStyle = '#ffffff'; c.font = 'bold 12px "Nunito", "PingFang SC", sans-serif';
+    c.textAlign = 'center';
+    c.fillText(info.badge, rx + rw / 2, ry + 34);
+
+    // Subject artwork spotlight
+    const spotX = rx + rw / 2, spotY = ry + 114;
+    const halo = c.createRadialGradient(spotX, spotY, 8, spotX, spotY, 74);
+    halo.addColorStop(0, 'rgba(255, 232, 150, 0.55)');
+    halo.addColorStop(0.65, 'rgba(251, 207, 232, 0.25)');
+    halo.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    c.fillStyle = halo; c.beginPath(); c.arc(spotX, spotY, 74, 0, Math.PI * 2); c.fill();
+
+    if (moment.kind === 'fish' && FISH[moment.id]) {
+      const tmp = document.createElement('canvas'); tmp.width = 220; tmp.height = 140;
+      drawFishArtwork(tmp.getContext('2d'), FISH[moment.id], 220, 140, false);
+      c.drawImage(tmp, spotX - 110, spotY - 70);
+    } else if (moment.kind === 'plant' && SUPREME_PLANTS[moment.id]) {
+      const tmp = document.createElement('canvas'); tmp.width = 200; tmp.height = 140;
+      drawPlantArtwork(tmp.getContext('2d'), SUPREME_PLANTS[moment.id], 200, 140, false);
+      c.drawImage(tmp, spotX - 100, spotY - 70);
+    } else {
+      // Supreme Dish golden cloche emblem
+      c.fillStyle = '#fff5d6'; c.strokeStyle = '#e5b55c'; c.lineWidth = 2.5;
+      c.beginPath(); c.arc(spotX, spotY, 48, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.font = '56px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+      c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.fillText(info.raw?.emoji || '👑', spotX, spotY + 4);
+      c.textBaseline = 'alphabetic';
+    }
+
+    // Subject Name
+    c.fillStyle = '#4a3525';
+    c.font = 'bold 22px "Nunito", "PingFang SC", "Microsoft YaHei", sans-serif';
+    c.textAlign = 'center';
+    c.fillText(info.itemName, rx + rw / 2, ry + 206);
+
+    // Stats badge bar
+    c.fillStyle = '#fbf1dc'; c.strokeStyle = '#dfc398'; c.lineWidth = 1.4;
+    c.beginPath(); c.roundRect(rx + 20, ry + 219, rw - 40, 30, 10); c.fill(); c.stroke();
+    c.fillStyle = '#7c4d1f'; c.font = 'bold 13px "Nunito", "PingFang SC", sans-serif';
+    c.fillText(info.statLine, rx + rw / 2, ry + 239);
+
+    // Wrapped description line (up to 2 lines cleanly)
+    c.fillStyle = '#75583e'; c.font = '12px "Nunito", "PingFang SC", sans-serif';
+    const maxChars = state.lang === 'zh' ? 21 : 38;
+    const q = info.quote || '';
+    if (q.length <= maxChars) {
+      c.fillText(q, rx + rw / 2, ry + 276);
+    } else {
+      c.fillText(q.slice(0, maxChars), rx + rw / 2, ry + 271);
+      c.fillText(q.slice(maxChars, maxChars * 2) + (q.length > maxChars * 2 ? '…' : ''), rx + rw / 2, ry + 290);
+    }
+
+    // Bottom footer watermark
+    c.fillStyle = '#9c7b59';
+    c.font = 'bold 12px "Nunito", "PingFang SC", sans-serif';
+    c.textAlign = 'left';
+    c.fillText('linxianying.github.io/pocket-valley', 40, H - 30);
+    c.textAlign = 'right';
+    c.fillText(state.lang === 'zh' ? '📸 口袋山谷绘本纪念明信片' : '📸 Pocket Valley Keepsake Postcard', W - 40, H - 30);
+  }
+
+  function buildSupremeShareText(moment) {
+    const info = getMomentMeta(moment);
+    const sObj = SEASONS[moment.season ?? state.season] || getSeason();
+    const dayNum = moment.day || state.day;
+    if (state.lang === 'zh') {
+      return `✨ 我在《口袋山谷》触发了小概率极品奇遇！【${info.itemName}】\n${sObj.icon} ${L(sObj.name)} 第${dayNum}天 · ${info.statLine}\n「${info.quote}」\n🌼 来逛逛我的水彩田园：https://linxianying.github.io/pocket-valley/`;
+    }
+    return `✨ Ultra-rare Mythic Moment in Pocket Valley! 【${info.itemName}】\n${sObj.icon} ${L(sObj.name)} Day ${dayNum} · ${info.statLine}\n"${info.quote}"\n🌼 Play Pocket Valley: https://linxianying.github.io/pocket-valley/`;
+  }
+
+  function openSupremeMomentModal(moment) {
+    const m = T().modals;
+    const info = getMomentMeta(moment);
+    const body = `
+      <div class="flex flex-col items-center gap-2.5">
+        <p class="text-xs font-semibold text-[#7a4b2b] text-center">${info.sub}</p>
+        <div class="relative rounded-2xl overflow-hidden border-2 border-[#dfb574] shadow-md bg-[#fffaf0] w-full max-w-[540px]">
+          <canvas id="supremePhotoCanvas" width="720" height="480" class="w-full h-auto block"></canvas>
+          <div id="supremePhotoFlash" class="pointer-events-none absolute inset-0 bg-white opacity-0 transition-opacity duration-300"></div>
+        </div>
+        <div class="flex flex-wrap items-center justify-center gap-2 w-full">
+          <button id="btnPhotoSave" class="btn-peach px-3.5 py-1.5 rounded-xl text-xs font-bold cursor-pointer">${m.photoSaveBtn}</button>
+          <button id="btnPhotoCopy" class="btn-sage px-3.5 py-1.5 rounded-xl text-xs font-bold cursor-pointer">${m.photoCopyBtn}</button>
+          <button id="btnPhotoShare" class="btn-honey px-3.5 py-1.5 rounded-xl text-xs font-bold cursor-pointer">${m.photoShareBtn}</button>
+          <button id="btnPhotoResnap" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#efe0c4] border border-[#c8a97e] text-[#5c4028] cursor-pointer">${m.photoResnapBtn}</button>
+        </div>
+        <div id="supremePhotoStatus" class="text-[11px] font-bold text-emerald-700 min-h-[16px] text-center"></div>
+      </div>
+    `;
+    openModal('📸', info.title, body,
+      `<button id="btnSupremeOpenDex" class="text-xs font-bold text-[#9c4a34] underline cursor-pointer">📖 ${T().fishDexBtn}</button>
+       <button id="btnSupremeClose" class="btn-peach px-4 py-1.5 rounded-xl text-xs font-bold cursor-pointer">${m.fishKeepBtn}</button>`);
+
+    const cv = document.getElementById('supremePhotoCanvas');
+    const flash = document.getElementById('supremePhotoFlash');
+    const statusEl = document.getElementById('supremePhotoStatus');
+    const triggerSnap = (withSound = true) => {
+      renderSupremePhotoCard(cv, moment);
+      if (withSound) AudioFX.shutter();
+      if (flash) {
+        flash.style.opacity = '0.85';
+        setTimeout(() => { flash.style.opacity = '0'; }, 90);
+      }
+    };
+    triggerSnap(false);
+
+    const downloadPng = () => {
+      const link = document.createElement('a');
+      link.download = `pocket-valley-mythic-${moment.id}-day${moment.day || state.day}.png`;
+      link.href = cv.toDataURL('image/png');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    };
+
+    document.getElementById('btnPhotoResnap').addEventListener('click', () => triggerSnap(true));
+    document.getElementById('btnPhotoSave').addEventListener('click', () => {
+      AudioFX.shutter();
+      downloadPng();
+      statusEl.textContent = m.photoSavedMsg;
+    });
+    document.getElementById('btnPhotoCopy').addEventListener('click', async () => {
+      AudioFX.ui();
+      const text = buildSupremeShareText(moment);
+      try {
+        if (navigator.clipboard && window.ClipboardItem) {
+          const blob = await new Promise(res => cv.toBlob(res, 'image/png'));
+          if (blob) {
+            try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); } catch {}
+          }
+        }
+        if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text);
+        statusEl.textContent = m.photoCopiedMsg;
+      } catch {
+        statusEl.textContent = text.slice(0, 60) + '…';
+      }
+    });
+    document.getElementById('btnPhotoShare').addEventListener('click', async () => {
+      AudioFX.shutter();
+      const text = buildSupremeShareText(moment);
+      try {
+        const blob = await new Promise(res => cv.toBlob(res, 'image/png'));
+        const file = blob ? new File([blob], `pocket-valley-${moment.id}.png`, { type: 'image/png' }) : null;
+        if (navigator.share) {
+          if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({ title: info.title, text, files: [file] });
+          } else {
+            await navigator.share({ title: info.title, text, url: 'https://linxianying.github.io/pocket-valley/' });
+          }
+          statusEl.textContent = m.photoSharedMsg;
+          return;
+        }
+      } catch (err) {
+        if (err && err.name === 'AbortError') return;
+      }
+      // Graceful fallback on desktop browsers without Web Share API: copy text + download PNG!
+      try { if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text); } catch {}
+      downloadPng();
+      statusEl.textContent = m.photoShareFallback;
+    });
+    document.getElementById('btnSupremeOpenDex').addEventListener('click', () => openAlmanacModal(info.almanacTab, info.almanacId));
+    document.getElementById('btnSupremeClose').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
+  }
+
   function openFishCatchModal(fid, weight, quality, isNewRecord) {
     const f = FISH[fid], m = T().modals;
     const val = getSellValue(fid, quality);
@@ -3812,22 +4492,60 @@
       </div>
     `;
     openModal('🎣', m.fishCaughtTitle, body,
-      `<button id="btnOpenDexAfterCatch" class="text-xs font-bold text-[#9c4a34] underline cursor-pointer">📖 ${T().fishDexBtn}</button>
+      `<div class="flex items-center gap-2.5">
+         <button id="btnOpenDexAfterCatch" class="text-xs font-bold text-[#9c4a34] underline cursor-pointer">📖 ${T().fishDexBtn}</button>
+         <button id="btnSnapCatchPhoto" class="px-2.5 py-1 rounded-xl bg-[#fff3d6] border border-[#d9b26f] text-[11px] font-bold text-[#6e4a1f] cursor-pointer">📸 ${state.lang === 'zh' ? '拍照分享' : 'Photo'}</button>
+       </div>
        <button id="btnCloseCatch" class="btn-peach px-4 py-1.5 rounded-xl text-xs font-bold cursor-pointer">${m.fishKeepBtn}</button>`);
 
     const art = document.getElementById('catchFishArt');
     if (art) drawFishArtwork(art.getContext('2d'), f, 120, 72, false);
     document.getElementById('btnCloseCatch').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
     document.getElementById('btnOpenDexAfterCatch').addEventListener('click', () => openAlmanacModal('fish', fid));
+    document.getElementById('btnSnapCatchPhoto').addEventListener('click', () => openSupremeMomentModal({ kind: 'fish', id: fid, weight, quality, isNewRecord }));
   }
 
-  // --- ILLUSTRATED ALMANAC / ENCYCLOPEDIA (Fish, Recipes, Crops, Ranch & Pets with Click-in Detail Pages!) ---
+  // --- SHARED COOKING ENGINE (Supports Supreme Dishes + Small-Probability Chef's Miracle!) ---
+  function cookRecipeWithMiracle(r, onRegularDone) {
+    if (!r || !state.kitchenUnlocked || !canCookRecipe(r)) { AudioFX.error(); return; }
+    for (const [ing, qty] of Object.entries(r.ingredients)) consumeIngredient(ing, qty);
+    const miracleChance = state.luckyCharm ? 0.075 : 0.045;
+    const isMiracle = !r.isSupreme && Math.random() < miracleChance;
+    const gain = isMiracle ? 2 : 1;
+    state.dishes[r.id] = (state.dishes[r.id] || 0) + gain;
+    state.recipeDex = state.recipeDex || {};
+    state.recipeDex[r.id] = (state.recipeDex[r.id] || 0) + gain;
+    state.totalCooked += gain;
+
+    if (r.isSupreme || isMiracle) {
+      AudioFX.mythic();
+      spawnParticles(state.player.x, state.player.y - 16, '#ffd147', 22, 2.6, 4.0);
+      spawnParticles(state.player.x, state.player.y - 16, '#fb7185', 14, 2.3, 3.4);
+      addFloatText(state.player.x, state.player.y - 26, `✨ ${r.emoji} ${L(r.name)}${isMiracle ? ' ×2!' : '!'}`, '#fef08a');
+      saveState(true);
+      updateHUD();
+      const moment = { kind: 'dish', id: r.id, miracle: isMiracle };
+      recordSupremeMoment(moment);
+      openSupremeMomentModal(moment);
+      return;
+    }
+
+    AudioFX.cook();
+    addFloatText(state.player.x, state.player.y - 26, T().floats.cookedDish(r.emoji, L(r.name)), '#fef08a');
+    updateHUD();
+    if (onRegularDone) onRegularDone();
+  }
+
+  // --- ILLUSTRATED ALMANAC / ENCYCLOPEDIA (Fish, Recipes, Flora, Ranch & Pets with Detail Views & Photo Share!) ---
   let almanacTab = 'fish';
 
   function getAlmanacCounts() {
     const fishU = FISH_ORDER.filter(id => (state.fishDex?.[id]?.count || 0) > 0).length;
     const recU = RECIPES.filter(r => (state.recipeDex?.[r.id] || state.dishes?.[r.id] || 0) > 0).length;
     const cropU = CROP_ORDER.filter(id => (state.cropDex?.[id] || 0) > 0).length;
+    const plantU = SUPREME_PLANT_ORDER.filter(id => (state.plantDex?.[id] || 0) > 0).length;
+    const floraU = cropU + plantU;
+    const floraT = CROP_ORDER.length + SUPREME_PLANT_ORDER.length;
     const aniU = ANIMAL_ORDER.filter(t => state.animals.some(a => a.type === t)).length;
     const petU = state.pet?.type ? 1 : 0;
     const ranchU = aniU + petU;
@@ -3835,10 +4553,10 @@
     return {
       fishU, fishT: FISH_ORDER.length,
       recU, recT: RECIPES.length,
-      cropU, cropT: CROP_ORDER.length,
+      cropU: floraU, cropT: floraT,
       ranchU, ranchT,
-      totalU: fishU + recU + cropU + ranchU,
-      totalT: FISH_ORDER.length + RECIPES.length + CROP_ORDER.length + ranchT
+      totalU: fishU + recU + floraU + ranchU,
+      totalT: FISH_ORDER.length + RECIPES.length + floraT + ranchT
     };
   }
 
@@ -3853,9 +4571,10 @@
         common: 'bg-[#eee4d3] text-[#6d5136] border-[#cfb996]',
         uncommon: 'bg-[#e3f4e8] text-[#2d6a3e] border-[#96cfa6]',
         rare: 'bg-[#e6f0fc] text-[#2b588c] border-[#9bc0ea]',
-        legendary: 'bg-[#fff2cc] text-[#9c5a09] border-[#e8bc55]'
+        legendary: 'bg-[#fff2cc] text-[#9c5a09] border-[#e8bc55]',
+        mythic: 'bg-gradient-to-r from-[#ffe4f2] via-[#fff3c4] to-[#e0f2fe] text-[#9d174d] border-[#f472b6]'
       };
-      return `<span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold border ${styles[tier] || styles.common}">${m.almanacTier[tier] || tier}</span>`;
+      return `<span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold border ${styles[tier] || styles.common}">${tier === 'mythic' ? '✨ ' : ''}${m.almanacTier[tier] || tier}</span>`;
     };
 
     const tabsHtml = `
@@ -3887,9 +4606,9 @@
           ing === detailId || (TAG_INGREDIENTS[ing] && TAG_INGREDIENTS[ing].ids.includes(detailId))
         ));
         contentHtml = `
-          <div class="rounded-2xl p-4 bg-[#fffdf7] border border-[#d6ba91] space-y-3">
+          <div class="rounded-2xl p-4 bg-[#fffdf7] border ${f.isSupreme ? 'border-[#f472b6]' : 'border-[#d6ba91]'} space-y-3">
             <div class="flex flex-col sm:flex-row items-center gap-4">
-              <div class="rounded-2xl p-2 ${caught ? 'bg-[#e8f5fa] border-2 border-[#9ecce0]' : 'bg-[#ede3d2] border-2 border-[#cbb798]'} shrink-0">
+              <div class="rounded-2xl p-2 ${caught ? (f.isSupreme ? 'bg-gradient-to-br from-[#fff5f8] to-[#fff9e0] border-2 border-[#f472b6]' : 'bg-[#e8f5fa] border-2 border-[#9ecce0]') : 'bg-[#ede3d2] border-2 border-[#cbb798]'} shrink-0">
                 <canvas id="almanacDetailFishCv" width="150" height="96"></canvas>
               </div>
               <div class="flex-1 text-center sm:text-left space-y-1.5">
@@ -3908,6 +4627,7 @@
               <div class="rounded-xl p-2 bg-[#fbf2df] border border-[#dcc39c]"><div class="text-[10px] opacity-75">${m.bestWeight}</div><strong class="num-tabular">${caught ? `${(rec.maxWeight || 0).toFixed(2)} kg` : `${f.minKg}–${f.maxKg} kg`}</strong></div>
             </div>
             ${usedIn.length > 0 ? `<div class="text-xs space-y-1"><div class="font-bold text-[#5c3c22]">🍳 ${state.lang === 'zh' ? '可用于烹饪以下菜谱' : 'Used in Recipes'}:</div><div class="flex flex-wrap gap-1.5">${usedIn.map(r => `<button data-jumprec="${r.id}" class="px-2 py-1 rounded-lg bg-[#fff4de] border border-[#d6ba91] text-[11px] font-semibold text-[#4a3525] cursor-pointer hover:border-[#e07a5f]">${r.emoji} ${L(r.name)}</button>`).join('')}</div></div>` : ''}
+            ${caught ? `<div><button id="btnAlmanacSnap" class="btn-honey px-3.5 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${m.almanacPhotoBtn}</button></div>` : ''}
           </div>`;
       } else if (almanacTab === 'recipes' && RECIPE_MAP[detailId]) {
         const r = RECIPE_MAP[detailId];
@@ -3918,11 +4638,14 @@
           return `<span class="px-2 py-1 rounded-xl text-xs font-semibold border ${ok ? 'bg-emerald-50 border-emerald-400 text-emerald-900' : 'bg-rose-50 border-rose-300 text-rose-800'}">${meta.emoji} ${L(meta.name)} ${have}/${req}</span>`;
         }).join(' ');
         contentHtml = `
-          <div class="rounded-2xl p-4 bg-[#fffdf7] border border-[#d6ba91] space-y-3">
+          <div class="rounded-2xl p-4 bg-[#fffdf7] border ${r.isSupreme ? 'border-[#f472b6]' : 'border-[#d6ba91]'} space-y-3">
             <div class="flex items-center gap-3.5">
-              <div class="w-16 h-16 rounded-2xl bg-[#fff3d6] border-2 border-[#dfb675] flex items-center justify-center text-4xl shrink-0">${r.emoji}</div>
+              <div class="w-16 h-16 rounded-2xl ${r.isSupreme ? 'bg-gradient-to-br from-[#fff2cc] to-[#ffe4f2] border-2 border-[#f472b6]' : 'bg-[#fff3d6] border-2 border-[#dfb675]'} flex items-center justify-center text-4xl shrink-0">${r.emoji}</div>
               <div class="space-y-1">
-                <div class="font-extrabold text-base text-[#4a3525]">${L(r.name)}</div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="font-extrabold text-base text-[#4a3525]">${L(r.name)}</span>
+                  ${r.isSupreme ? tierBadge('mythic') : ''}
+                </div>
                 <p class="text-xs text-[#6d5136] leading-relaxed">${L(r.desc)}</p>
                 <div class="text-[11px] font-bold ${cookedN > 0 ? 'text-emerald-700' : 'text-[#8c6b4d]'}">${cookedN > 0 ? `✓ ${m.almanacCookedCount(cookedN)}` : m.almanacNotCooked}</div>
               </div>
@@ -3941,7 +4664,36 @@
                 ? `<button id="btnAlmanacCookNow" ${canCook ? '' : 'disabled'} class="btn-peach px-4 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${canCook ? m.almanacCookNow : m.missingIng}</button>`
                 : `<span class="text-[11px] font-semibold text-amber-800 bg-amber-50 border border-amber-300 px-2.5 py-1 rounded-lg">🏡 ${m.almanacNeedKitchenShort}</span>`}
               <button id="btnAlmanacGoKitchen" class="btn-sage px-3.5 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${m.almanacGoKitchen}</button>
+              ${cookedN > 0 ? `<button id="btnAlmanacSnap" class="btn-honey px-3.5 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${m.almanacPhotoBtn}</button>` : ''}
             </div>
+          </div>`;
+      } else if (almanacTab === 'crops' && detailId.startsWith('plant:') && SUPREME_PLANTS[detailId.slice(6)]) {
+        const pid = detailId.slice(6), p = SUPREME_PLANTS[pid], foundN = state.plantDex?.[pid] || 0;
+        const usedIn = RECIPES.filter(r => Object.keys(r.ingredients).some(ing =>
+          ing === pid || (TAG_INGREDIENTS[ing] && TAG_INGREDIENTS[ing].ids.includes(pid))
+        ));
+        contentHtml = `
+          <div class="rounded-2xl p-4 bg-[#fffdf7] border border-[#f472b6] space-y-3">
+            <div class="flex flex-col sm:flex-row items-center gap-4">
+              <div class="rounded-2xl p-2 ${foundN > 0 ? 'bg-gradient-to-br from-[#fff5f8] to-[#fff9e0] border-2 border-[#f472b6]' : 'bg-[#ede3d2] border-2 border-[#cbb798]'} shrink-0">
+                <canvas id="almanacDetailPlantCv" width="144" height="96"></canvas>
+              </div>
+              <div class="flex-1 text-center sm:text-left space-y-1.5">
+                <div class="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+                  <span class="font-extrabold text-base text-[#4a3525]">${foundN > 0 ? `${p.emoji} ${L(p.name)}` : `❓ ${L(p.name)}`}</span>
+                  ${tierBadge('mythic')}
+                </div>
+                <p class="text-xs text-[#6d5136] leading-relaxed">${L(p.desc)}</p>
+                <div class="inline-block text-[11px] font-bold text-[#7e22ce] bg-[#f5f3ff] border border-[#d8b4fe] px-2.5 py-1 rounded-lg">🌱 ${m.almanacMutationFrom}：${L(p.fromText)}</div>
+              </div>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-center text-xs">
+              <div class="rounded-xl p-2 bg-[#fbf2df] border border-[#dcc39c]"><div class="text-[10px] opacity-75">${m.almanacSellPrice}</div><strong class="num-tabular text-amber-900">🪙 ${p.sellPrice}g / ⭐${Math.round(p.sellPrice * 1.5)}g</strong></div>
+              <div class="rounded-xl p-2 bg-[#fbf2df] border border-[#dcc39c]"><div class="text-[10px] opacity-75">${m.almanacEnergy}</div><strong class="num-tabular text-emerald-800">🍀 +${p.energy}</strong></div>
+              <div class="rounded-xl p-2 bg-[#fbf2df] border border-[#dcc39c]"><div class="text-[10px] opacity-75">${state.lang === 'zh' ? '奇遇次数' : 'Found'}</div><strong class="num-tabular">${foundN}</strong></div>
+            </div>
+            ${usedIn.length > 0 ? `<div class="text-xs space-y-1"><div class="font-bold text-[#5c3c22]">🍳 ${state.lang === 'zh' ? '可用于烹饪以下极品菜谱' : 'Used in Supreme Recipes'}:</div><div class="flex flex-wrap gap-1.5">${usedIn.map(r => `<button data-jumprec="${r.id}" class="px-2 py-1 rounded-lg bg-[#fff4de] border border-[#f472b6] text-[11px] font-semibold text-[#4a3525] cursor-pointer hover:border-[#e07a5f]">${r.emoji} ${L(r.name)}</button>`).join('')}</div></div>` : ''}
+            ${foundN > 0 ? `<div><button id="btnAlmanacSnap" class="btn-honey px-3.5 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${m.almanacPhotoBtn}</button></div>` : `<div class="text-[11px] font-semibold text-[#8c6b4d]">${m.almanacNotFoundYet}</div>`}
           </div>`;
       } else if (almanacTab === 'crops' && CROPS[detailId]) {
         const c = CROPS[detailId], harv = state.cropDex?.[c.id] || 0;
@@ -4006,9 +4758,12 @@
     } else if (almanacTab === 'fish') {
       const cards = FISH_ORDER.map(fid => {
         const f = FISH[fid], rec = state.fishDex?.[fid], caught = (rec?.count || 0) > 0;
+        const cardStyle = f.isSupreme
+          ? (caught ? 'bg-gradient-to-br from-[#fffdf7] to-[#fff0f6] border-[#f472b6] hover:border-[#db2777]' : 'bg-[#fbf1f5] border-[#e8b4cc] hover:border-[#db2777]')
+          : (caught ? 'bg-[#fffdf7] border-[#d6ba91] hover:border-[#e07a5f]' : 'bg-[#f8f0e2] border-[#dcc7a7] hover:border-[#b8976a]');
         return `
-          <button data-adetail="${fid}" class="rounded-2xl p-2.5 text-left transition cursor-pointer flex items-center gap-2.5 border ${caught ? 'bg-[#fffdf7] border-[#d6ba91] hover:border-[#e07a5f]' : 'bg-[#f8f0e2] border-[#dcc7a7] hover:border-[#b8976a]'}">
-            <div class="rounded-xl p-1 ${caught ? 'bg-[#e8f5fa] border border-[#b0d7e6]' : 'bg-[#ede3d2] border border-[#d2c0a5]'} shrink-0">
+          <button data-adetail="${fid}" class="rounded-2xl p-2.5 text-left transition cursor-pointer flex items-center gap-2.5 border ${cardStyle}">
+            <div class="rounded-xl p-1 ${caught ? (f.isSupreme ? 'bg-[#fff5f8] border border-[#f472b6]' : 'bg-[#e8f5fa] border border-[#b0d7e6]') : 'bg-[#ede3d2] border border-[#d2c0a5]'} shrink-0">
               <canvas id="dexArt_${fid}" width="72" height="48"></canvas>
             </div>
             <div class="min-w-0 flex-1">
@@ -4016,7 +4771,7 @@
                 <span class="truncate">${caught ? `${f.emoji} ${L(f.name)}` : '❓ ???'}</span>
                 ${tierBadge(f.tier)}
               </div>
-              <p class="text-[10.5px] text-[#75583e] leading-snug mt-0.5 truncate">${caught ? L(f.when) : L(f.when)}</p>
+              <p class="text-[10.5px] text-[#75583e] leading-snug mt-0.5 truncate">${L(f.when)}</p>
               <div class="text-[10px] font-semibold text-[#5c4028] mt-1 flex items-center justify-between num-tabular">
                 <span>${caught ? `${m.caughtCount}: ${rec.count} · ⚖️${(rec.maxWeight || 0).toFixed(2)}kg` : m.undiscovered.split('—')[0]}</span>
                 ${caught ? `<span class="text-amber-800">🪙${f.sellPrice}g</span>` : ''}
@@ -4033,13 +4788,16 @@
           const meta = getItemMeta(ingId);
           return `${meta ? meta.emoji : ''}${req > 1 ? `×${req}` : ''}`;
         }).join(' ');
+        const cardStyle = r.isSupreme
+          ? (cookedN > 0 ? 'bg-gradient-to-br from-[#fffdf7] to-[#fff0f6] border-[#f472b6] hover:border-[#db2777]' : 'bg-[#fbf1f5] border-[#e8b4cc] hover:border-[#db2777]')
+          : (cookedN > 0 ? 'bg-[#fffdf7] border-[#d6ba91] hover:border-[#e07a5f]' : 'bg-[#f8f0e2] border-[#dcc7a7] hover:border-[#b8976a]');
         return `
-          <button data-adetail="${r.id}" class="rounded-2xl p-2.5 text-left transition cursor-pointer flex items-center gap-2.5 border ${cookedN > 0 ? 'bg-[#fffdf7] border-[#d6ba91] hover:border-[#e07a5f]' : 'bg-[#f8f0e2] border-[#dcc7a7] hover:border-[#b8976a]'}">
-            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-2xl shrink-0 border ${cookedN > 0 ? 'bg-[#fff3d6] border-[#dfb675]' : 'bg-[#ede3d2] border-[#d2c0a5] opacity-80'}">${r.emoji}</div>
+          <button data-adetail="${r.id}" class="rounded-2xl p-2.5 text-left transition cursor-pointer flex items-center gap-2.5 border ${cardStyle}">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-2xl shrink-0 border ${r.isSupreme ? 'bg-[#fff2cc] border-[#f472b6]' : (cookedN > 0 ? 'bg-[#fff3d6] border-[#dfb675]' : 'bg-[#ede3d2] border-[#d2c0a5] opacity-80')}">${r.emoji}</div>
             <div class="min-w-0 flex-1">
               <div class="font-bold text-xs text-[#4a3525] flex items-center justify-between gap-1">
                 <span class="truncate">${L(r.name)} ${cookedN > 0 ? '✓' : ''}</span>
-                <span class="text-[11px] text-amber-800 num-tabular shrink-0">🪙${r.sellPrice}g</span>
+                <span class="flex items-center gap-1 shrink-0">${r.isSupreme ? tierBadge('mythic') : ''}<span class="text-[11px] text-amber-800 num-tabular">🪙${r.sellPrice}g</span></span>
               </div>
               <div class="text-[10.5px] text-[#75583e] mt-0.5 truncate">${ingIcons} · 🍀+${r.energy}</div>
               <div class="text-[10px] font-semibold mt-0.5 ${canCook ? 'text-emerald-700' : 'text-[#826449]'}">${cookedN > 0 ? m.almanacCookedCount(cookedN) : (canCook ? `✨ ${m.almanacCookNow}` : m.almanacNotCooked)}</div>
@@ -4048,7 +4806,7 @@
       }).join('');
       contentHtml = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${cards}</div>`;
     } else if (almanacTab === 'crops') {
-      const cards = CROP_ORDER.map(cid => {
+      const cCards = CROP_ORDER.map(cid => {
         const c = CROPS[cid], harv = state.cropDex?.[cid] || 0;
         const bIcons = SEASONS.filter(s => s.bonus.includes(cid)).map(s => s.icon).join('');
         return `
@@ -4064,7 +4822,33 @@
             </div>
           </button>`;
       }).join('');
-      contentHtml = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${cards}</div>`;
+      const pCards = SUPREME_PLANT_ORDER.map(pid => {
+        const p = SUPREME_PLANTS[pid], foundN = state.plantDex?.[pid] || 0;
+        return `
+          <button data-adetail="plant:${pid}" class="rounded-2xl p-2.5 text-left transition cursor-pointer flex items-center gap-2.5 border ${foundN > 0 ? 'bg-gradient-to-br from-[#fffdf7] to-[#fff0f6] border-[#f472b6] hover:border-[#db2777]' : 'bg-[#fbf1f5] border-[#e8b4cc] hover:border-[#db2777]'}">
+            <div class="rounded-xl p-1 ${foundN > 0 ? 'bg-[#fff5f8] border border-[#f472b6]' : 'bg-[#ede3d2] border border-[#d2c0a5]'} shrink-0">
+              <canvas id="dexPlantArt_${pid}" width="64" height="44"></canvas>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="font-bold text-xs text-[#4a3525] flex items-center justify-between gap-1">
+                <span class="truncate">${foundN > 0 ? `${p.emoji} ${L(p.name)}` : '❓ ???'}</span>
+                ${tierBadge('mythic')}
+              </div>
+              <p class="text-[10.5px] text-[#75583e] mt-0.5 truncate">${L(p.fromText)}</p>
+              <div class="text-[10px] font-semibold text-[#5c4028] mt-0.5 flex items-center justify-between num-tabular">
+                <span>${foundN > 0 ? m.almanacFoundCount(foundN) : (state.lang === 'zh' ? '尚未发现' : 'Undiscovered')}</span>
+                ${foundN > 0 ? `<span class="text-amber-800">🪙${p.sellPrice}g</span>` : ''}
+              </div>
+            </div>
+          </button>`;
+      }).join('');
+      contentHtml = `
+        <div class="space-y-2.5">
+          <div class="font-bold text-xs text-[#9d174d]">${m.almanacSupremePlants}</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${pCards}</div>
+          <div class="font-bold text-xs text-[#5c3c22] pt-1">${m.almanacFarmCrops}</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${cCards}</div>
+        </div>`;
     } else {
       const aCards = ANIMAL_ORDER.map(aid => {
         const a = ANIMALS[aid], prod = ITEMS[a.product], owned = state.animals.filter(x => x.type === aid).length;
@@ -4110,9 +4894,33 @@
         if (c) drawFishArtwork(c.getContext('2d'), FISH[fid], 72, 48, !((state.fishDex?.[fid]?.count || 0) > 0));
       }
     }
+    if (!detailId && almanacTab === 'crops') {
+      for (const pid of SUPREME_PLANT_ORDER) {
+        const c = document.getElementById(`dexPlantArt_${pid}`);
+        if (c) drawPlantArtwork(c.getContext('2d'), SUPREME_PLANTS[pid], 64, 44, !((state.plantDex?.[pid] || 0) > 0));
+      }
+    }
     const detailFishCv = document.getElementById('almanacDetailFishCv');
     if (detailFishCv && FISH[detailId]) {
       drawFishArtwork(detailFishCv.getContext('2d'), FISH[detailId], 150, 96, !((state.fishDex?.[detailId]?.count || 0) > 0));
+    }
+    const detailPlantCv = document.getElementById('almanacDetailPlantCv');
+    if (detailPlantCv && detailId?.startsWith('plant:')) {
+      const pid = detailId.slice(6);
+      if (SUPREME_PLANTS[pid]) drawPlantArtwork(detailPlantCv.getContext('2d'), SUPREME_PLANTS[pid], 144, 96, !((state.plantDex?.[pid] || 0) > 0));
+    }
+    const snapBtn = document.getElementById('btnAlmanacSnap');
+    if (snapBtn && detailId) {
+      snapBtn.addEventListener('click', () => {
+        if (almanacTab === 'fish' && FISH[detailId]) {
+          const rec = state.fishDex?.[detailId];
+          openSupremeMomentModal({ kind: 'fish', id: detailId, weight: rec?.maxWeight || FISH[detailId].maxKg, quality: 1 });
+        } else if (almanacTab === 'crops' && detailId.startsWith('plant:')) {
+          openSupremeMomentModal({ kind: 'plant', id: detailId.slice(6), quality: 1 });
+        } else if (almanacTab === 'recipes' && RECIPE_MAP[detailId]) {
+          openSupremeMomentModal({ kind: 'dish', id: detailId, miracle: !RECIPE_MAP[detailId].isSupreme });
+        }
+      });
     }
     const backBtn = document.getElementById('btnAlmanacBack');
     if (backBtn) backBtn.addEventListener('click', () => openAlmanacModal(almanacTab, null));
@@ -4123,17 +4931,7 @@
     const cookNow = document.getElementById('btnAlmanacCookNow');
     if (cookNow && RECIPE_MAP[detailId]) {
       cookNow.addEventListener('click', () => {
-        const r = RECIPE_MAP[detailId];
-        if (!state.kitchenUnlocked || !canCookRecipe(r)) { AudioFX.error(); return; }
-        for (const [ing, qty] of Object.entries(r.ingredients)) consumeIngredient(ing, qty);
-        state.dishes[r.id] = (state.dishes[r.id] || 0) + 1;
-        state.recipeDex = state.recipeDex || {};
-        state.recipeDex[r.id] = (state.recipeDex[r.id] || 0) + 1;
-        state.totalCooked += 1;
-        AudioFX.cook();
-        addFloatText(state.player.x, state.player.y - 26, T().floats.cookedDish(r.emoji, L(r.name)), '#fef08a');
-        updateHUD();
-        openAlmanacModal('recipes', detailId);
+        cookRecipeWithMiracle(RECIPE_MAP[detailId], () => openAlmanacModal('recipes', detailId));
       });
     }
     document.getElementById('btnCloseDex').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
@@ -4353,6 +5151,19 @@
     renderHotbar();
   }
 
+  function rollMythicPlantForCrop(cropId) {
+    // Small-probability rare botanical mutation (3.5% base, 6% with Lucky Charm!)
+    const chance = state.luckyCharm ? 0.06 : 0.035;
+    if (Math.random() >= chance) return null;
+    const isMysticWeather = state.weather === 'rainy' || state.weather === 'snowy' || state.timeMinutes >= 19 * 60;
+    const candidates = SUPREME_PLANT_ORDER.filter(pid => SUPREME_PLANTS[pid].parents.includes(cropId));
+    if (isMysticWeather && !candidates.includes('astralLotus') && Math.random() < 0.35) {
+      return 'astralLotus';
+    }
+    if (candidates.length > 0) return candidates[Math.floor(Math.random() * candidates.length)];
+    return SUPREME_PLANT_ORDER[Math.floor(Math.random() * SUPREME_PLANT_ORDER.length)];
+  }
+
   function harvestTile(tx, ty) {
     const td = getTileData(tx, ty);
     if (!td || !td.crop || !isCropRipe(td.crop)) return;
@@ -4371,11 +5182,31 @@
     state.cropDex[crop.id] = (state.cropDex[crop.id] || 0) + qty;
     if (crop.regrow > 0) td.crop.daysGrown = crop.days - crop.regrow;
     else td.crop = null;
-    AudioFX.harvest();
     const wx = (tx + 0.5) * TILE, wy = (ty + 0.5) * TILE;
     spawnParticles(wx, wy, crop.color, 12, 1.9, 3.6);
     if (goldCount > 0) spawnParticles(wx, wy, '#ffe066', 8, 2.2, 3.2);
     addFloatText(wx, wy - 8, `+${qty} ${crop.emoji} ${L(crop.name)}${goldCount > 0 ? ' ⭐' : ''}`, goldCount > 0 ? '#fef08a' : '#ffffff');
+
+    // Roll for ultra-rare Mythic Mutant Plant accompaniment!
+    const mythicPid = rollMythicPlantForCrop(crop.id);
+    if (mythicPid && SUPREME_PLANTS[mythicPid]) {
+      const mp = SUPREME_PLANTS[mythicPid];
+      state.satchel[`${mythicPid}_1`] = (state.satchel[`${mythicPid}_1`] || 0) + 1;
+      state.plantDex = state.plantDex || {};
+      state.plantDex[mythicPid] = (state.plantDex[mythicPid] || 0) + 1;
+      AudioFX.mythic();
+      spawnParticles(wx, wy - 8, '#ff8fb8', 22, 2.6, 4.2);
+      spawnParticles(wx, wy - 8, '#ffd147', 16, 2.4, 3.6);
+      addFloatText(wx, wy - 28, `✨ ${mp.emoji} ${L(mp.name)}!`, '#fde047');
+      saveState(true);
+      updateHUD();
+      const moment = { kind: 'plant', id: mythicPid, quality: 1, fromCrop: crop.id };
+      recordSupremeMoment(moment);
+      openSupremeMomentModal(moment);
+      return;
+    }
+
+    AudioFX.harvest();
     updateHUD();
   }
 
@@ -4787,6 +5618,7 @@
         <button data-kcat="savory" class="px-2.5 py-1 rounded-xl font-bold text-xs cursor-pointer ${kitchenCat === 'savory' ? 'btn-peach' : 'bg-[#e8d5b3] border border-[#b58d60] text-[#4a3525]'}">${m.kitchenCatSavory}</button>
         <button data-kcat="seafood" class="px-2.5 py-1 rounded-xl font-bold text-xs cursor-pointer ${kitchenCat === 'seafood' ? 'btn-peach' : 'bg-[#e8d5b3] border border-[#b58d60] text-[#4a3525]'}">${m.kitchenCatSeafood}</button>
         <button data-kcat="sweet" class="px-2.5 py-1 rounded-xl font-bold text-xs cursor-pointer ${kitchenCat === 'sweet' ? 'btn-peach' : 'bg-[#e8d5b3] border border-[#b58d60] text-[#4a3525]'}">${m.kitchenCatSweet}</button>
+        <button data-kcat="supreme" class="px-2.5 py-1 rounded-xl font-bold text-xs cursor-pointer ${kitchenCat === 'supreme' ? 'btn-peach' : 'bg-gradient-to-r from-[#ffe4f2] to-[#fff3c4] border border-[#f472b6] text-[#9d174d]'}">${m.kitchenCatSupreme}</button>
       </div>`;
 
     const cards = filtered.map(r => {
@@ -4800,11 +5632,11 @@
       }).join(' ');
 
       return `
-        <div class="rounded-2xl p-2.5 bg-[#fffdf7] border border-[#d6ba91] flex flex-col justify-between gap-2">
+        <div class="rounded-2xl p-2.5 ${r.isSupreme ? 'bg-gradient-to-br from-[#fffdf7] to-[#fff0f6] border-[#f472b6]' : 'bg-[#fffdf7] border-[#d6ba91]'} border flex flex-col justify-between gap-2">
           <div>
             <div class="flex items-center justify-between gap-1">
-              <span class="font-bold text-sm">${r.emoji} ${L(r.name)}</span>
-              <span class="text-[11px] font-semibold text-amber-800">${m.dishCount(owned)}</span>
+              <span class="font-bold text-sm">${r.emoji} ${L(r.name)}${r.isSupreme ? ` <span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-[#ffe4f2] text-[#9d174d] border border-[#f472b6]">✨ ${m.almanacTier.mythic}</span>` : ''}</span>
+              <span class="text-[11px] font-semibold text-amber-800 shrink-0">${m.dishCount(owned)}</span>
             </div>
             <p class="text-[11px] text-[#75583e] mt-0.5">${L(r.desc)}</p>
             <div class="flex flex-wrap gap-1 mt-1.5">${ingChips}</div>
@@ -4833,16 +5665,7 @@
     document.getElementById('btnKitchenToDex').addEventListener('click', () => openAlmanacModal('recipes'));
     document.querySelectorAll('[data-cook]').forEach(b => b.addEventListener('click', () => {
       const r = RECIPE_MAP[b.dataset.cook];
-      if (!r || !canCookRecipe(r)) { AudioFX.error(); return; }
-      for (const [ing, qty] of Object.entries(r.ingredients)) consumeIngredient(ing, qty);
-      state.dishes[r.id] = (state.dishes[r.id] || 0) + 1;
-      state.recipeDex = state.recipeDex || {};
-      state.recipeDex[r.id] = (state.recipeDex[r.id] || 0) + 1;
-      state.totalCooked += 1;
-      AudioFX.cook();
-      addFloatText(state.player.x, state.player.y - 26, T().floats.cookedDish(r.emoji, L(r.name)), '#fef08a');
-      updateHUD();
-      openKitchenModal(kitchenCat);
+      cookRecipeWithMiracle(r, () => openKitchenModal(kitchenCat));
     }));
   }
 
