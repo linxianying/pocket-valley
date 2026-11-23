@@ -348,6 +348,172 @@
     }
   ];
 
+  const BOY_OUTFITS = [
+    {
+      id: 'overalls', style: 'overalls', name: { zh: '森林牛仔背带装', en: 'Forest Denim Overalls' },
+      shirt: '#fff8e8', overalls: '#5f87b2', overallsShade: '#4a6e96', pants: '#5f87b2',
+      ribbon: '#e07a5f', hair: '#5a3a29', hairLight: '#7b523b', preview: '🌿', skirt: '#5f87b2',
+      flowerA: '#fff8e8', flowerB: '#e07a5f'
+    },
+    {
+      id: 'chambray', style: 'shirt', name: { zh: '晴空条纹田园衫', en: 'Sky Chambray Shirt' },
+      shirt: '#83b8d9', overalls: '#c8a875', overallsShade: '#ad8d5c', pants: '#b59260',
+      ribbon: '#e8b44c', hair: '#4a3123', hairLight: '#6b4935', preview: '🩵', skirt: '#83b8d9',
+      flowerA: '#fffef0', flowerB: '#e8b44c'
+    },
+    {
+      id: 'vest', style: 'vest', name: { zh: '麦田森系马甲装', en: 'Harvest Sage Vest' },
+      shirt: '#fffaf0', overalls: '#78a572', overallsShade: '#5d8758', pants: '#8d6b4a',
+      ribbon: '#d96b52', hair: '#6e492d', hairLight: '#916441', preview: '🌾', skirt: '#78a572',
+      flowerA: '#fffaf0', flowerB: '#8d6b4a'
+    },
+    {
+      id: 'cardigan', style: 'vest', name: { zh: '莓果暖织开衫装', en: 'Berry Knit Cardigan' },
+      shirt: '#fff6e6', overalls: '#d47474', overallsShade: '#b55b5b', pants: '#586d8a',
+      ribbon: '#6ba37a', hair: '#452e20', hairLight: '#664632', preview: '🍓', skirt: '#d47474',
+      flowerA: '#fff6e6', flowerB: '#586d8a'
+    }
+  ];
+
+  const HOUSE_STYLES = [
+    {
+      id: 'terracotta', emoji: '🏡',
+      name: { zh: '红瓦奶油小屋', en: 'Classic Terracotta' },
+      desc: { zh: '暖红弧顶配奶油粉墙，经典田园风', en: 'Warm terracotta roof & cream stucco' },
+      roof: '#d47462', roofTrim: '#f8e6cb', wall: '#fbf1dc', wallDetail: null,
+      chimney: '#c2a791', door: '#b87b4c', doorStyle: 'arch', roofStyle: 'curved',
+      windowFrame: '#7c5636', flowerBox: '#9c6c47', flowers: ['#ffb3c6', '#fff3b0', '#ffb3c6']
+    },
+    {
+      id: 'sage', emoji: '🌲',
+      name: { zh: '森林绿瓦木屋', en: 'Woodland Sage Cabin' },
+      desc: { zh: '森系苔绿人字顶与暖木墙面', en: 'Mossy sage gable roof & honey timber' },
+      roof: '#5d986d', roofTrim: '#e8f3e4', wall: '#e8ca9c', wallDetail: 'timber',
+      chimney: '#9b8d80', door: '#8a5534', doorStyle: 'double', roofStyle: 'gable',
+      windowFrame: '#5e3d24', flowerBox: '#7a5233', flowers: ['#ffffff', '#a8e6cf', '#ffe599']
+    },
+    {
+      id: 'lavender', emoji: '🪻',
+      name: { zh: '薰衣草童话屋', en: 'Lavender Storybook' },
+      desc: { zh: '柔雾蓝紫屋顶与象牙白童话墙', en: 'Soft lavender roof & ivory storybook walls' },
+      roof: '#8c86c4', roofTrim: '#f3eefc', wall: '#f7f3fc', wallDetail: 'stone',
+      chimney: '#b5aec7', door: '#9975b5', doorStyle: 'arch', roofStyle: 'curved',
+      windowFrame: '#6a5a8c', flowerBox: '#8b78ad', flowers: ['#e0b3ff', '#ffd6e8', '#fff5ba']
+    },
+    {
+      id: 'honey', emoji: '🌻',
+      name: { zh: '蜂蜜茅草农舍', en: 'Honey Thatch Cottage' },
+      desc: { zh: '金黄蓬松茅草顶与杏色暖墙', en: 'Golden thatch roof & sunny peach walls' },
+      roof: '#e0af4f', roofTrim: '#fff2cc', wall: '#fdedd4', wallDetail: 'thatch',
+      chimney: '#c79e7a', door: '#c47c3e', doorStyle: 'round', roofStyle: 'thatch',
+      windowFrame: '#85582e', flowerBox: '#a6703c', flowers: ['#ffd54f', '#ffffff', '#ff9e7d']
+    }
+  ];
+  const HOUSE_STYLE_MAP = Object.fromEntries(HOUSE_STYLES.map(h => [h.id, h]));
+
+  const FARM_LAYOUTS = {
+    pondRight: {
+      id: 'pondRight', emoji: '🏞️',
+      name: { zh: '荷花东池农庄', en: 'East Lotus Pond' },
+      tag: { zh: '水池靠右 · 经典布局', en: 'Pond on Right · Classic' },
+      desc: { zh: '小屋在左上，宽阔农田居中偏左，荷花池在右侧', en: 'Cottage top-left, wide field center-left, lotus pond on the right' },
+      cottage: { x: 2, y: 2 },
+      petBed: { x: 2, y: 5, standX: 3, standY: 5.5 },
+      mailbox: { x: 6, y: 4 },
+      shipping: { x: 7, y: 4 },
+      shop: { x: 16, y: 2 },
+      signpost: { x: 22, y: 4 },
+      paths: [[11,6],[12,6],[18,6],[22,6]],
+      farmRects: [{ x1: 3, x2: 15, y1: 7, y2: 13, gateXs: [11, 12] }],
+      pondRect: { x1: 18, x2: 21, y1: 9, y2: 13, skip: [[18,9],[21,13]] },
+      docks: [[17,11],[18,11]],
+      lotusTiles: [[19,10],[20,12]],
+      summerLotusTiles: [[19,12],[20,10]],
+      duckCenter: { x: 19.8, y: 11.4 },
+      pondBounds: { minX: 18.6, maxX: 21.4, minY: 9.7, maxY: 12.6 },
+      spawn: { x: 4.5, y: 6.2 },
+      wakeup: { x: 4, y: 5.5 },
+      starterTilled: { x1: 6, x2: 9, y1: 8, y2: 9, turnip: [6,8], wheat: [7,8] },
+      debris: [
+        [3,7,'weed'], [4,7,'twig'], [14,7,'stone'], [15,7,'weed'],
+        [3,12,'stone'], [4,13,'twig'], [13,13,'stone'], [15,12,'twig'],
+        [14,13,'weed'], [3,10,'weed'], [15,9,'stone'], [12,7,'twig']
+      ],
+      extraTrees: [
+        [1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[7,1],[8,1],[9,1],[10,1],[13,1],[14,1],[15,1],[16,1],[17,1],[18,1],[19,1],[20,1],[21,1],[22,1],
+        [1,2],[1,3],[1,4],[22,2],[22,3],[22,14],[1,14],[2,14]
+      ]
+    },
+    pondLeft: {
+      id: 'pondLeft', emoji: '🪷',
+      name: { zh: '荷花西池农庄', en: 'West Lotus Pond' },
+      tag: { zh: '水池靠左 · 清幽水岸', en: 'Pond on Left · Lakeside' },
+      desc: { zh: '荷花池在左侧，小屋居中直通右侧宽阔大农田', en: 'Lotus pond on the left, central cottage opening onto the right meadow' },
+      cottage: { x: 12, y: 2 },
+      petBed: { x: 12, y: 5, standX: 13, standY: 5.5 },
+      mailbox: { x: 16, y: 4 },
+      shipping: { x: 17, y: 4 },
+      shop: { x: 2, y: 2 },
+      signpost: { x: 22, y: 4 },
+      paths: [[4,6],[13,6],[14,6],[22,6]],
+      farmRects: [{ x1: 8, x2: 20, y1: 7, y2: 13, gateXs: [13, 14] }],
+      pondRect: { x1: 2, x2: 5, y1: 9, y2: 13, skip: [[5,9],[2,13]] },
+      docks: [[5,11],[6,11]],
+      lotusTiles: [[3,10],[4,12]],
+      summerLotusTiles: [[3,12],[4,10]],
+      duckCenter: { x: 3.8, y: 11.4 },
+      pondBounds: { minX: 2.6, maxX: 5.4, minY: 9.7, maxY: 12.6 },
+      spawn: { x: 13.5, y: 6.2 },
+      wakeup: { x: 13.5, y: 5.5 },
+      starterTilled: { x1: 12, x2: 15, y1: 8, y2: 9, turnip: [12,8], wheat: [13,8] },
+      debris: [
+        [8,7,'weed'], [9,7,'twig'], [19,7,'stone'], [20,7,'weed'],
+        [8,12,'stone'], [9,13,'twig'], [18,13,'stone'], [20,12,'twig'],
+        [19,13,'weed'], [8,10,'weed'], [20,9,'stone'], [17,7,'twig']
+      ],
+      extraTrees: [
+        [1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[7,1],[10,1],[11,1],[12,1],[13,1],[14,1],[15,1],[16,1],[17,1],[18,1],[19,1],[20,1],[21,1],[22,1],
+        [1,2],[1,3],[1,4],[22,2],[22,3],[22,14],[21,14],[1,14]
+      ]
+    },
+    pondCenter: {
+      id: 'pondCenter', emoji: '🌿',
+      name: { zh: '溪畔双田农庄', en: 'Twin-Meadow Pond' },
+      tag: { zh: '水池居中 · 左右双田', en: 'Center Pond · Twin Fields' },
+      desc: { zh: '荷花池镶嵌在农庄中央，东西两侧各有一片花田', en: 'Central lotus pond flanked by symmetric west & east garden beds' },
+      cottage: { x: 8, y: 2 },
+      petBed: { x: 8, y: 5, standX: 9, standY: 5.5 },
+      mailbox: { x: 12, y: 4 },
+      shipping: { x: 13, y: 4 },
+      shop: { x: 16, y: 2 },
+      signpost: { x: 22, y: 4 },
+      paths: [[5,6],[6,6],[17,6],[18,6],[22,6]],
+      farmRects: [
+        { x1: 2, x2: 8, y1: 7, y2: 13, gateXs: [5, 6] },
+        { x1: 15, x2: 21, y1: 7, y2: 13, gateXs: [17, 18] }
+      ],
+      pondRect: { x1: 10, x2: 13, y1: 9, y2: 13, skip: [[10,9],[13,13]] },
+      docks: [[9,11],[10,11]],
+      lotusTiles: [[11,10],[12,12]],
+      summerLotusTiles: [[11,12],[12,10]],
+      duckCenter: { x: 11.8, y: 11.4 },
+      pondBounds: { minX: 10.6, maxX: 13.4, minY: 9.7, maxY: 12.6 },
+      spawn: { x: 9.5, y: 6.2 },
+      wakeup: { x: 9.5, y: 5.5 },
+      starterTilled: { x1: 4, x2: 7, y1: 8, y2: 9, turnip: [4,8], wheat: [5,8] },
+      debris: [
+        [2,7,'weed'], [3,7,'twig'], [8,12,'stone'], [2,13,'weed'],
+        [3,12,'stone'], [7,13,'twig'], [15,7,'weed'], [21,7,'stone'],
+        [20,13,'weed'], [16,13,'stone'], [21,11,'twig'], [15,10,'weed']
+      ],
+      extraTrees: [
+        [1,1],[2,1],[3,1],[4,1],[7,1],[8,1],[9,1],[10,1],[11,1],[12,1],[13,1],[14,1],[15,1],[16,1],[17,1],[18,1],[19,1],[20,1],[21,1],[22,1],
+        [1,2],[1,3],[1,4],[2,2],[2,3],[3,2],[22,2],[22,3],[22,14],[1,14]
+      ]
+    }
+  };
+  const FARM_LAYOUT_ORDER = ['pondRight', 'pondLeft', 'pondCenter'];
+
   const SEASONS = [
     {
       id: 'spring', name: { zh: '春季', en: 'Spring' }, icon: '🌸',
@@ -736,6 +902,7 @@
         shipped: (n, g) => `📦 放入 ${n} 件（今晚 +${g}g）`,
         freshStart: '🌼 欢迎来到崭新的口袋山谷！',
         dressChanged: (name) => `👗 换上了${name}！`,
+        houseChanged: (name) => `🏡 小屋焕然一新：${name}！`,
         noFeed: '牧草饲料不够啦！去米莉的牧场铺买些吧 🌾',
         fedAnimals: (n) => `🌾 喂饱了 ${n} 只小动物！明天有收获哦`,
         allFed: '小动物们今天都已经吃得饱饱啦！',
@@ -810,6 +977,7 @@
         cottageTitle: '温暖田园小屋',
         cottageAsk: '回到温暖的小屋啦，想先下厨做点好吃的，还是直接睡一觉到明天？',
         openKitchenNow: '🍳 进入厨房做饭',
+        cottageCustomizeBtn: '🏡 换装/改小屋',
         sleepBin: (g) => `📦 出货箱今晚将结算：<strong>+${g}g</strong>`,
         sleepGrow: '💧 浇过水的作物会长大，喂饱的牧场动物会在清晨送来新鲜产出！',
         sleepSatchelWarn: (n) => `💡 你的花篮里还有 ${n} 件可出货的物品还没放进出货箱哦！`,
@@ -857,9 +1025,21 @@
           <p class="italic text-[#7c5c40]">—— 明日天气预报：${nextW}</p>
         `,
         nextForecastText: { rainy: '🌧️ 细雨（免浇水！）', snowy: '❄️ 雪天（免浇水！）', cloudy: '☁️ 多云', breezy: '🍃 微风', sunny: '☀️ 晴天' },
-        dressTitle: '衣橱 · 选一条碎花小裙子',
-        dressHint: '小草帽配双麻花小辫和碎花农妇裙，随时换颜色哦！',
-        dressDone: '就穿这条！',
+        dressTitle: '衣橱与小屋外观',
+        dressHint: '随时切换男女角色、田园穿搭与温暖小屋样式！',
+        dressDone: '保存装扮 ✨',
+        wardrobeTabChar: '👗 角色与换装',
+        wardrobeTabHouse: '🏡 小屋样子',
+        setupTitle: '欢迎来到口袋山谷 · 定制你的农庄',
+        setupSub: '在开启田园生活前，先挑好你的角色穿搭、小屋样式和喜欢的农庄地图布局吧！',
+        setupStepChar: '1. 选择角色性别与田园穿搭',
+        setupStepHouse: '2. 选择你的田园小屋样子',
+        setupStepMap: '3. 选择农庄地图布局（荷花池位置）',
+        genderFemale: '👧 女孩',
+        genderMale: '👦 男孩',
+        setupSpinHint: '点击角色可转身预览',
+        setupStartBtn: '🌱 开始我的田园生活！',
+        setupMapNote: '角色与小屋外观随时可在顶部「👗 换装」修改；地图布局选定后即生成农庄。',
         helpTitle: '口袋山谷田园与牧场手册',
         helpBody: `
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs leading-relaxed">
@@ -1052,6 +1232,7 @@
         shipped: (n, g) => `📦 Shipped ${n} (+${g}g tonight!)`,
         freshStart: '🌼 Welcome to a fresh valley!',
         dressChanged: (name) => `👗 Wearing ${name}!`,
+        houseChanged: (name) => `🏡 Cottage restyled: ${name}!`,
         noFeed: "Out of Animal Feed! Buy some at Millie's Ranch Shop 🌾",
         fedAnimals: (n) => `🌾 Fed ${n} animal${n>1?'s':''}! Fresh produce tomorrow`,
         allFed: 'All your animals are already full & happy today!',
@@ -1126,6 +1307,7 @@
         cottageTitle: 'Cozy Storybook Cottage',
         cottageAsk: 'Home sweet home! Would you like to cook in your kitchen or turn in for the night?',
         openKitchenNow: '🍳 Open Kitchen',
+        cottageCustomizeBtn: '🏡 Style / House',
         sleepBin: (g) => `📦 Shipping Bin tonight: <strong>+${g}g</strong>`,
         sleepGrow: '💧 Watered crops will grow & fed pasture animals will leave fresh produce at dawn!',
         sleepSatchelWarn: (n) => `💡 You still have ${n} shippable item(s) in your basket!`,
@@ -1173,9 +1355,21 @@
           <p class="italic text-[#7c5c40]">— Tomorrow's forecast: ${nextW}</p>
         `,
         nextForecastText: { rainy: '🌧️ Rainy (free watering!)', snowy: '❄️ Snowy (free watering!)', cloudy: '☁️ Cloudy', breezy: '🍃 Breezy', sunny: '☀️ Sunny' },
-        dressTitle: 'Wardrobe · Pick a Floral Dress',
-        dressHint: 'Twin braided pigtails + straw sunhat + floral cottage dress!',
-        dressDone: 'Wear This!',
+        dressTitle: 'Wardrobe & Cottage Style',
+        dressHint: 'Switch character gender, cozy farm outfit, and cottage appearance anytime!',
+        dressDone: 'Save Look ✨',
+        wardrobeTabChar: '👗 Character & Outfit',
+        wardrobeTabHouse: '🏡 Cottage Style',
+        setupTitle: 'Welcome to Pocket Valley · Customize Your Farm',
+        setupSub: 'Before starting your cozy valley life, choose your character, outfit, cottage style, and farm map layout!',
+        setupStepChar: '1. Choose Character Gender & Outfit',
+        setupStepHouse: '2. Choose Your Cottage Style',
+        setupStepMap: '3. Choose Farm Map Layout (Lotus Pond Placement)',
+        genderFemale: '👧 Girl',
+        genderMale: '👦 Boy',
+        setupSpinHint: 'Click character to turn',
+        setupStartBtn: '🌱 Start Farming!',
+        setupMapNote: 'You can change character & cottage style anytime via "👗 Wardrobe". Map layout sets up your farm.',
         helpTitle: 'Pocket Valley Guide',
         helpBody: `
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs leading-relaxed">
@@ -1317,7 +1511,18 @@
     return n - Math.floor(n);
   }
 
-  function buildFarmMap() {
+  function getFarmLayout(layoutId) {
+    const id = layoutId || (typeof state !== 'undefined' && state ? state.mapLayout : 'pondRight');
+    return FARM_LAYOUTS[id] || FARM_LAYOUTS.pondRight;
+  }
+
+  function getHouseStyle(styleId) {
+    const id = styleId || (typeof state !== 'undefined' && state ? state.houseStyle : 'terracotta');
+    return HOUSE_STYLE_MAP[id] || HOUSE_STYLES[0];
+  }
+
+  function buildFarmMap(layoutId = 'pondRight') {
+    const lay = FARM_LAYOUTS[layoutId] || FARM_LAYOUTS.pondRight;
     const map = Array.from({ length: ROWS }, () => Array(COLS).fill(TILE_TYPE.GRASS));
     for (let y = 0; y < ROWS; y++) {
       for (let x = 0; x < COLS; x++) {
@@ -1329,38 +1534,39 @@
     map[6][23] = TILE_TYPE.PATH;
     map[7][23] = TILE_TYPE.GRASS;
 
-    const extraTrees = [
-      [1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[7,1],[8,1],[9,1],[10,1],[13,1],[14,1],[15,1],[16,1],[17,1],[18,1],[19,1],[20,1],[21,1],[22,1],
-      [1,2],[1,3],[1,4],[22,2],[22,3],[22,14],[1,14],[2,14]
-    ];
-    for (const [x, y] of extraTrees) map[y][x] = TILE_TYPE.WALL;
+    for (const [x, y] of lay.extraTrees) map[y][x] = TILE_TYPE.WALL;
 
-    // Cottage (2..5, 2..4), Mailbox (6,4), Shipping Bin (7,4), Pip's Shop (16..20, 2..4), Signpost (22,4)
-    for (let y = 2; y <= 4; y++) for (let x = 2; x <= 5; x++) map[y][x] = TILE_TYPE.WALL;
-    map[4][6] = TILE_TYPE.WALL;
-    map[4][7] = TILE_TYPE.WALL;
-    map[4][22] = TILE_TYPE.WALL; // signpost to pasture
-    for (let y = 2; y <= 4; y++) for (let x = 16; x <= 20; x++) map[y][x] = TILE_TYPE.WALL;
+    // Cottage (4x3), Mailbox, Shipping Bin, Pip's Shop (5x3), Signpost
+    for (let y = lay.cottage.y; y <= lay.cottage.y + 2; y++) {
+      for (let x = lay.cottage.x; x <= lay.cottage.x + 3; x++) map[y][x] = TILE_TYPE.WALL;
+    }
+    map[lay.mailbox.y][lay.mailbox.x] = TILE_TYPE.WALL;
+    map[lay.shipping.y][lay.shipping.x] = TILE_TYPE.WALL;
+    map[lay.signpost.y][lay.signpost.x] = TILE_TYPE.WALL;
+    for (let y = lay.shop.y; y <= lay.shop.y + 2; y++) {
+      for (let x = lay.shop.x; x <= lay.shop.x + 4; x++) map[y][x] = TILE_TYPE.WALL;
+    }
 
     // Paths (extending to East Gate!)
     for (let x = 3; x <= 23; x++) map[5][x] = TILE_TYPE.PATH;
-    map[6][11] = TILE_TYPE.PATH;
-    map[6][12] = TILE_TYPE.PATH;
-    map[6][18] = TILE_TYPE.PATH;
-    map[6][22] = TILE_TYPE.PATH;
+    for (const [px, py] of lay.paths) map[py][px] = TILE_TYPE.PATH;
 
-    // Farmable meadow (3..15, 7..13)
-    for (let y = 7; y <= 13; y++) for (let x = 3; x <= 15; x++) map[y][x] = TILE_TYPE.FARMABLE;
+    // Farmable meadow(s)
+    for (const rect of lay.farmRects) {
+      for (let y = rect.y1; y <= rect.y2; y++) {
+        for (let x = rect.x1; x <= rect.x2; x++) map[y][x] = TILE_TYPE.FARMABLE;
+      }
+    }
 
-    // Lotus Pond (18..21, 9..13) + Dock
-    for (let y = 9; y <= 13; y++) {
-      for (let x = 18; x <= 21; x++) {
-        if ((x === 18 && y === 9) || (x === 21 && y === 13)) continue;
+    // Lotus Pond + Dock
+    const pr = lay.pondRect;
+    for (let y = pr.y1; y <= pr.y2; y++) {
+      for (let x = pr.x1; x <= pr.x2; x++) {
+        if (pr.skip.some(([sx, sy]) => sx === x && sy === y)) continue;
         map[y][x] = TILE_TYPE.WATER;
       }
     }
-    map[11][17] = TILE_TYPE.DOCK;
-    map[11][18] = TILE_TYPE.DOCK;
+    for (const [dx, dy] of lay.docks) map[dy][dx] = TILE_TYPE.DOCK;
     return map;
   }
 
@@ -1412,28 +1618,25 @@
     return map;
   }
 
-  const MAPS = { farm: buildFarmMap(), pasture: buildPastureMap() };
+  const MAPS = { farm: buildFarmMap('pondRight'), pasture: buildPastureMap() };
   function curMap() { return MAPS[state.area] || MAPS.farm; }
 
   // =========================================================================
   // STATE MANAGEMENT
   // =========================================================================
-  function createInitialState(keepLang = 'zh', keepDress = 0) {
+  function createInitialState(keepLang = 'zh', keepDress = 0, keepGender = 'female', keepHouseStyle = 'terracotta', keepMapLayout = 'pondRight', setupDone = false) {
+    const lay = FARM_LAYOUTS[keepMapLayout] || FARM_LAYOUTS.pondRight;
+    const st = lay.starterTilled;
     const farm = {};
-    for (let y = 8; y <= 9; y++) {
-      for (let x = 6; x <= 9; x++) {
+    for (let y = st.y1; y <= st.y2; y++) {
+      for (let x = st.x1; x <= st.x2; x++) {
         farm[`${x},${y}`] = { tilled: true, watered: false, crop: null, debris: null, placeable: null };
       }
     }
-    farm['6,8'].crop = { id: 'turnip', daysGrown: 1 };
-    farm['7,8'].crop = { id: 'wheat', daysGrown: 1 };
+    farm[`${st.turnip[0]},${st.turnip[1]}`].crop = { id: 'turnip', daysGrown: 1 };
+    farm[`${st.wheat[0]},${st.wheat[1]}`].crop = { id: 'wheat', daysGrown: 1 };
 
-    const debrisList = [
-      [3,7,'weed'], [4,7,'twig'], [14,7,'stone'], [15,7,'weed'],
-      [3,12,'stone'], [4,13,'twig'], [13,13,'stone'], [15,12,'twig'],
-      [14,13,'weed'], [3,10,'weed'], [15,9,'stone'], [12,7,'twig']
-    ];
-    for (const [x, y, type] of debrisList) {
+    for (const [x, y, type] of lay.debris) {
       farm[`${x},${y}`] = { tilled: false, watered: false, crop: null, debris: type, placeable: null };
     }
 
@@ -1449,7 +1652,11 @@
 
     return {
       lang: keepLang,
+      gender: keepGender === 'male' ? 'male' : 'female',
       dressIdx: keepDress,
+      houseStyle: HOUSE_STYLE_MAP[keepHouseStyle] ? keepHouseStyle : 'terracotta',
+      mapLayout: lay.id,
+      setupDone: Boolean(setupDone),
       area: 'farm',
       day: 1,
       seasonIdx: 0,
@@ -1486,7 +1693,7 @@
       farm,
       unreadMail: true,
       lastSavedAt: null,
-      player: { x: 4.5 * TILE, y: 6.2 * TILE, dir: 'down', walkFrame: 0, swingTimer: 0, swingTool: null }
+      player: { x: lay.spawn.x * TILE, y: lay.spawn.y * TILE, dir: 'down', walkFrame: 0, swingTimer: 0, swingTool: null }
     };
   }
 
@@ -1501,6 +1708,7 @@
   let cloudSyncTimer = null;
 
   let state = loadState();
+  MAPS.farm = buildFarmMap(state.mapLayout);
 
   const petAI = {
     x: state.player.x - 28,
@@ -1522,10 +1730,17 @@
 
   function hydrateState(parsed) {
     if (!parsed || typeof parsed.day !== 'number' || !parsed.farm) return null;
-    const base = createInitialState(parsed.lang || 'zh', parsed.dressIdx || 0);
+    const g = parsed.gender === 'male' ? 'male' : 'female';
+    const hs = HOUSE_STYLE_MAP[parsed.houseStyle] ? parsed.houseStyle : 'terracotta';
+    const ml = FARM_LAYOUTS[parsed.mapLayout] ? parsed.mapLayout : 'pondRight';
+    const base = createInitialState(parsed.lang || 'zh', parsed.dressIdx || 0, g, hs, ml, true);
     return {
       ...base,
       ...parsed,
+      gender: g,
+      houseStyle: hs,
+      mapLayout: ml,
+      setupDone: true,
       seeds: { ...base.seeds, ...(parsed.seeds || {}) },
       placeables: { ...base.placeables, ...(parsed.placeables || {}) },
       pantry: { ...(parsed.pantry || {}) },
@@ -1551,7 +1766,7 @@
         }
       }
     } catch (e) {}
-    return createInitialState('zh', 0);
+    return createInitialState('zh', 0, 'female', 'terracotta', 'pondRight', false);
   }
 
   const IDBBackup = {
@@ -1662,7 +1877,10 @@
     const next = hydrateState(parsed);
     if (!next) return false;
     state = next;
+    MAPS.farm = buildFarmMap(state.mapLayout);
+    if (typeof resetPondFishShadows === 'function') resetPondFishShadows();
     if (typeof cancelFishing === 'function') cancelFishing();
+    if (document.getElementById('pvSetupRoot') && typeof closeModal === 'function') closeModal();
     syncPetNearPlayer();
     saveState(true, true);
     applyStaticLabels();
@@ -2067,7 +2285,11 @@
     const k = getWeatherKey(w, sIdx);
     return ({ sunny: '☀️', cloudy: '☁️', breezy: '🍃', rainy: '🌧️', snowy: '❄️' })[k] || '☀️';
   }
-  function getDress() { return DRESS_THEMES[state.dressIdx % DRESS_THEMES.length]; }
+  function getOutfitList(gender = state.gender) { return gender === 'male' ? BOY_OUTFITS : DRESS_THEMES; }
+  function getDress(gender = state.gender, idx = state.dressIdx) {
+    const list = getOutfitList(gender);
+    return list[((idx || 0) % list.length + list.length) % list.length];
+  }
   function getCanCapacity() { return state.canLevel === 1 ? 20 : state.canLevel === 2 ? 36 : 60; }
   function getTileData(x, y) { return state.farm[`${x},${y}`] || null; }
   function ensureTileData(x, y) {
@@ -2240,11 +2462,20 @@
     progress: 0.28,
     hold: false
   };
-  const pondFishShadows = [
-    { x: 19.2 * TILE, y: 10.6 * TILE, ang: 0.4, speed: 12, phase: 0, size: 1.0 },
-    { x: 20.4 * TILE, y: 11.8 * TILE, ang: 2.5, speed: 9, phase: 2.1, size: 0.8 },
-    { x: 19.6 * TILE, y: 12.2 * TILE, ang: 4.1, speed: 14, phase: 4.0, size: 1.15 }
-  ];
+  const pondFishShadows = [];
+  function resetPondFishShadows(area = state.area) {
+    const b = area === 'pasture'
+      ? { minX: 18.6, maxX: 21.4, minY: 8.8, maxY: 12.6 }
+      : getFarmLayout().pondBounds;
+    const cx = (b.minX + b.maxX) / 2, cy = (b.minY + b.maxY) / 2;
+    pondFishShadows.length = 0;
+    pondFishShadows.push(
+      { x: (cx - 0.6) * TILE, y: (cy - 0.5) * TILE, ang: 0.4, speed: 12, phase: 0, size: 1.0 },
+      { x: (cx + 0.5) * TILE, y: (cy + 0.4) * TILE, ang: 2.5, speed: 9, phase: 2.1, size: 0.8 },
+      { x: cx * TILE, y: (cy + 0.8) * TILE, ang: 4.1, speed: 14, phase: 4.0, size: 1.15 }
+    );
+  }
+  resetPondFishShadows('farm');
 
   function getSelectedSlot() {
     const all = getAllHotbarSlots().all;
@@ -2334,6 +2565,7 @@
     if (state.area === targetArea || isTransitioning) return;
     cancelFishing();
     state.area = targetArea;
+    resetPondFishShadows(targetArea);
     walkTarget = null;
     particles.length = 0;
     if (spawnX !== null && spawnY !== null) {
@@ -2401,11 +2633,21 @@
         if (wantFish) startFishingCast(tx, ty);
         else refillWater();
       } else {
+        let standX = 17.3, standY = 11.5, castX = 19, castY = 11;
+        if (state.area === 'farm') {
+          const lay = getFarmLayout();
+          const pondCenterX = (lay.pondRect.x1 + lay.pondRect.x2) / 2;
+          const pondEast = pondCenterX > lay.docks[0][0];
+          standX = pondEast ? (lay.docks[1][0] - 0.2) : (lay.docks[0][0] + 0.6);
+          standY = lay.docks[0][1] + 0.5;
+          castX = pondEast ? (lay.docks[1][0] + 1) : (lay.docks[0][0] - 1);
+          castY = lay.docks[0][1];
+        }
         walkTarget = {
-          x: (state.area === 'farm' ? 17.8 : 17.3) * TILE, y: 11.5 * TILE,
+          x: standX * TILE, y: standY * TILE,
           onArrive: () => {
-            faceToward(19, 11);
-            if (wantFish) startFishingCast(19, 11);
+            faceToward(castX, castY);
+            if (wantFish) startFishingCast(castX, castY);
             else refillWater();
           }
         };
@@ -2450,12 +2692,13 @@
   // =========================================================================
   function getLandmarkAt(tx, ty) {
     if (state.area === 'farm') {
-      if (tx >= 2 && tx <= 5 && ty >= 2 && ty <= 4) return 'cottage';
-      if (tx === 2 && ty === 5) return 'petBed';
-      if (tx === 6 && ty === 4) return 'mailbox';
-      if (tx === 7 && ty === 4) return 'shipping';
-      if (tx >= 16 && tx <= 20 && ty >= 2 && ty <= 4) return 'shop';
-      if ((tx === 22 && ty === 4) || (tx === 23 && ty >= 5 && ty <= 7)) return 'gateToPasture';
+      const lay = getFarmLayout();
+      if (tx >= lay.cottage.x && tx <= lay.cottage.x + 3 && ty >= lay.cottage.y && ty <= lay.cottage.y + 2) return 'cottage';
+      if (tx === lay.petBed.x && ty === lay.petBed.y) return 'petBed';
+      if (tx === lay.mailbox.x && ty === lay.mailbox.y) return 'mailbox';
+      if (tx === lay.shipping.x && ty === lay.shipping.y) return 'shipping';
+      if (tx >= lay.shop.x && tx <= lay.shop.x + 4 && ty >= lay.shop.y && ty <= lay.shop.y + 2) return 'shop';
+      if ((tx === lay.signpost.x && ty === lay.signpost.y) || (tx === 23 && ty >= 5 && ty <= 7)) return 'gateToPasture';
     } else {
       if (tx >= 3 && tx <= 7 && ty >= 2 && ty <= 4) return 'barn';
       if ((tx === 9 || tx === 10) && ty === 4) return 'trough';
@@ -2466,13 +2709,18 @@
   }
 
   function getLandmarkStandTile(lm) {
+    const lay = getFarmLayout();
     const map = {
-      cottage: { x: 3.5, y: 5 }, petBed: { x: 3, y: 5.5 }, mailbox: { x: 6, y: 5 }, shipping: { x: 7, y: 5 },
-      shop: { x: 18, y: 5 }, gateToPasture: { x: 22.2, y: 5.5 },
+      cottage: { x: lay.cottage.x + 1.5, y: lay.cottage.y + 3 },
+      petBed: { x: lay.petBed.standX, y: lay.petBed.standY },
+      mailbox: { x: lay.mailbox.x, y: lay.mailbox.y + 1 },
+      shipping: { x: lay.shipping.x, y: lay.shipping.y + 1 },
+      shop: { x: lay.shop.x + 2, y: lay.shop.y + 3 },
+      gateToPasture: { x: 22.2, y: 5.5 },
       barn: { x: 5, y: 5 }, trough: { x: 9.5, y: 5 }, ranchShop: { x: 17.5, y: 5 },
       gateToFarm: { x: 1.5, y: 5.5 }
     };
-    return map[lm] || { x: 4, y: 6 };
+    return map[lm] || { x: lay.spawn.x, y: lay.spawn.y };
   }
 
   function triggerLandmark(lm) {
@@ -2600,7 +2848,8 @@
   }
 
   function drawPetBed() {
-    const px = 2.5 * TILE, py = 5.45 * TILE;
+    const pb = getFarmLayout().petBed;
+    const px = (pb.x + 0.5) * TILE, py = (pb.y + 0.45) * TILE;
     // Soft shadow
     ctx.fillStyle = 'rgba(56, 40, 25, 0.16)';
     ctx.beginPath(); ctx.ellipse(px, py + 5, 14, 5.5, 0, 0, Math.PI * 2); ctx.fill();
@@ -3002,15 +3251,18 @@
 
   function updateFishing(dt) {
     // Animate peaceful pond fish shadows
+    const pb = state.area === 'pasture'
+      ? { minX: 18.6, maxX: 21.4, minY: 8.8, maxY: 12.6 }
+      : getFarmLayout().pondBounds;
     for (const s of pondFishShadows) {
       s.phase += dt * 1.4;
       s.ang += Math.sin(s.phase * 0.6) * dt * 0.8;
       s.x += Math.cos(s.ang) * s.speed * dt;
       s.y += Math.sin(s.ang) * s.speed * dt;
-      if (s.x < 18.6 * TILE) s.ang = 0.2;
-      if (s.x > 21.4 * TILE) s.ang = Math.PI - 0.2;
-      if (s.y < 9.7 * TILE) s.ang = Math.PI / 2;
-      if (s.y > 12.6 * TILE) s.ang = -Math.PI / 2;
+      if (s.x < pb.minX * TILE) { s.x = pb.minX * TILE; s.ang = 0.2; }
+      if (s.x > pb.maxX * TILE) { s.x = pb.maxX * TILE; s.ang = Math.PI - 0.2; }
+      if (s.y < pb.minY * TILE) { s.y = pb.minY * TILE; s.ang = Math.PI / 2; }
+      if (s.y > pb.maxY * TILE) { s.y = pb.maxY * TILE; s.ang = -Math.PI / 2; }
     }
 
     if (fishing.phase === 'waiting') {
@@ -3589,7 +3841,9 @@
       state.area = 'farm';
       state.timeMinutes = 6 * 60;
       state.energy = passedOut ? Math.round(state.maxEnergy * 0.8) : state.maxEnergy;
-      state.player.x = 4 * TILE; state.player.y = 5.5 * TILE; state.player.dir = 'down';
+      const wakeLay = getFarmLayout();
+      state.player.x = wakeLay.wakeup.x * TILE; state.player.y = wakeLay.wakeup.y * TILE; state.player.dir = 'down';
+      resetPondFishShadows('farm');
       walkTarget = null;
       if (state.pet) {
         state.pet.pettedToday = false;
@@ -3623,7 +3877,16 @@
     document.getElementById('modalFooter').innerHTML = footerHTML;
     document.getElementById('modalOverlay').classList.remove('hidden');
   }
-  function closeModal() { modalOpen = false; document.getElementById('modalOverlay').classList.add('hidden'); }
+  function closeModal() {
+    const wasSetup = Boolean(document.getElementById('pvSetupRoot'));
+    modalOpen = false;
+    document.getElementById('modalOverlay').classList.add('hidden');
+    if (wasSetup && !state.setupDone) {
+      state.setupDone = true;
+      hadLocalSave = true;
+      saveState(true, true);
+    }
+  }
   document.getElementById('modalCloseBtn').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
   document.getElementById('modalOverlay').addEventListener('click', (e) => { if (e.target.id === 'modalOverlay') { AudioFX.ui(); closeModal(); } });
 
@@ -4011,7 +4274,7 @@
     if (sb) sb.addEventListener('click', () => { shipAllFromSatchel(); openSatchelModal(basketTab); });
   }
 
-  // --- COTTAGE MODAL (Cook + Sleep) ---
+  // --- COTTAGE MODAL (Cook + Style + Sleep) ---
   function openCottageModal() {
     AudioFX.ui();
     const m = T().modals, pending = getShippingPendingGold(), sc = getShippableBasketCount();
@@ -4029,6 +4292,7 @@
       <div class="flex flex-wrap gap-1.5">
         <button id="btnCancelSleep" class="px-2.5 py-1.5 rounded-xl bg-[#e8d5b3] border border-[#b58d60] font-bold text-xs cursor-pointer">${m.stayAwake}</button>
         <button id="btnCottageKitchen" class="btn-sage px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${m.openKitchenNow}</button>
+        <button id="btnCottageCustomize" class="px-2.5 py-1.5 rounded-xl bg-[#fff3dc] border border-[#c5a176] font-bold text-xs text-[#5c3c22] cursor-pointer">${m.cottageCustomizeBtn}</button>
       </div>
       <div class="flex flex-wrap gap-1.5">
         ${sc > 0 ? `<button id="btnShipAndSleep" class="btn-sage px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${m.shipAndSleep}</button>` : ''}
@@ -4037,6 +4301,7 @@
     openModal('🏡', m.cottageTitle, body, footer);
     document.getElementById('btnCancelSleep').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
     document.getElementById('btnCottageKitchen').addEventListener('click', () => openKitchenModal());
+    document.getElementById('btnCottageCustomize').addEventListener('click', () => openDressModal('house'));
     document.getElementById('btnConfirmSleep').addEventListener('click', () => startSleepSequence(false));
     const sas = document.getElementById('btnShipAndSleep');
     if (sas) sas.addEventListener('click', () => { shipAllFromSatchel(); startSleepSequence(false); });
@@ -4079,33 +4344,356 @@
     document.getElementById('btnStartNewDay').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
   }
 
-  // --- WARDROBE, MAILBOX, HELP ---
-  function openDressModal() {
+  // --- LIVE PREVIEW HELPERS (Character, Cottage Style & Farm Layout Mini-Map) ---
+  function renderCharacterPreviewCanvas(canvasEl, gender, dressIdx, dir = 'down') {
+    if (!canvasEl) return;
+    const pctx = canvasEl.getContext('2d');
+    const w = canvasEl.width, h = canvasEl.height;
+    pctx.clearRect(0, 0, w, h);
+    // Soft meadow backdrop
+    const grad = pctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, '#eef7fb');
+    grad.addColorStop(0.62, '#f9f2df');
+    grad.addColorStop(1, '#b8dd97');
+    pctx.fillStyle = grad;
+    pctx.fillRect(0, 0, w, h);
+    pctx.fillStyle = '#97cc74';
+    pctx.beginPath(); pctx.ellipse(w / 2, h - 16, w * 0.44, 15, 0, 0, Math.PI * 2); pctx.fill();
+    drawFarmerSprite(pctx, {
+      x: w / 2, y: h - 22, dir, gender, outfit: getDress(gender, dressIdx),
+      scale: 2.25, walkFrame: 0, swingTimer: 0, swingTool: null
+    });
+  }
+
+  function renderCottagePreviewCanvas(canvasEl, styleId) {
+    if (!canvasEl) return;
+    const pctx = canvasEl.getContext('2d');
+    const w = canvasEl.width, h = canvasEl.height;
+    pctx.clearRect(0, 0, w, h);
+    const grad = pctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, '#e3f2fa');
+    grad.addColorStop(0.55, '#f6efdc');
+    grad.addColorStop(1, '#a9d684');
+    pctx.fillStyle = grad;
+    pctx.fillRect(0, 0, w, h);
+    pctx.save();
+    const s = Math.min(w / 146, h / 114);
+    pctx.translate((w - 128 * s) / 2, (h - 96 * s) / 2 + 4);
+    pctx.scale(s, s);
+    drawCottageSprite(pctx, 0, 0, styleId, { winter: false, evening: false, kitchen: false });
+    pctx.restore();
+  }
+
+  function renderLayoutMiniPreview(canvasEl, layoutId, houseStyleId = state.houseStyle) {
+    if (!canvasEl) return;
+    const lay = FARM_LAYOUTS[layoutId] || FARM_LAYOUTS.pondRight;
+    const hs = HOUSE_STYLE_MAP[houseStyleId] || HOUSE_STYLES[0];
+    const pctx = canvasEl.getContext('2d');
+    const w = canvasEl.width, h = canvasEl.height;
+    const tw = w / COLS, th = h / ROWS;
+    const m = buildFarmMap(layoutId);
+    pctx.clearRect(0, 0, w, h);
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        const t = m[y][x];
+        if (t === TILE_TYPE.WALL) pctx.fillStyle = '#5e995f';
+        else if (t === TILE_TYPE.WATER) pctx.fillStyle = '#62b6d9';
+        else if (t === TILE_TYPE.DOCK) pctx.fillStyle = '#c89560';
+        else if (t === TILE_TYPE.PATH) pctx.fillStyle = '#e7d5b0';
+        else if (t === TILE_TYPE.FARMABLE) pctx.fillStyle = (x + y) % 2 === 0 ? '#a8d67e' : '#9acc72';
+        else pctx.fillStyle = '#89c46c';
+        pctx.fillRect(x * tw, y * th, Math.ceil(tw), Math.ceil(th));
+      }
+    }
+    // Highlight tilled starter patch
+    const st = lay.starterTilled;
+    pctx.fillStyle = '#b48056';
+    pctx.fillRect(st.x1 * tw + 1, st.y1 * th + 1, (st.x2 - st.x1 + 1) * tw - 2, (st.y2 - st.y1 + 1) * th - 2);
+    // Cottage icon block
+    pctx.fillStyle = hs.wall;
+    pctx.fillRect(lay.cottage.x * tw + 1, (lay.cottage.y + 1) * th, 4 * tw - 2, 2 * th - 1);
+    pctx.fillStyle = hs.roof;
+    pctx.beginPath();
+    pctx.moveTo(lay.cottage.x * tw, (lay.cottage.y + 1.3) * th);
+    pctx.lineTo((lay.cottage.x + 2) * tw, lay.cottage.y * th);
+    pctx.lineTo((lay.cottage.x + 4) * tw, (lay.cottage.y + 1.3) * th);
+    pctx.closePath();
+    pctx.fill();
+    // Shop awning block
+    pctx.fillStyle = '#7bb58d';
+    pctx.fillRect(lay.shop.x * tw + 1, lay.shop.y * th + 2, 5 * tw - 2, 1.3 * th);
+    pctx.fillStyle = '#f5e6cc';
+    pctx.fillRect(lay.shop.x * tw + 2, (lay.shop.y + 1.3) * th, 5 * tw - 4, 1.5 * th);
+    // Lotus pink dot in pond
+    if (lay.lotusTiles[0]) {
+      const [lx, ly] = lay.lotusTiles[0];
+      pctx.fillStyle = '#ff9ebb';
+      pctx.beginPath(); pctx.arc((lx + 0.5) * tw, (ly + 0.5) * th, 3, 0, Math.PI * 2); pctx.fill();
+    }
+    // East pasture arrow
+    pctx.fillStyle = '#fff9e6';
+    pctx.font = 'bold 9px sans-serif';
+    pctx.textAlign = 'right';
+    pctx.fillText('→', w - 2, 6.2 * th);
+  }
+
+  // --- WARDROBE & COTTAGE STYLE MODAL ---
+  let wardrobeTab = 'char';
+  let previewSpinDirIdx = 0;
+  const PREVIEW_DIRS = ['down', 'right', 'up', 'left'];
+
+  function openDressModal(tab = wardrobeTab) {
+    wardrobeTab = tab === 'house' ? 'house' : 'char';
     AudioFX.ui();
     const m = T().modals;
-    const cards = DRESS_THEMES.map((d, idx) => `
-      <button data-pickdress="${idx}" class="rounded-2xl p-3 text-left border-2 transition cursor-pointer flex items-center gap-3 ${idx === state.dressIdx ? 'bg-[#fff5e4] border-[#e07a5f] shadow-md' : 'bg-[#fffdf7] border-[#d6ba91] hover:border-[#c88c72]'}">
-        <div class="w-11 h-11 rounded-full flex items-center justify-center text-xl shrink-0 border-2 border-white" style="background:${d.skirt}; box-shadow:0 2px 6px rgba(0,0,0,0.12)">${d.preview}</div>
-        <div>
-          <div class="font-bold text-xs sm:text-sm text-[#4a3525]">${L(d.name)} ${idx === state.dressIdx ? '✓' : ''}</div>
-          <div class="flex items-center gap-1.5 mt-1">
-            <span class="w-3.5 h-3.5 rounded-full border border-black/15" style="background:${d.skirt}"></span>
-            <span class="w-3.5 h-3.5 rounded-full border border-black/15" style="background:${d.flowerA}"></span>
-            <span class="w-3.5 h-3.5 rounded-full border border-black/15" style="background:${d.flowerB}"></span>
-            <span class="w-3.5 h-3.5 rounded-full border border-black/15" style="background:${d.ribbon}"></span>
+    const curGender = state.gender === 'male' ? 'male' : 'female';
+    const outfits = getOutfitList(curGender);
+    const tabsHtml = `
+      <div class="flex gap-1.5">
+        <button data-wtab="char" class="px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer ${wardrobeTab === 'char' ? 'btn-peach' : 'bg-[#e8d5b3] border border-[#b58d60] text-[#4a3525]'}">${m.wardrobeTabChar}</button>
+        <button data-wtab="house" class="px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer ${wardrobeTab === 'house' ? 'btn-peach' : 'bg-[#e8d5b3] border border-[#b58d60] text-[#4a3525]'}">${m.wardrobeTabHouse}</button>
+      </div>
+    `;
+    let contentHtml = '';
+    if (wardrobeTab === 'char') {
+      const cards = outfits.map((d, idx) => `
+        <button data-pickdress="${idx}" class="rounded-2xl p-2.5 text-left border-2 transition cursor-pointer flex items-center gap-2.5 ${idx === state.dressIdx ? 'bg-[#fff5e4] border-[#e07a5f] shadow-md' : 'bg-[#fffdf7] border-[#d6ba91] hover:border-[#c88c72]'}">
+          <div class="w-9 h-9 rounded-full flex items-center justify-center text-lg shrink-0 border-2 border-white" style="background:${d.skirt}; box-shadow:0 2px 6px rgba(0,0,0,0.12)">${d.preview}</div>
+          <div class="min-w-0">
+            <div class="font-bold text-xs text-[#4a3525] truncate">${L(d.name)} ${idx === state.dressIdx ? '✓' : ''}</div>
+            <div class="flex items-center gap-1 mt-1">
+              <span class="w-3 h-3 rounded-full border border-black/15" style="background:${d.skirt}"></span>
+              <span class="w-3 h-3 rounded-full border border-black/15" style="background:${d.flowerA}"></span>
+              <span class="w-3 h-3 rounded-full border border-black/15" style="background:${d.flowerB}"></span>
+              <span class="w-3 h-3 rounded-full border border-black/15" style="background:${d.ribbon}"></span>
+            </div>
           </div>
-        </div>
-      </button>`).join('');
-    openModal('👗', m.dressTitle, `<p class="text-xs text-[#73563d]">${m.dressHint}</p><div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">${cards}</div>`,
-      `<span class="text-[11px] opacity-75">👒 ${L(getDress().name)}</span><button id="btnDressDone" class="btn-peach px-4 py-1.5 rounded-xl text-xs font-bold cursor-pointer">${m.dressDone}</button>`);
+        </button>`).join('');
+      contentHtml = `
+        <div class="flex flex-col sm:flex-row gap-3 items-center sm:items-stretch">
+          <div class="flex flex-col items-center justify-center shrink-0">
+            <canvas id="wardrobeCharPreview" width="112" height="122" class="rounded-2xl border-2 border-[#c5a176] shadow-inner cursor-pointer"></canvas>
+            <span class="text-[10px] text-[#7e634a] mt-1">↻ ${m.setupSpinHint}</span>
+          </div>
+          <div class="flex-1 w-full space-y-2.5">
+            <div class="grid grid-cols-2 gap-2">
+              <button data-pickgender="female" class="py-1.5 px-3 rounded-xl font-bold text-xs border-2 cursor-pointer transition ${curGender === 'female' ? 'bg-[#ffe8e2] border-[#e07a5f] text-[#5c2c1d]' : 'bg-[#fffdf7] border-[#d6ba91] text-[#5c3c22]'}">${m.genderFemale} ${curGender === 'female' ? '✓' : ''}</button>
+              <button data-pickgender="male" class="py-1.5 px-3 rounded-xl font-bold text-xs border-2 cursor-pointer transition ${curGender === 'male' ? 'bg-[#e3f1fa] border-[#5f87b2] text-[#1f3b57]' : 'bg-[#fffdf7] border-[#d6ba91] text-[#5c3c22]'}">${m.genderMale} ${curGender === 'male' ? '✓' : ''}</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${cards}</div>
+          </div>
+        </div>`;
+    } else {
+      const hCards = HOUSE_STYLES.map(hs => `
+        <button data-pickhouse="${hs.id}" class="rounded-2xl p-2.5 text-left border-2 transition cursor-pointer flex flex-col gap-1.5 ${hs.id === state.houseStyle ? 'bg-[#fff5e4] border-[#e07a5f] shadow-md' : 'bg-[#fffdf7] border-[#d6ba91] hover:border-[#c88c72]'}">
+          <canvas data-housepreview="${hs.id}" width="150" height="106" class="w-full h-auto rounded-xl border border-[#d6ba91]"></canvas>
+          <div class="font-bold text-xs text-[#4a3525]">${hs.emoji} ${L(hs.name)} ${hs.id === state.houseStyle ? '✓' : ''}</div>
+          <div class="text-[11px] text-[#73563d] leading-snug">${L(hs.desc)}</div>
+        </button>`).join('');
+      contentHtml = `<div class="grid grid-cols-2 gap-2.5">${hCards}</div>`;
+    }
+    const footerSummary = wardrobeTab === 'char'
+      ? `${curGender === 'male' ? '👦' : '👧'} ${L(getDress().name)}`
+      : `${getHouseStyle().emoji} ${L(getHouseStyle().name)}`;
+    openModal('👗', m.dressTitle, `<div class="space-y-3"><p class="text-xs text-[#73563d]">${m.dressHint}</p>${tabsHtml}${contentHtml}</div>`,
+      `<span class="text-[11px] opacity-80">${footerSummary}</span><button id="btnDressDone" class="btn-peach px-4 py-1.5 rounded-xl text-xs font-bold cursor-pointer">${m.dressDone}</button>`);
+
+    document.querySelectorAll('[data-wtab]').forEach(b => b.addEventListener('click', () => openDressModal(b.dataset.wtab)));
+    const charCanvas = document.getElementById('wardrobeCharPreview');
+    if (charCanvas) {
+      renderCharacterPreviewCanvas(charCanvas, curGender, state.dressIdx, PREVIEW_DIRS[previewSpinDirIdx]);
+      charCanvas.addEventListener('click', () => {
+        previewSpinDirIdx = (previewSpinDirIdx + 1) % PREVIEW_DIRS.length;
+        AudioFX.ui();
+        renderCharacterPreviewCanvas(charCanvas, curGender, state.dressIdx, PREVIEW_DIRS[previewSpinDirIdx]);
+      });
+    }
+    document.querySelectorAll('[data-housepreview]').forEach(cv => renderCottagePreviewCanvas(cv, cv.dataset.housepreview));
+    document.querySelectorAll('[data-pickgender]').forEach(b => b.addEventListener('click', () => {
+      state.gender = b.dataset.pickgender === 'male' ? 'male' : 'female';
+      state.dressIdx = state.dressIdx % getOutfitList(state.gender).length;
+      AudioFX.harvest(); saveState(true);
+      spawnParticles(state.player.x, state.player.y - 10, getDress().skirt, 10, 1.8, 3.5);
+      openDressModal('char');
+    }));
     document.querySelectorAll('[data-pickdress]').forEach(b => b.addEventListener('click', () => {
       state.dressIdx = Number(b.dataset.pickdress);
       AudioFX.harvest(); saveState(true);
       spawnParticles(state.player.x, state.player.y - 10, getDress().skirt, 10, 1.8, 3.5);
       addFloatText(state.player.x, state.player.y - 26, T().floats.dressChanged(L(getDress().name)), '#fff5d6');
-      openDressModal();
+      openDressModal('char');
+    }));
+    document.querySelectorAll('[data-pickhouse]').forEach(b => b.addEventListener('click', () => {
+      state.houseStyle = b.dataset.pickhouse;
+      AudioFX.harvest(); saveState(true);
+      const lay = getFarmLayout();
+      spawnParticles((lay.cottage.x + 2) * TILE, (lay.cottage.y + 1.5) * TILE, getHouseStyle().roof, 14, 2.0, 3.8);
+      addFloatText(state.player.x, state.player.y - 26, T().floats.houseChanged(L(getHouseStyle().name)), '#fff5d6');
+      openDressModal('house');
     }));
     document.getElementById('btnDressDone').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
+  }
+
+  // --- START-OF-GAME CHARACTER, COTTAGE & MAP LAYOUT SETUP WIZARD ---
+  let setupDraft = { gender: 'female', dressIdx: 0, houseStyle: 'terracotta', mapLayout: 'pondRight', dirIdx: 0 };
+
+  function applySetupDraftToWorld(finalize = false) {
+    const lang = state.lang;
+    state = createInitialState(lang, setupDraft.dressIdx, setupDraft.gender, setupDraft.houseStyle, setupDraft.mapLayout, finalize);
+    MAPS.farm = buildFarmMap(state.mapLayout);
+    resetPondFishShadows('farm');
+    cancelFishing();
+    syncPetNearPlayer();
+    applyStaticLabels();
+    updateHUD();
+    renderHotbar();
+    if (finalize) {
+      hadLocalSave = true;
+      saveState(true, true);
+    }
+  }
+
+  function openStartSetupModal(initFromState = false) {
+    const prevScroll = (!initFromState && document.getElementById('pvSetupRoot'))
+      ? (document.getElementById('modalBody')?.scrollTop || 0)
+      : 0;
+    if (initFromState) {
+      setupDraft = {
+        gender: state.gender === 'male' ? 'male' : 'female',
+        dressIdx: state.dressIdx || 0,
+        houseStyle: state.houseStyle || 'terracotta',
+        mapLayout: state.mapLayout || 'pondRight',
+        dirIdx: 0
+      };
+    }
+    const m = T().modals;
+    const outfits = getOutfitList(setupDraft.gender);
+    const outfitBtns = outfits.map((d, idx) => `
+      <button data-sdress="${idx}" class="rounded-xl p-2 text-left border-2 transition cursor-pointer flex items-center gap-2 ${idx === setupDraft.dressIdx ? 'bg-[#fff5e4] border-[#e07a5f] shadow-sm' : 'bg-[#fffdf7] border-[#d6ba91] hover:border-[#c88c72]'}">
+        <div class="w-7 h-7 rounded-full flex items-center justify-center text-sm shrink-0 border border-white" style="background:${d.skirt}">${d.preview}</div>
+        <div class="min-w-0">
+          <div class="font-bold text-[11px] text-[#4a3525] truncate">${L(d.name)}</div>
+          <div class="flex items-center gap-1 mt-0.5">
+            <span class="w-2.5 h-2.5 rounded-full border border-black/15" style="background:${d.skirt}"></span>
+            <span class="w-2.5 h-2.5 rounded-full border border-black/15" style="background:${d.ribbon}"></span>
+          </div>
+        </div>
+      </button>`).join('');
+
+    const houseCards = HOUSE_STYLES.map(hs => `
+      <button data-shouse="${hs.id}" class="rounded-xl p-2 text-left border-2 transition cursor-pointer flex flex-col gap-1 ${hs.id === setupDraft.houseStyle ? 'bg-[#fff5e4] border-[#e07a5f] shadow-sm' : 'bg-[#fffdf7] border-[#d6ba91] hover:border-[#c88c72]'}">
+        <canvas data-shousecv="${hs.id}" width="124" height="84" class="w-full h-auto rounded-lg border border-[#dcc39c]"></canvas>
+        <div class="font-bold text-[11px] text-[#4a3525] truncate">${hs.emoji} ${L(hs.name)}</div>
+      </button>`).join('');
+
+    const mapCards = FARM_LAYOUT_ORDER.map(lid => {
+      const lay = FARM_LAYOUTS[lid];
+      return `
+        <button data-smap="${lid}" class="rounded-xl p-2 text-left border-2 transition cursor-pointer flex flex-col gap-1 ${lid === setupDraft.mapLayout ? 'bg-[#fff5e4] border-[#e07a5f] shadow-sm' : 'bg-[#fffdf7] border-[#d6ba91] hover:border-[#c88c72]'}">
+          <canvas data-smapcv="${lid}" width="144" height="96" class="w-full h-auto rounded-lg border border-[#b59469]"></canvas>
+          <div class="font-bold text-xs text-[#4a3525]">${lay.emoji} ${L(lay.name)}</div>
+          <div class="inline-block text-[10px] font-bold text-[#9c4c34] bg-[#fde9dc] px-1.5 py-0.5 rounded-md w-fit">${L(lay.tag)}</div>
+          <div class="text-[10px] text-[#73563d] leading-snug">${L(lay.desc)}</div>
+        </button>`;
+    }).join('');
+
+    const body = `
+      <div id="pvSetupRoot" class="space-y-3.5">
+        <div class="flex items-start justify-between gap-2">
+          <p class="text-xs text-[#6e5239] leading-relaxed">${m.setupSub}</p>
+          <button id="btnSetupLang" class="shrink-0 px-2.5 py-1 rounded-xl bg-[#f3e3c3] border border-[#b58d60] font-bold text-[11px] text-[#4a3525] cursor-pointer">🌐 ${state.lang === 'zh' ? 'EN' : '中文'}</button>
+        </div>
+
+        <div class="rounded-2xl p-3 bg-[#fffaf0] border border-[#d6ba91] space-y-2.5">
+          <div class="font-bold text-xs text-[#5c3c22]">${m.setupStepChar}</div>
+          <div class="flex flex-col sm:flex-row gap-3 items-center sm:items-stretch">
+            <div class="flex flex-col items-center justify-center shrink-0">
+              <canvas id="setupCharPreview" width="102" height="112" class="rounded-2xl border-2 border-[#c5a176] shadow-inner cursor-pointer"></canvas>
+              <span class="text-[10px] text-[#7e634a] mt-1">↻ ${m.setupSpinHint}</span>
+            </div>
+            <div class="flex-1 w-full space-y-2">
+              <div class="grid grid-cols-2 gap-2">
+                <button data-sgender="female" class="py-1.5 px-3 rounded-xl font-bold text-xs border-2 cursor-pointer transition ${setupDraft.gender === 'female' ? 'bg-[#ffe8e2] border-[#e07a5f] text-[#5c2c1d]' : 'bg-[#fffdf7] border-[#d6ba91] text-[#5c3c22]'}">${m.genderFemale} ${setupDraft.gender === 'female' ? '✓' : ''}</button>
+                <button data-sgender="male" class="py-1.5 px-3 rounded-xl font-bold text-xs border-2 cursor-pointer transition ${setupDraft.gender === 'male' ? 'bg-[#e3f1fa] border-[#5f87b2] text-[#1f3b57]' : 'bg-[#fffdf7] border-[#d6ba91] text-[#5c3c22]'}">${m.genderMale} ${setupDraft.gender === 'male' ? '✓' : ''}</button>
+              </div>
+              <div class="grid grid-cols-2 gap-1.5">${outfitBtns}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-2xl p-3 bg-[#fffaf0] border border-[#d6ba91] space-y-2">
+          <div class="font-bold text-xs text-[#5c3c22]">${m.setupStepHouse}</div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">${houseCards}</div>
+        </div>
+
+        <div class="rounded-2xl p-3 bg-[#fffaf0] border border-[#d6ba91] space-y-2">
+          <div class="font-bold text-xs text-[#5c3c22]">${m.setupStepMap}</div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">${mapCards}</div>
+          <div class="text-[10px] text-[#7e634a]">💡 ${m.setupMapNote}</div>
+        </div>
+      </div>
+    `;
+
+    const curOutfit = getDress(setupDraft.gender, setupDraft.dressIdx);
+    const curHouse = HOUSE_STYLE_MAP[setupDraft.houseStyle] || HOUSE_STYLES[0];
+    const curLay = FARM_LAYOUTS[setupDraft.mapLayout] || FARM_LAYOUTS.pondRight;
+    const footer = `
+      <span class="text-[11px] text-[#5c3c22] truncate">${setupDraft.gender === 'male' ? '👦' : '👧'} ${L(curOutfit.name)} · ${curHouse.emoji} ${L(curHouse.name)} · ${curLay.emoji} ${L(curLay.tag)}</span>
+      <button id="btnStartValleyNow" class="btn-peach px-4 py-2 rounded-xl text-xs font-extrabold cursor-pointer shrink-0">${m.setupStartBtn}</button>
+    `;
+    openModal('🌼', m.setupTitle, body, footer);
+    if (prevScroll > 0) document.getElementById('modalBody').scrollTop = prevScroll;
+
+    const charCv = document.getElementById('setupCharPreview');
+    renderCharacterPreviewCanvas(charCv, setupDraft.gender, setupDraft.dressIdx, PREVIEW_DIRS[setupDraft.dirIdx]);
+    if (charCv) {
+      charCv.addEventListener('click', () => {
+        setupDraft.dirIdx = (setupDraft.dirIdx + 1) % PREVIEW_DIRS.length;
+        AudioFX.ui();
+        renderCharacterPreviewCanvas(charCv, setupDraft.gender, setupDraft.dressIdx, PREVIEW_DIRS[setupDraft.dirIdx]);
+      });
+    }
+    document.querySelectorAll('[data-shousecv]').forEach(cv => renderCottagePreviewCanvas(cv, cv.dataset.shousecv));
+    document.querySelectorAll('[data-smapcv]').forEach(cv => renderLayoutMiniPreview(cv, cv.dataset.smapcv, setupDraft.houseStyle));
+
+    document.getElementById('btnSetupLang').addEventListener('click', () => {
+      state.lang = state.lang === 'zh' ? 'en' : 'zh';
+      AudioFX.ui();
+      applyStaticLabels();
+      openStartSetupModal(false);
+    });
+    document.querySelectorAll('[data-sgender]').forEach(b => b.addEventListener('click', () => {
+      setupDraft.gender = b.dataset.sgender === 'male' ? 'male' : 'female';
+      setupDraft.dressIdx = setupDraft.dressIdx % getOutfitList(setupDraft.gender).length;
+      AudioFX.ui();
+      applySetupDraftToWorld(false);
+      openStartSetupModal(false);
+    }));
+    document.querySelectorAll('[data-sdress]').forEach(b => b.addEventListener('click', () => {
+      setupDraft.dressIdx = Number(b.dataset.sdress);
+      AudioFX.ui();
+      applySetupDraftToWorld(false);
+      openStartSetupModal(false);
+    }));
+    document.querySelectorAll('[data-shouse]').forEach(b => b.addEventListener('click', () => {
+      setupDraft.houseStyle = b.dataset.shouse;
+      AudioFX.ui();
+      applySetupDraftToWorld(false);
+      openStartSetupModal(false);
+    }));
+    document.querySelectorAll('[data-smap]').forEach(b => b.addEventListener('click', () => {
+      setupDraft.mapLayout = b.dataset.smap;
+      AudioFX.ui();
+      applySetupDraftToWorld(false);
+      openStartSetupModal(false);
+    }));
+    document.getElementById('btnStartValleyNow').addEventListener('click', () => {
+      applySetupDraftToWorld(true);
+      closeModal();
+      AudioFX.morning();
+      spawnParticles(state.player.x, state.player.y - 10, '#fef08a', 14, 2.0, 3.8);
+      addFloatText(state.player.x, state.player.y - 26, T().floats.freshStart, '#fef08a');
+    });
   }
 
   function openMailboxModal() {
@@ -4388,15 +4976,18 @@
        <button id="btnDoReset" class="btn-peach px-3.5 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${m.confirmReset}</button>`);
     document.getElementById('btnCancelReset').addEventListener('click', closeModal);
     document.getElementById('btnDoReset').addEventListener('click', () => {
-      const kl = state.lang, kd = state.dressIdx;
+      const kl = state.lang, kd = state.dressIdx, kg = state.gender, kh = state.houseStyle, km = state.mapLayout;
       localStorage.removeItem(SAVE_KEY); localStorage.removeItem(OLD_SAVE_KEY);
       IDBBackup.clear();
-      state = createInitialState(kl, kd);
+      hadLocalSave = false;
+      state = createInitialState(kl, kd, kg, kh, km, false);
+      MAPS.farm = buildFarmMap(state.mapLayout);
+      resetPondFishShadows('farm');
       cancelFishing();
       syncPetNearPlayer();
-      saveState(true, true);
-      closeModal(); applyStaticLabels(); updateHUD(); renderHotbar();
-      AudioFX.morning(); addFloatText(state.player.x, state.player.y - 26, T().floats.freshStart, '#fef08a');
+      applyStaticLabels(); updateHUD(); renderHotbar();
+      AudioFX.ui();
+      openStartSetupModal(true);
     });
   });
 
@@ -4434,7 +5025,8 @@
     }
 
     if (state.area === 'farm' && Math.random() < dt * 2.0) {
-      smokePuffs.push({ x: 4.7 * TILE + (Math.random() - 0.5) * 3, y: 1.9 * TILE, r: 4 + Math.random() * 2, life: 1, vx: 7 + Math.random() * 6, vy: -13 - Math.random() * 5 });
+      const cot = getFarmLayout().cottage;
+      smokePuffs.push({ x: (cot.x + 2.7) * TILE + (Math.random() - 0.5) * 3, y: (cot.y - 0.1) * TILE, r: 4 + Math.random() * 2, life: 1, vx: 7 + Math.random() * 6, vy: -13 - Math.random() * 5 });
     }
     for (let i = smokePuffs.length - 1; i >= 0; i--) {
       const s = smokePuffs[i]; s.x += s.vx * dt; s.y += s.vy * dt; s.r += dt * 4.5; s.life -= dt * 0.42;
@@ -4580,14 +5172,17 @@
   // STORYBOOK WATERCOLOR RENDERER
   // =========================================================================
   const INK = '#543c2c';
-  function roundRectPath(x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  function roundRectPath(x, y, w, h, r, c = ctx) {
+    c.beginPath();
+    c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
   }
 
   function drawPondFishShadows() {
+    const m = curMap();
     for (const s of pondFishShadows) {
+      const tx = Math.floor(s.x / TILE), ty = Math.floor(s.y / TILE);
+      if (tx < 0 || tx >= COLS || ty < 0 || ty >= ROWS || m[ty][tx] !== TILE_TYPE.WATER) continue;
       ctx.save();
       ctx.translate(s.x, s.y);
       ctx.rotate(s.ang);
@@ -4700,16 +5295,19 @@
     // Layer 2: Pond fish shadows
     drawPondFishShadows();
 
-    // Layer 3 & 4: Area props, buildings & Y-sorted characters (Girl + Pet + Animals)
+    // Layer 3 & 4: Area props, buildings & Y-sorted characters (Farmer + Pet + Animals)
     const petActor = (state.pet && state.pet.type)
       ? [{ y: petAI.y, draw: () => drawPetSprite(ctx, state.pet.type, petAI.x, petAI.y, petAI.dir, petAI.walkFrame, petAI.idleMode, state.pet.hasGift, 1) }]
       : [];
 
     if (state.area === 'farm') {
+      const lay = getFarmLayout();
       drawPondDuckling();
       drawFarmFences();
-      for (let y = 7; y <= 13; y++) for (let x = 3; x <= 15; x++) {
-        const td = getTileData(x, y); if (td) drawFarmContents(x, y, td);
+      for (const rect of lay.farmRects) {
+        for (let y = rect.y1; y <= rect.y2; y++) for (let x = rect.x1; x <= rect.x2; x++) {
+          const td = getTileData(x, y); if (td) drawFarmContents(x, y, td);
+        }
       }
       drawCursorHighlight();
       drawCottage();
@@ -4717,7 +5315,7 @@
       drawMailbox();
       drawShippingBin();
       drawShopStand();
-      drawSignpost(22, 4, T().gateToPasture);
+      drawSignpost(lay.signpost.x, lay.signpost.y, T().gateToPasture);
       const farmActors = [{ y: state.player.y, draw: () => drawGirlFarmer() }, ...petActor];
       farmActors.sort((a, b) => a.y - b.y);
       for (const ac of farmActors) ac.draw();
@@ -4779,12 +5377,16 @@
       const wave = Math.sin(animTime * 2.2 + x * 1.3 + y);
       ctx.strokeStyle = 'rgba(255,255,255,0.48)'; ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.arc(px + 14 + wave * 2, py + 15, 6, 0.2, 1.8); ctx.stroke();
-      const isLotusTile = (x === 19 && y === 10) || (x === 20 && y === 12) || (season.id === 'summer' && ((x === 19 && y === 12) || (x === 20 && y === 10)));
+      const baseLotus = state.area === 'farm' ? getFarmLayout().lotusTiles : [[19, 10], [20, 12]];
+      const summerLotus = state.area === 'farm' ? getFarmLayout().summerLotusTiles : [[19, 12], [20, 10]];
+      const isMainLotus = baseLotus.some(([lx, ly]) => lx === x && ly === y);
+      const isFirstLotus = baseLotus[0] && baseLotus[0][0] === x && baseLotus[0][1] === y;
+      const isLotusTile = isMainLotus || (season.id === 'summer' && summerLotus.some(([lx, ly]) => lx === x && ly === y));
       if (isLotusTile && season.id !== 'winter') {
         const bob = Math.sin(animTime * 2 + x + y) * 1.2;
         ctx.fillStyle = '#5eb06d';
         ctx.beginPath(); ctx.arc(px + 16, py + 16 + bob, 8.5, 0.35, Math.PI * 2 - 0.35); ctx.lineTo(px + 16, py + 16 + bob); ctx.fill();
-        if (season.id === 'summer' || (x === 19 && y === 10)) {
+        if (season.id === 'summer' || isFirstLotus) {
           // Layered blooming pink lotus!
           ctx.fillStyle = '#ff9ebb';
           for (let p = 0; p < 5; p++) {
@@ -4830,7 +5432,8 @@
   }
 
   function drawPondDuckling() {
-    const cx = 19.8 * TILE + Math.cos(animTime * 0.7) * 18, cy = 11.4 * TILE + Math.sin(animTime * 0.7) * 14;
+    const dc = getFarmLayout().duckCenter;
+    const cx = dc.x * TILE + Math.cos(animTime * 0.7) * 18, cy = dc.y * TILE + Math.sin(animTime * 0.7) * 14;
     ctx.save(); ctx.translate(cx, cy);
     if (Math.sin(animTime * 0.7) > 0) ctx.scale(-1, 1);
     ctx.strokeStyle = 'rgba(255,255,255,0.45)'; ctx.lineWidth = 1.2;
@@ -4844,12 +5447,15 @@
   }
 
   function drawFarmFences() {
-    for (let x = 3; x <= 15; x++) {
-      if (x === 11 || x === 12) continue;
-      const px = x * TILE, py = 6 * TILE + 20;
-      ctx.fillStyle = '#f4ead7'; ctx.strokeStyle = '#9c7d5c'; ctx.lineWidth = 1.2;
-      roundRectPath(px, py + 2, TILE, 4.5, 2); ctx.fill(); ctx.stroke();
-      roundRectPath(px + 12, py - 6, 8, 16, 3); ctx.fill(); ctx.stroke();
+    const lay = getFarmLayout();
+    for (const rect of lay.farmRects) {
+      for (let x = rect.x1; x <= rect.x2; x++) {
+        if (rect.gateXs.includes(x)) continue;
+        const px = x * TILE, py = (rect.y1 - 1) * TILE + 20;
+        ctx.fillStyle = '#f4ead7'; ctx.strokeStyle = '#9c7d5c'; ctx.lineWidth = 1.2;
+        roundRectPath(px, py + 2, TILE, 4.5, 2); ctx.fill(); ctx.stroke();
+        roundRectPath(px + 12, py - 6, 8, 16, 3); ctx.fill(); ctx.stroke();
+      }
     }
   }
 
@@ -4969,40 +5575,116 @@
     }
   }
 
-  function drawCottage() {
-    const x = 2 * TILE, y = 2 * TILE, w = 4 * TILE, h = 3 * TILE;
-    const isEvening = state.timeMinutes >= 17 * 60 + 30;
-    ctx.fillStyle = 'rgba(56,40,25,0.18)'; ctx.beginPath(); ctx.ellipse(x + w / 2, y + h, w * 0.52, 9, 0, 0, Math.PI * 2); ctx.fill();
-    roundRectPath(x + w - 34, y - 6, 16, 26, 3); ctx.fillStyle = '#c2a791'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.4; ctx.stroke();
-    roundRectPath(x + 8, y + 36, w - 16, h - 36, 6); ctx.fillStyle = '#fbf1dc'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.6; ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x - 2, y + 40); ctx.quadraticCurveTo(x + w / 2, y - 4, x + w + 2, y + 40); ctx.closePath();
-    ctx.fillStyle = isWinter() ? '#eef6fa' : '#d47462'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.6; ctx.stroke();
-    if (isWinter()) {
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath(); ctx.moveTo(x + 6, y + 32); ctx.quadraticCurveTo(x + w / 2, y + 2, x + w - 6, y + 32); ctx.quadraticCurveTo(x + w / 2, y + 24, x + 6, y + 32); ctx.fill();
+  function drawCottageSprite(c, x, y, styleId = 'terracotta', opts = {}) {
+    const hs = HOUSE_STYLE_MAP[styleId] || HOUSE_STYLES[0];
+    const w = 4 * TILE, h = 3 * TILE;
+    const winter = Boolean(opts.winter);
+    const isEvening = Boolean(opts.evening);
+    const kitchen = Boolean(opts.kitchen);
+
+    // Shadow
+    c.fillStyle = 'rgba(56,40,25,0.18)';
+    c.beginPath(); c.ellipse(x + w / 2, y + h, w * 0.52, 9, 0, 0, Math.PI * 2); c.fill();
+
+    // Chimney
+    roundRectPath(x + w - 34, y - 6, 16, 26, 3, c);
+    c.fillStyle = hs.chimney; c.fill(); c.strokeStyle = INK; c.lineWidth = 1.4; c.stroke();
+
+    // Wall body
+    roundRectPath(x + 8, y + 36, w - 16, h - 36, 6, c);
+    c.fillStyle = hs.wall; c.fill(); c.strokeStyle = INK; c.lineWidth = 1.6; c.stroke();
+
+    // Subtle wall texture details by cottage style
+    if (hs.wallDetail === 'timber') {
+      c.strokeStyle = 'rgba(122, 82, 48, 0.25)'; c.lineWidth = 1.1;
+      for (let ly = y + 48; ly < y + h - 4; ly += 10) {
+        c.beginPath(); c.moveTo(x + 10, ly); c.lineTo(x + w - 10, ly); c.stroke();
+      }
+    } else if (hs.wallDetail === 'stone') {
+      c.fillStyle = 'rgba(146, 134, 178, 0.22)';
+      for (const [bx, by] of [[14, 79], [28, 84], [96, 80], [104, 86], [16, 44], [100, 44]]) {
+        roundRectPath(x + bx, y + by, 10, 5, 2, c); c.fill();
+      }
     }
-    ctx.fillStyle = isWinter() ? '#ffffff' : '#f8e6cb';
-    for (let sx = x + 6; sx < x + w - 4; sx += 12) { ctx.beginPath(); ctx.arc(sx, y + 40, 4.5, 0, Math.PI); ctx.fill(); }
+
+    // Roof silhouette per style
+    c.beginPath();
+    if (hs.roofStyle === 'gable') {
+      c.moveTo(x - 3, y + 40); c.lineTo(x + w / 2, y + 4); c.lineTo(x + w + 3, y + 40);
+    } else if (hs.roofStyle === 'thatch') {
+      c.moveTo(x - 4, y + 42);
+      c.bezierCurveTo(x + 12, y + 10, x + w - 12, y + 10, x + w + 4, y + 42);
+    } else {
+      c.moveTo(x - 2, y + 40); c.quadraticCurveTo(x + w / 2, y - 4, x + w + 2, y + 40);
+    }
+    c.closePath();
+    c.fillStyle = winter ? '#eef6fa' : hs.roof; c.fill(); c.strokeStyle = INK; c.lineWidth = 1.6; c.stroke();
+
+    if (hs.roofStyle === 'thatch' && !winter) {
+      c.strokeStyle = 'rgba(166, 112, 42, 0.38)'; c.lineWidth = 1.2;
+      for (let tx = x + 16; tx < x + w - 14; tx += 14) {
+        c.beginPath(); c.moveTo(tx, y + 25); c.lineTo(tx - 3, y + 38); c.stroke();
+      }
+    }
+
+    if (winter) {
+      c.fillStyle = '#ffffff';
+      c.beginPath(); c.moveTo(x + 6, y + 32); c.quadraticCurveTo(x + w / 2, y + 2, x + w - 6, y + 32); c.quadraticCurveTo(x + w / 2, y + 24, x + 6, y + 32); c.fill();
+    }
+
+    // Scalloped eaves trim
+    c.fillStyle = winter ? '#ffffff' : hs.roofTrim;
+    for (let sx = x + 6; sx < x + w - 4; sx += 12) {
+      c.beginPath(); c.arc(sx, y + 40, 4.5, 0, Math.PI); c.fill();
+    }
+
     // Door
-    ctx.beginPath(); ctx.moveTo(x + 50, y + h); ctx.lineTo(x + 50, y + 66); ctx.arc(x + 63, y + 66, 13, Math.PI, 0); ctx.lineTo(x + 76, y + h); ctx.closePath();
-    ctx.fillStyle = '#b87b4c'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.5; ctx.stroke();
-    ctx.strokeStyle = '#5fa35b'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(x + 63, y + 72, 4.5, 0, Math.PI * 2); ctx.stroke();
+    if (hs.doorStyle === 'round') {
+      c.beginPath(); c.arc(x + 63, y + 80, 14, Math.PI, 0); c.lineTo(x + 77, y + h); c.lineTo(x + 49, y + h); c.closePath();
+    } else if (hs.doorStyle === 'double') {
+      roundRectPath(x + 50, y + 61, 26, h - 61, 3, c);
+    } else {
+      c.beginPath(); c.moveTo(x + 50, y + h); c.lineTo(x + 50, y + 66); c.arc(x + 63, y + 66, 13, Math.PI, 0); c.lineTo(x + 76, y + h); c.closePath();
+    }
+    c.fillStyle = hs.door; c.fill(); c.strokeStyle = INK; c.lineWidth = 1.5; c.stroke();
+    if (hs.doorStyle === 'double') {
+      c.beginPath(); c.moveTo(x + 63, y + 61); c.lineTo(x + 63, y + h); c.stroke();
+    } else {
+      c.strokeStyle = '#5fa35b'; c.lineWidth = 2.5;
+      c.beginPath(); c.arc(x + 63, y + 72, 4.5, 0, Math.PI * 2); c.stroke();
+    }
+
+    // Windows & flower boxes
     const winCol = isEvening ? '#fef08a' : '#bfe3f2';
     for (const wx of [x + 17, x + w - 39]) {
-      roundRectPath(wx, y + 52, 22, 19, 5); ctx.fillStyle = winCol; ctx.fill(); ctx.strokeStyle = '#7c5636'; ctx.lineWidth = 1.8; ctx.stroke();
-      roundRectPath(wx - 2, y + 71, 26, 7, 2); ctx.fillStyle = '#9c6c47'; ctx.fill();
-      for (const [ox, col] of [[3, '#ffb3c6'], [11, '#fff3b0'], [19, '#ffb3c6']]) { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(wx + ox, y + 71, 3, 0, Math.PI * 2); ctx.fill(); }
+      roundRectPath(wx, y + 52, 22, 19, 5, c); c.fillStyle = winCol; c.fill(); c.strokeStyle = hs.windowFrame; c.lineWidth = 1.8; c.stroke();
+      roundRectPath(wx - 2, y + 71, 26, 7, 2, c); c.fillStyle = hs.flowerBox; c.fill();
+      const fl = hs.flowers;
+      for (const [ox, col] of [[3, fl[0]], [11, fl[1]], [19, fl[2]]]) {
+        c.fillStyle = col; c.beginPath(); c.arc(wx + ox, y + 71, 3, 0, Math.PI * 2); c.fill();
+      }
     }
+
     // Cozy Kitchen badge on roof when kitchen is unlocked!
-    if (state.kitchenUnlocked) {
-      ctx.fillStyle = '#fff9e6'; ctx.beginPath(); ctx.arc(x + w / 2, y + 24, 10, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = '#9c6239'; ctx.lineWidth = 1.4; ctx.stroke();
-      ctx.font = '11px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('🍳', x + w / 2, y + 28);
+    if (kitchen) {
+      c.fillStyle = '#fff9e6'; c.beginPath(); c.arc(x + w / 2, y + 24, 10, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = '#9c6239'; c.lineWidth = 1.4; c.stroke();
+      c.font = '11px sans-serif'; c.textAlign = 'center'; c.fillText('🍳', x + w / 2, y + 28);
     }
   }
 
+  function drawCottage() {
+    const cot = getFarmLayout().cottage;
+    drawCottageSprite(ctx, cot.x * TILE, cot.y * TILE, state.houseStyle, {
+      winter: isWinter(),
+      evening: state.timeMinutes >= 17 * 60 + 30,
+      kitchen: state.kitchenUnlocked
+    });
+  }
+
   function drawMailbox() {
-    const px = 6 * TILE, py = 4 * TILE;
+    const mb = getFarmLayout().mailbox;
+    const px = mb.x * TILE, py = mb.y * TILE;
     ctx.fillStyle = '#a4754d'; ctx.fillRect(px + 14, py + 14, 4, 16);
     roundRectPath(px + 8, py + 7, 16, 11, 5); ctx.fillStyle = '#e89587'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.3; ctx.stroke();
     if (state.unreadMail) {
@@ -5012,14 +5694,16 @@
   }
 
   function drawShippingBin() {
-    const px = 7 * TILE, py = 4 * TILE;
+    const sb = getFarmLayout().shipping;
+    const px = sb.x * TILE, py = sb.y * TILE;
     roundRectPath(px + 4, py + 8, 24, 19, 4); ctx.fillStyle = '#c48d59'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.4; ctx.stroke();
     roundRectPath(px + 2.5, py + 5, 27, 7, 3); ctx.fillStyle = isWinter() ? '#f1f7fa' : '#dba672'; ctx.fill(); ctx.stroke();
     if (getShippingPendingGold() > 0) { ctx.fillStyle = '#ffd166'; ctx.beginPath(); ctx.arc(px + 25, py + 5, 4.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
   }
 
   function drawShopStand() {
-    const x = 16 * TILE, y = 2 * TILE, w = 5 * TILE, h = 3 * TILE;
+    const sh = getFarmLayout().shop;
+    const x = sh.x * TILE, y = sh.y * TILE, w = 5 * TILE, h = 3 * TILE;
     roundRectPath(x + 8, y + 32, w - 16, h - 32, 6); ctx.fillStyle = '#f5e6cc'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.5; ctx.stroke();
     ctx.fillStyle = '#d9c29f'; ctx.fillRect(x + 14, y + 38, w - 28, 30);
     const bob = Math.sin(animTime * 2.4) * 1.2, nx = x + w / 2, ny = y + 48 + bob;
@@ -5183,160 +5867,275 @@
   }
 
   // =========================================================================
-  // CUTE COTTAGECORE GIRL WITH TWIN BRAIDS (双麻花小辫子) + FLORAL DRESS + STRAW HAT
+  // STORYBOOK FARMER SPRITE (FEMALE & MALE + OUTFITS + LIVE PREVIEW SUPPORT)
   // =========================================================================
-  function drawBraid(x, y, sway, side, d) {
-    // 3 cute rounded descending braid puffs + matching ribbon bow tie at bottom!
-    ctx.fillStyle = d.hair;
-    ctx.strokeStyle = INK;
-    ctx.lineWidth = 1.1;
+  function drawBraid(c, x, y, sway, side, d) {
+    c.fillStyle = d.hair;
+    c.strokeStyle = INK;
+    c.lineWidth = 1.1;
     const pts = [
       [x + side * 0.5, y],
       [x + side * 1.4 + sway * 0.4, y + 4.3],
       [x + side * 2.0 + sway * 0.8, y + 8.5]
     ];
     for (const [bx, by] of pts) {
-      ctx.beginPath(); ctx.arc(bx, by, 2.7, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      c.beginPath(); c.arc(bx, by, 2.7, 0, Math.PI * 2); c.fill(); c.stroke();
     }
-    // Cute ribbon tie at the tip of the braid!
     const tipX = pts[2][0], tipY = pts[2][1] + 2.5;
-    ctx.fillStyle = d.ribbon;
-    ctx.beginPath(); ctx.ellipse(tipX - 2, tipY, 2.1, 1.3, -0.3, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(tipX + 2, tipY, 2.1, 1.3, 0.3, 0, Math.PI * 2); ctx.fill();
-    // Little hair tuft below ribbon
-    ctx.fillStyle = d.hair;
-    ctx.beginPath(); ctx.arc(tipX + sway * 0.2, tipY + 2.2, 1.5, 0, Math.PI * 2); ctx.fill();
+    c.fillStyle = d.ribbon;
+    c.beginPath(); c.ellipse(tipX - 2, tipY, 2.1, 1.3, -0.3, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.ellipse(tipX + 2, tipY, 2.1, 1.3, 0.3, 0, Math.PI * 2); c.fill();
+    c.fillStyle = d.hair;
+    c.beginPath(); c.arc(tipX + sway * 0.2, tipY + 2.2, 1.5, 0, Math.PI * 2); c.fill();
+  }
+
+  function drawFarmerSprite(c, opts) {
+    const {
+      x, y, dir = 'down', gender = 'female', outfit: d = getDress(),
+      scale = 1, walkFrame = 0, swingTimer = 0, swingTool = null
+    } = opts;
+    const walking = walkFrame > 0;
+    const step = walking ? Math.sin(walkFrame) * 3 : 0;
+    const bob = walking ? Math.abs(Math.cos(walkFrame)) * -2.2 : Math.sin(animTime * 2.5) * 0.6;
+    const sway = walking ? Math.sin(walkFrame) * 1.6 : Math.sin(animTime * 2) * 0.4;
+
+    c.save();
+    c.translate(x, y);
+    if (scale !== 1) c.scale(scale, scale);
+
+    // Ground shadow
+    c.fillStyle = 'rgba(56, 40, 25, 0.24)';
+    c.beginPath(); c.ellipse(0, 6.5, 11, 4.5, 0, 0, Math.PI * 2); c.fill();
+
+    if (gender === 'male') {
+      // Boots & cuffed trousers
+      c.fillStyle = d.pants || '#5f87b2'; c.strokeStyle = INK; c.lineWidth = 1.05;
+      roundRectPath(-6.2, -3.5 + bob * 0.3 + step * 0.6, 5.2, 7.2, 2, c); c.fill(); c.stroke();
+      roundRectPath(1.0, -3.5 + bob * 0.3 - step * 0.6, 5.2, 7.2, 2, c); c.fill(); c.stroke();
+      c.fillStyle = '#73472a'; c.strokeStyle = INK; c.lineWidth = 1;
+      c.beginPath(); c.ellipse(-3.7, 4.4 + step * 0.8, 3.6, 2.3, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.beginPath(); c.ellipse(3.7, 4.4 - step * 0.8, 3.6, 2.3, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+
+      // Shirt sleeves
+      c.fillStyle = d.shirt || '#fff8e8'; c.strokeStyle = INK; c.lineWidth = 1.1;
+      c.beginPath(); c.ellipse(-8.6, -9.5 + bob, 3.3, 4.1, 0.2, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.beginPath(); c.ellipse(8.6, -9.5 + bob, 3.3, 4.1, -0.2, 0, Math.PI * 2); c.fill(); c.stroke();
+      // Little hands
+      c.fillStyle = '#ffe4cc';
+      c.beginPath(); c.arc(-9.2, -5.6 + bob, 2.1, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.beginPath(); c.arc(9.2, -5.6 + bob, 2.1, 0, Math.PI * 2); c.fill(); c.stroke();
+
+      // Torso shirt
+      roundRectPath(-7.4, -13.5 + bob, 14.8, 12.2, 4.5, c);
+      c.fillStyle = d.shirt || '#fff8e8'; c.fill(); c.strokeStyle = INK; c.lineWidth = 1.2; c.stroke();
+
+      // Overalls / Vest / Shirt accent
+      if (d.style === 'overalls') {
+        // Denim bib + straps
+        roundRectPath(-5.8, -9.8 + bob, 11.6, 8.6, 3, c);
+        c.fillStyle = d.overalls; c.fill(); c.strokeStyle = INK; c.lineWidth = 1.05; c.stroke();
+        c.fillStyle = d.overalls;
+        c.fillRect(-5.2, -13.2 + bob, 2.2, 4.5);
+        c.fillRect(3.0, -13.2 + bob, 2.2, 4.5);
+        if (dir !== 'up') {
+          c.fillStyle = '#ffd166';
+          c.beginPath(); c.arc(-4.1, -9.3 + bob, 1.1, 0, Math.PI * 2); c.arc(4.1, -9.3 + bob, 1.1, 0, Math.PI * 2); c.fill();
+        }
+      } else if (d.style === 'vest') {
+        // Open cottage vest / cardigan
+        c.fillStyle = d.overalls; c.strokeStyle = INK; c.lineWidth = 1.05;
+        roundRectPath(-7.2, -13.2 + bob, 5.4, 11.4, 2.5, c); c.fill(); c.stroke();
+        roundRectPath(1.8, -13.2 + bob, 5.4, 11.4, 2.5, c); c.fill(); c.stroke();
+      } else {
+        // Cozy chambray shirt with subtle stripe & brown belt
+        c.fillStyle = 'rgba(255,255,255,0.28)';
+        c.fillRect(-4.2, -13 + bob, 1.6, 10.5);
+        c.fillRect(2.6, -13 + bob, 1.6, 10.5);
+        c.fillStyle = '#7d502d';
+        c.fillRect(-7.2, -3.5 + bob, 14.4, 2.4);
+        c.fillStyle = '#f5cb5c';
+        c.fillRect(-1.5, -3.7 + bob, 3, 2.8);
+      }
+
+      // Cozy farm neckerchief / scarf
+      if (dir !== 'up') {
+        c.fillStyle = d.ribbon; c.strokeStyle = INK; c.lineWidth = 0.9;
+        c.beginPath(); c.moveTo(-4.6, -13.2 + bob); c.lineTo(4.6, -13.2 + bob); c.lineTo(0, -9.6 + bob); c.closePath(); c.fill(); c.stroke();
+      }
+
+      // Head & short tousled storybook hair
+      if (dir === 'up') {
+        c.fillStyle = d.hair; c.strokeStyle = INK; c.lineWidth = 1.2;
+        c.beginPath(); c.arc(0, -19.5 + bob, 8.5, 0, Math.PI * 2); c.fill(); c.stroke();
+      } else {
+        c.fillStyle = '#ffe4cc'; c.strokeStyle = INK; c.lineWidth = 1.2;
+        c.beginPath(); c.arc(0, -19.5 + bob, 8.2, 0, Math.PI * 2); c.fill(); c.stroke();
+        // Side hair tufts & boyish bangs
+        c.fillStyle = d.hair;
+        c.beginPath();
+        c.arc(0, -20.8 + bob, 8.5, Math.PI * 0.96, Math.PI * 2.04);
+        c.lineTo(7.8, -17.4 + bob);
+        c.lineTo(5.6, -19.2 + bob);
+        c.lineTo(2.4, -18.2 + bob);
+        c.lineTo(0.2, -20.0 + bob);
+        c.lineTo(-2.8, -18.0 + bob);
+        c.lineTo(-5.8, -19.4 + bob);
+        c.lineTo(-7.8, -17.4 + bob);
+        c.closePath(); c.fill();
+
+        const eyeShift = dir === 'right' ? 2.2 : dir === 'left' ? -2.2 : 0;
+        c.fillStyle = '#3d281b';
+        if (dir === 'down') {
+          c.beginPath(); c.arc(-3.1, -17.8 + bob, 1.5, 0, Math.PI * 2); c.arc(3.1, -17.8 + bob, 1.5, 0, Math.PI * 2); c.fill();
+          c.fillStyle = '#ffffff';
+          c.beginPath(); c.arc(-3.5, -18.4 + bob, 0.55, 0, Math.PI * 2); c.arc(2.7, -18.4 + bob, 0.55, 0, Math.PI * 2); c.fill();
+          c.fillStyle = 'rgba(244, 146, 134, 0.45)';
+          c.beginPath(); c.ellipse(-5.2, -15.7 + bob, 1.7, 1.0, 0, 0, Math.PI * 2); c.ellipse(5.2, -15.7 + bob, 1.7, 1.0, 0, 0, Math.PI * 2); c.fill();
+          c.strokeStyle = '#9e5a49'; c.lineWidth = 1.05;
+          c.beginPath(); c.arc(0, -15.6 + bob, 1.8, 0.15 * Math.PI, 0.85 * Math.PI); c.stroke();
+        } else {
+          c.beginPath(); c.arc(eyeShift * 1.3, -17.8 + bob, 1.5, 0, Math.PI * 2); c.fill();
+          c.fillStyle = '#ffffff'; c.beginPath(); c.arc(eyeShift * 1.3 - 0.3, -18.4 + bob, 0.55, 0, Math.PI * 2); c.fill();
+          c.fillStyle = 'rgba(244, 146, 134, 0.42)'; c.beginPath(); c.ellipse(eyeShift * 1.7, -15.7 + bob, 1.6, 1.0, 0, 0, Math.PI * 2); c.fill();
+        }
+      }
+
+      // Woven Farmer Straw Hat (slightly flatter crown + colorful band + cute wheat sprig!)
+      c.fillStyle = '#efd084';
+      c.beginPath(); c.ellipse(0, -24.6 + bob, 13.8, 4.6, 0, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = '#946a30'; c.lineWidth = 1.25; c.stroke();
+      roundRectPath(-7.8, -30.5 + bob, 15.6, 6.4, 3, c);
+      c.fillStyle = '#f5dc98'; c.fill(); c.stroke();
+      c.fillStyle = d.ribbon;
+      c.fillRect(-7.6, -26.2 + bob, 15.2, 2.2);
+      // Tiny golden leaf/wheat sprout tucked in hatband
+      c.fillStyle = '#79b879';
+      c.beginPath(); c.ellipse(6.5, -27.2 + bob, 2.6, 1.3, -0.5, 0, Math.PI * 2); c.fill();
+    } else {
+      // FEMALE: Boots & white socks
+      c.fillStyle = '#fffdf7';
+      c.fillRect(-5.5, -1 + step * 0.7, 3.6, 4);
+      c.fillRect(1.9, -1 - step * 0.7, 3.6, 4);
+      c.fillStyle = '#8a5536'; c.strokeStyle = INK; c.lineWidth = 1;
+      c.beginPath(); c.ellipse(-3.8, 4.2 + step * 0.8, 3.3, 2.3, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.beginPath(); c.ellipse(3.8, 4.2 - step * 0.8, 3.3, 2.3, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+
+      // Puff sleeves
+      c.fillStyle = '#fff9ee'; c.strokeStyle = INK; c.lineWidth = 1.1;
+      c.beginPath(); c.arc(-8.5, -10.5 + bob, 3.6, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.beginPath(); c.arc(8.5, -10.5 + bob, 3.6, 0, Math.PI * 2); c.fill(); c.stroke();
+
+      // Flared floral cottagecore dress (碎花农妇小裙子)
+      c.beginPath();
+      c.moveTo(-6, -13 + bob); c.lineTo(6, -13 + bob);
+      c.quadraticCurveTo(11 + sway * 0.5, -5 + bob, 12.5 + sway, 2 + bob);
+      c.quadraticCurveTo(6 + sway, 4.5 + bob, 0 + sway * 0.5, 3 + bob);
+      c.quadraticCurveTo(-6 + sway * 0.5, 4.5 + bob, -12.5 + sway, 2 + bob);
+      c.quadraticCurveTo(-11 + sway * 0.5, -5 + bob, -6, -13 + bob);
+      c.closePath();
+      c.fillStyle = d.skirt; c.fill();
+
+      // Tiny floral blooms scattered on skirt
+      for (const [bx, by, col] of [[-6.5,-3.5,d.flowerA],[5.8,-4,d.flowerB],[-2.5,-0.2,d.flowerB],[7.8,0.2,d.flowerA],[-8.2,0.5,d.flowerA],[2.4,-7.2,d.flowerA]]) {
+        c.fillStyle = d.leaf; c.beginPath(); c.arc(bx + sway * 0.6 + 1.4, by + bob + 0.8, 1.3, 0, Math.PI * 2); c.fill();
+        c.fillStyle = col; c.beginPath(); c.arc(bx + sway * 0.6, by + bob, 1.8, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#ffd56b'; c.beginPath(); c.arc(bx + sway * 0.6, by + bob, 0.7, 0, Math.PI * 2); c.fill();
+      }
+      c.strokeStyle = INK; c.lineWidth = 1.2; c.stroke();
+
+      // White pinafore apron (front) or waist bow (back)
+      if (dir !== 'up') {
+        c.fillStyle = '#fffdf8';
+        c.beginPath();
+        c.moveTo(-4.5, -10.5 + bob); c.lineTo(4.5, -10.5 + bob);
+        c.lineTo(6 + sway * 0.5, -0.5 + bob);
+        c.quadraticCurveTo(0 + sway * 0.5, 1.5 + bob, -6 + sway * 0.5, -0.5 + bob);
+        c.closePath(); c.fill();
+        c.strokeStyle = '#d4c3aa'; c.lineWidth = 0.9; c.stroke();
+      } else {
+        c.fillStyle = d.ribbon;
+        c.beginPath(); c.ellipse(-3.5, -8 + bob, 3.2, 2, -0.3, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.ellipse(3.5, -8 + bob, 3.2, 2, 0.3, 0, Math.PI * 2); c.fill();
+        c.fillRect(-1.5, -7 + bob, 3, 5);
+      }
+
+      // Back head hair when facing up
+      if (dir === 'up') {
+        c.fillStyle = d.hair; c.strokeStyle = INK; c.lineWidth = 1.2;
+        c.beginPath(); c.arc(0, -19.5 + bob, 8.6, 0, Math.PI * 2); c.fill(); c.stroke();
+      }
+
+      // Face
+      if (dir !== 'up') {
+        c.fillStyle = '#ffe4cc'; c.strokeStyle = INK; c.lineWidth = 1.2;
+        c.beginPath(); c.arc(0, -19.5 + bob, 8.2, 0, Math.PI * 2); c.fill(); c.stroke();
+        // Cute bangs
+        c.fillStyle = d.hair;
+        c.beginPath();
+        c.arc(0, -20.5 + bob, 8.4, Math.PI * 1.05, Math.PI * 1.95);
+        c.lineTo(6, -19 + bob);
+        c.quadraticCurveTo(2, -21.5 + bob, 0, -18.5 + bob);
+        c.quadraticCurveTo(-2.5, -21.5 + bob, -6.5, -19 + bob);
+        c.closePath(); c.fill();
+
+        const eyeShift = dir === 'right' ? 2.2 : dir === 'left' ? -2.2 : 0;
+        c.fillStyle = '#3d281b';
+        if (dir === 'down') {
+          c.beginPath(); c.arc(-3.1, -18 + bob, 1.5, 0, Math.PI * 2); c.arc(3.1, -18 + bob, 1.5, 0, Math.PI * 2); c.fill();
+          c.fillStyle = '#ffffff';
+          c.beginPath(); c.arc(-3.5, -18.6 + bob, 0.55, 0, Math.PI * 2); c.arc(2.7, -18.6 + bob, 0.55, 0, Math.PI * 2); c.fill();
+          c.fillStyle = 'rgba(244, 134, 152, 0.58)';
+          c.beginPath(); c.ellipse(-5.3, -15.8 + bob, 1.9, 1.1, 0, 0, Math.PI * 2); c.ellipse(5.3, -15.8 + bob, 1.9, 1.1, 0, 0, Math.PI * 2); c.fill();
+          c.strokeStyle = '#9e5a49'; c.lineWidth = 1;
+          c.beginPath(); c.arc(0, -15.6 + bob, 1.6, 0.15 * Math.PI, 0.85 * Math.PI); c.stroke();
+        } else {
+          c.beginPath(); c.arc(eyeShift * 1.3, -18 + bob, 1.5, 0, Math.PI * 2); c.fill();
+          c.fillStyle = '#ffffff'; c.beginPath(); c.arc(eyeShift * 1.3 - 0.3, -18.6 + bob, 0.55, 0, Math.PI * 2); c.fill();
+          c.fillStyle = 'rgba(244, 134, 152, 0.55)'; c.beginPath(); c.ellipse(eyeShift * 1.7, -15.8 + bob, 1.8, 1.1, 0, 0, Math.PI * 2); c.fill();
+        }
+      }
+
+      // ADORABLE TWIN BRAIDED PIGTAILS
+      if (dir === 'down' || dir === 'up') {
+        drawBraid(c, -8.2, -16.8 + bob, -sway, -1, d);
+        drawBraid(c, 8.2, -16.8 + bob, sway, 1, d);
+      } else if (dir === 'right') {
+        drawBraid(c, -6.5, -16.8 + bob, -sway, -1, d);
+        drawBraid(c, 3.2, -16.2 + bob, sway, 0.6, d);
+      } else {
+        drawBraid(c, 6.5, -16.8 + bob, sway, 1, d);
+        drawBraid(c, -3.2, -16.2 + bob, -sway, -0.6, d);
+      }
+
+      // Little Woven Straw Sunhat + Ribbon Bow
+      c.fillStyle = '#f3d284';
+      c.beginPath(); c.ellipse(0, -24.5 + bob, 14.5, 5.2, 0, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = '#9c7134'; c.lineWidth = 1.25; c.stroke();
+      c.fillStyle = '#f7dd99';
+      c.beginPath(); c.arc(0, -25.2 + bob, 8.2, Math.PI, 0); c.closePath(); c.fill(); c.stroke();
+      c.strokeStyle = d.ribbon; c.lineWidth = 2.6;
+      c.beginPath(); c.ellipse(0, -25 + bob, 8.2, 2.2, 0, 0.08 * Math.PI, 0.92 * Math.PI); c.stroke();
+      const bowX = dir === 'left' ? -6.5 : 6.8;
+      c.fillStyle = d.ribbon;
+      c.beginPath(); c.ellipse(bowX - 2, -25.5 + bob, 2.8, 1.6, -0.3, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.ellipse(bowX + 2, -25.5 + bob, 2.8, 1.6, 0.3, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#fffdf5'; c.beginPath(); c.arc(bowX, -25.5 + bob, 1.4, 0, Math.PI * 2); c.fill();
+    }
+
+    if (swingTimer > 0) {
+      const ang = dir === 'right' ? 0 : dir === 'down' ? Math.PI / 2 : dir === 'left' ? Math.PI : -Math.PI / 2;
+      c.fillStyle = swingTool === 'can' ? '#67d4f6' : '#fef08a';
+      c.beginPath(); c.arc(Math.cos(ang) * 16, -8 + Math.sin(ang) * 16, 4.5, 0, Math.PI * 2); c.fill();
+    }
+    c.restore();
   }
 
   function drawGirlFarmer() {
-    const p = state.player, d = getDress();
-    const walking = p.walkFrame > 0;
-    const step = walking ? Math.sin(p.walkFrame) * 3 : 0;
-    const bob = walking ? Math.abs(Math.cos(p.walkFrame)) * -2.2 : Math.sin(animTime * 2.5) * 0.6;
-    const sway = walking ? Math.sin(p.walkFrame) * 1.6 : Math.sin(animTime * 2) * 0.4;
-
-    ctx.save();
-    ctx.translate(p.x, p.y);
-
-    // Shadow
-    ctx.fillStyle = 'rgba(56, 40, 25, 0.24)';
-    ctx.beginPath(); ctx.ellipse(0, 6.5, 11, 4.5, 0, 0, Math.PI * 2); ctx.fill();
-
-    // Boots & white socks
-    ctx.fillStyle = '#fffdf7';
-    ctx.fillRect(-5.5, -1 + step * 0.7, 3.6, 4);
-    ctx.fillRect(1.9, -1 - step * 0.7, 3.6, 4);
-    ctx.fillStyle = '#8a5536'; ctx.strokeStyle = INK; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.ellipse(-3.8, 4.2 + step * 0.8, 3.3, 2.3, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-    ctx.beginPath(); ctx.ellipse(3.8, 4.2 - step * 0.8, 3.3, 2.3, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-
-    // Puff sleeves
-    ctx.fillStyle = '#fff9ee'; ctx.strokeStyle = INK; ctx.lineWidth = 1.1;
-    ctx.beginPath(); ctx.arc(-8.5, -10.5 + bob, 3.6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-    ctx.beginPath(); ctx.arc(8.5, -10.5 + bob, 3.6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-
-    // Flared floral cottagecore dress (碎花农妇小裙子)
-    ctx.beginPath();
-    ctx.moveTo(-6, -13 + bob); ctx.lineTo(6, -13 + bob);
-    ctx.quadraticCurveTo(11 + sway * 0.5, -5 + bob, 12.5 + sway, 2 + bob);
-    ctx.quadraticCurveTo(6 + sway, 4.5 + bob, 0 + sway * 0.5, 3 + bob);
-    ctx.quadraticCurveTo(-6 + sway * 0.5, 4.5 + bob, -12.5 + sway, 2 + bob);
-    ctx.quadraticCurveTo(-11 + sway * 0.5, -5 + bob, -6, -13 + bob);
-    ctx.closePath();
-    ctx.fillStyle = d.skirt; ctx.fill();
-
-    // Tiny floral blooms scattered on skirt
-    for (const [bx, by, col] of [[-6.5,-3.5,d.flowerA],[5.8,-4,d.flowerB],[-2.5,-0.2,d.flowerB],[7.8,0.2,d.flowerA],[-8.2,0.5,d.flowerA],[2.4,-7.2,d.flowerA]]) {
-      ctx.fillStyle = d.leaf; ctx.beginPath(); ctx.arc(bx + sway * 0.6 + 1.4, by + bob + 0.8, 1.3, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(bx + sway * 0.6, by + bob, 1.8, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#ffd56b'; ctx.beginPath(); ctx.arc(bx + sway * 0.6, by + bob, 0.7, 0, Math.PI * 2); ctx.fill();
-    }
-    ctx.strokeStyle = INK; ctx.lineWidth = 1.2; ctx.stroke();
-
-    // White pinafore apron (front) or waist bow (back)
-    if (p.dir !== 'up') {
-      ctx.fillStyle = '#fffdf8';
-      ctx.beginPath();
-      ctx.moveTo(-4.5, -10.5 + bob); ctx.lineTo(4.5, -10.5 + bob);
-      ctx.lineTo(6 + sway * 0.5, -0.5 + bob);
-      ctx.quadraticCurveTo(0 + sway * 0.5, 1.5 + bob, -6 + sway * 0.5, -0.5 + bob);
-      ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = '#d4c3aa'; ctx.lineWidth = 0.9; ctx.stroke();
-    } else {
-      ctx.fillStyle = d.ribbon;
-      ctx.beginPath(); ctx.ellipse(-3.5, -8 + bob, 3.2, 2, -0.3, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(3.5, -8 + bob, 3.2, 2, 0.3, 0, Math.PI * 2); ctx.fill();
-      ctx.fillRect(-1.5, -7 + bob, 3, 5);
-    }
-
-    // Back head hair when facing up
-    if (p.dir === 'up') {
-      ctx.fillStyle = d.hair; ctx.strokeStyle = INK; ctx.lineWidth = 1.2;
-      ctx.beginPath(); ctx.arc(0, -19.5 + bob, 8.6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-    }
-
-    // Face
-    if (p.dir !== 'up') {
-      ctx.fillStyle = '#ffe4cc'; ctx.strokeStyle = INK; ctx.lineWidth = 1.2;
-      ctx.beginPath(); ctx.arc(0, -19.5 + bob, 8.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-      // Cute bangs
-      ctx.fillStyle = d.hair;
-      ctx.beginPath();
-      ctx.arc(0, -20.5 + bob, 8.4, Math.PI * 1.05, Math.PI * 1.95);
-      ctx.lineTo(6, -19 + bob);
-      ctx.quadraticCurveTo(2, -21.5 + bob, 0, -18.5 + bob);
-      ctx.quadraticCurveTo(-2.5, -21.5 + bob, -6.5, -19 + bob);
-      ctx.closePath(); ctx.fill();
-
-      const eyeShift = p.dir === 'right' ? 2.2 : p.dir === 'left' ? -2.2 : 0;
-      ctx.fillStyle = '#3d281b';
-      if (p.dir === 'down') {
-        ctx.beginPath(); ctx.arc(-3.1, -18 + bob, 1.5, 0, Math.PI * 2); ctx.arc(3.1, -18 + bob, 1.5, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath(); ctx.arc(-3.5, -18.6 + bob, 0.55, 0, Math.PI * 2); ctx.arc(2.7, -18.6 + bob, 0.55, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = 'rgba(244, 134, 152, 0.58)';
-        ctx.beginPath(); ctx.ellipse(-5.3, -15.8 + bob, 1.9, 1.1, 0, 0, Math.PI * 2); ctx.ellipse(5.3, -15.8 + bob, 1.9, 1.1, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = '#9e5a49'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.arc(0, -15.6 + bob, 1.6, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
-      } else {
-        ctx.beginPath(); ctx.arc(eyeShift * 1.3, -18 + bob, 1.5, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(eyeShift * 1.3 - 0.3, -18.6 + bob, 0.55, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = 'rgba(244, 134, 152, 0.55)'; ctx.beginPath(); ctx.ellipse(eyeShift * 1.7, -15.8 + bob, 1.8, 1.1, 0, 0, Math.PI * 2); ctx.fill();
-      }
-    }
-
-    // ADORABLE TWIN BRAIDED PIGTAILS (明显的两个麻花小辫子!) drawn cleanly over shoulders!
-    if (p.dir === 'down' || p.dir === 'up') {
-      drawBraid(-8.2, -16.8 + bob, -sway, -1, d);
-      drawBraid(8.2, -16.8 + bob, sway, 1, d);
-    } else if (p.dir === 'right') {
-      drawBraid(-6.5, -16.8 + bob, -sway, -1, d);
-      drawBraid(3.2, -16.2 + bob, sway, 0.6, d);
-    } else {
-      drawBraid(6.5, -16.8 + bob, sway, 1, d);
-      drawBraid(-3.2, -16.2 + bob, -sway, -0.6, d);
-    }
-
-    // Little Woven Straw Sunhat + Ribbon Bow
-    ctx.fillStyle = '#f3d284';
-    ctx.beginPath(); ctx.ellipse(0, -24.5 + bob, 14.5, 5.2, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#9c7134'; ctx.lineWidth = 1.25; ctx.stroke();
-    ctx.fillStyle = '#f7dd99';
-    ctx.beginPath(); ctx.arc(0, -25.2 + bob, 8.2, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.strokeStyle = d.ribbon; ctx.lineWidth = 2.6;
-    ctx.beginPath(); ctx.ellipse(0, -25 + bob, 8.2, 2.2, 0, 0.08 * Math.PI, 0.92 * Math.PI); ctx.stroke();
-    const bowX = p.dir === 'left' ? -6.5 : 6.8;
-    ctx.fillStyle = d.ribbon;
-    ctx.beginPath(); ctx.ellipse(bowX - 2, -25.5 + bob, 2.8, 1.6, -0.3, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(bowX + 2, -25.5 + bob, 2.8, 1.6, 0.3, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#fffdf5'; ctx.beginPath(); ctx.arc(bowX, -25.5 + bob, 1.4, 0, Math.PI * 2); ctx.fill();
-
-    if (p.swingTimer > 0) {
-      const ang = p.dir === 'right' ? 0 : p.dir === 'down' ? Math.PI / 2 : p.dir === 'left' ? Math.PI : -Math.PI / 2;
-      ctx.fillStyle = p.swingTool === 'can' ? '#67d4f6' : '#fef08a';
-      ctx.beginPath(); ctx.arc(Math.cos(ang) * 16, -8 + Math.sin(ang) * 16, 4.5, 0, Math.PI * 2); ctx.fill();
-    }
-    ctx.restore();
+    const p = state.player;
+    drawFarmerSprite(ctx, {
+      x: p.x, y: p.y, dir: p.dir, gender: state.gender, outfit: getDress(),
+      scale: 1, walkFrame: p.walkFrame, swingTimer: p.swingTimer, swingTool: p.swingTool
+    });
   }
 
   function drawTrees(season) {
@@ -5440,8 +6239,13 @@
     // 5. Warm glowing cottage windows & garden lanterns at dusk/night
     if (mins >= 18 * 60) {
       const glowAlpha = Math.min(0.45, ((mins - 1080) / 180) * 0.45);
+      const lay = getFarmLayout();
       const lights = state.area === 'farm'
-        ? [[3.3 * TILE, 4.3 * TILE, 64], [4.8 * TILE, 4.3 * TILE, 64], [18.5 * TILE, 4.2 * TILE, 74]]
+        ? [
+            [(lay.cottage.x + 1.3) * TILE, (lay.cottage.y + 2.3) * TILE, 64],
+            [(lay.cottage.x + 2.8) * TILE, (lay.cottage.y + 2.3) * TILE, 64],
+            [(lay.shop.x + 2.5) * TILE, (lay.shop.y + 2.2) * TILE, 74]
+          ]
         : [[5.5 * TILE, 4 * TILE, 68], [18 * TILE, 4.2 * TILE, 74]];
       if (state.area === 'farm') {
         for (const [k, td] of Object.entries(state.farm)) {
@@ -5467,18 +6271,19 @@
   }
 
   window.addEventListener('themechange', () => render());
-  window.addEventListener('beforeunload', () => { if (gameBooted) saveState(true, true); });
-  window.addEventListener('pagehide', () => { if (gameBooted) saveState(true, true); });
+  window.addEventListener('beforeunload', () => { if (gameBooted && state.setupDone) saveState(true, true); });
+  window.addEventListener('pagehide', () => { if (gameBooted && state.setupDone) saveState(true, true); });
   document.addEventListener('visibilitychange', () => {
-    if (gameBooted && document.visibilityState === 'hidden') saveState(true, false);
+    if (gameBooted && state.setupDone && document.visibilityState === 'hidden') saveState(true, false);
   });
-  setInterval(() => { if (gameBooted) saveState(true, true); }, 15000);
+  setInterval(() => { if (gameBooted && state.setupDone) saveState(true, true); }, 15000);
 
   applyStaticLabels();
   updateHUD();
   renderHotbar();
   gameBooted = true;
   if (!hadLocalSave) {
+    if (!state.setupDone) openStartSetupModal(true);
     IDBBackup.load().then(parsed => {
       if (parsed && !hadLocalSave) {
         hadLocalSave = true;
