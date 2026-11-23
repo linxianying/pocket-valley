@@ -1,0 +1,3455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>口袋山谷 · Pocket Valley</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --background: #f5efe2;
+      --card: #fffaf0;
+      --border: #d9c5a3;
+      --foreground: #463222;
+      --muted-foreground: #7e634a;
+      --primary: #e07a5f;
+      --primary-foreground: #ffffff;
+    }
+    * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', ui-rounded, 'SF Pro Rounded', system-ui, -apple-system, sans-serif;
+    }
+    canvas#gameCanvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      cursor: pointer;
+      border-radius: 14px;
+    }
+    .storybook-frame {
+      background: linear-gradient(180deg, #b88c62 0%, #966c47 100%);
+      border: 3px solid #6e4c30;
+      box-shadow: inset 0 2px 0 rgba(255, 245, 228, 0.45), 0 10px 28px rgba(42, 28, 16, 0.25);
+    }
+    .parchment {
+      background: linear-gradient(180deg, #fffaf0 0%, #f7ecd6 100%);
+      color: #4a3525;
+      border: 1.5px solid #c5a176;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 3px 10px rgba(74, 53, 37, 0.14);
+    }
+    .slot-btn {
+      background: linear-gradient(180deg, #fffdf7 0%, #f3e4c8 100%);
+      border: 1.5px solid #b58d60;
+      color: #4a3525;
+      transition: transform 0.1s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+    }
+    .slot-btn:hover { transform: translateY(-1.5px); border-color: #d67a63; }
+    .slot-btn.active {
+      background: linear-gradient(180deg, #fffdf4 0%, #ffe6b8 100%);
+      border-color: #e07a5f;
+      box-shadow: 0 0 0 2px rgba(224, 122, 95, 0.45), 0 3px 8px rgba(74, 53, 37, 0.18);
+      transform: translateY(-2px);
+    }
+    .btn-peach {
+      background: linear-gradient(180deg, #e88d72 0%, #d46f53 100%);
+      color: #fffdf9;
+      border: 1.5px solid #9c4a34;
+      text-shadow: 0 1px 1px rgba(80, 30, 15, 0.25);
+      transition: filter 0.12s ease, transform 0.08s ease;
+    }
+    .btn-peach:hover:not(:disabled) { filter: brightness(1.06); transform: translateY(-1px); }
+    .btn-peach:active:not(:disabled) { transform: translateY(0); }
+    .btn-peach:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-sage {
+      background: linear-gradient(180deg, #74b078 0%, #58935c 100%);
+      color: #fffdf9;
+      border: 1.5px solid #3c6b3f;
+      text-shadow: 0 1px 1px rgba(25, 55, 28, 0.25);
+      transition: filter 0.12s ease, transform 0.08s ease;
+    }
+    .btn-sage:hover:not(:disabled) { filter: brightness(1.06); transform: translateY(-1px); }
+    .btn-sage:disabled { opacity: 0.45; cursor: not-allowed; }
+    .modal-backdrop {
+      background: rgba(40, 30, 24, 0.52);
+      backdrop-filter: blur(3px);
+    }
+    .num-tabular { font-variant-numeric: tabular-nums; }
+    .fade-overlay { transition: opacity 0.4s ease; pointer-events: none; }
+    .cozy-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .cozy-scroll::-webkit-scrollbar-track { background: rgba(181, 141, 96, 0.15); border-radius: 4px; }
+    .cozy-scroll::-webkit-scrollbar-thumb { background: rgba(181, 141, 96, 0.5); border-radius: 4px; }
+  </style>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased min-h-screen p-3 sm:p-4">
+  <div class="max-w-[990px] mx-auto flex flex-col gap-2.5">
+
+    <!-- Top Compact Header -->
+    <div class="flex flex-wrap items-center justify-between gap-2 bg-[var(--card)] border border-[var(--border)] rounded-2xl px-3.5 py-2 shadow-sm">
+      <div class="flex items-center gap-2.5">
+        <span class="text-xl" aria-hidden="true">🌼</span>
+        <div>
+          <h1 id="uiGameTitle" class="text-sm font-bold leading-tight tracking-tight text-[var(--foreground)]">口袋山谷</h1>
+          <p id="uiControlsLine" class="text-xs text-[var(--muted-foreground)] leading-tight">WASD 移动 · 点击或空格耕种 · E 互动/采摘/喂动物</p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-1.5 text-xs">
+        <button id="btnAreaToggle" class="px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90 font-semibold flex items-center gap-1 cursor-pointer">
+          <span id="uiAreaToggleIcon">🐮</span><span id="uiAreaToggleLabel">去牧场</span>
+        </button>
+        <button id="btnKitchen" class="px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer">
+          <span>🍳</span><span id="uiKitchenBtn">厨房</span>
+        </button>
+        <button id="btnShopShortcut" class="px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer">
+          <span>🧺</span><span id="uiShopBtn">花种铺</span>
+        </button>
+        <button id="btnRanchShopShortcut" class="px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer">
+          <span>🥛</span><span id="uiRanchShopBtn">牧场铺</span>
+        </button>
+        <button id="btnSatchel" class="px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer">
+          <span>💐</span><span id="uiSatchelBtn">花篮</span>
+          <span id="satchelBadge" class="px-1.5 py-0.5 rounded-full text-[11px] font-bold bg-[var(--primary)] text-[var(--primary-foreground)] num-tabular">0</span>
+        </button>
+        <button id="btnDress" class="px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium flex items-center gap-1 cursor-pointer">
+          <span>👗</span><span id="uiDressLabel">换装</span>
+        </button>
+        <button id="btnLang" class="px-2.5 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-semibold flex items-center gap-1 cursor-pointer">
+          <span>🌐</span><span id="uiLangLabel">EN</span>
+        </button>
+        <button id="btnSleepQuick" class="px-2 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium cursor-pointer" title="Sleep / 休息">🌙</button>
+        <button id="btnSound" class="px-2 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium cursor-pointer">🔊</button>
+        <button id="btnHelp" class="px-2 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium cursor-pointer">❓</button>
+        <button id="btnReset" class="px-2 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:opacity-85 font-medium text-[var(--muted-foreground)] cursor-pointer">↺</button>
+      </div>
+    </div>
+
+    <!-- Main Storybook Game Frame -->
+    <div class="storybook-frame rounded-2xl p-2.5 relative overflow-hidden">
+
+      <!-- In-Game HUD Overlay Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-2 px-0.5">
+        <div class="parchment rounded-xl px-3 py-1.5 flex items-center gap-2 text-xs font-semibold">
+          <span id="hudAreaPill" class="px-1.5 py-0.5 rounded-lg bg-[#e9d5b2] text-[#5c3c22] text-[11px] font-bold">🏡 农庄</span>
+          <span class="opacity-30">|</span>
+          <div class="flex items-center gap-1">
+            <span id="hudSeasonIcon">🌸</span>
+            <span id="hudDate" class="num-tabular">春季 第1天</span>
+          </div>
+          <span class="opacity-30">|</span>
+          <div class="flex items-center gap-1">
+            <span id="hudClockIcon">☀️</span>
+            <span id="hudTime" class="num-tabular font-bold">上午 6:00</span>
+          </div>
+          <span class="opacity-30">|</span>
+          <div class="flex items-center gap-1">
+            <span id="hudWeatherIcon">☀️</span>
+            <span id="hudWeatherText">晴朗</span>
+          </div>
+          <span class="opacity-30 hidden md:inline">|</span>
+          <div class="hidden md:flex items-center gap-1 text-[11px] opacity-80">
+            <span id="uiForecastLabel">明日:</span>
+            <span id="hudForecastIcon">☀️</span>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-1.5">
+          <div class="parchment rounded-xl px-2.5 py-1.5 flex items-center gap-2 text-xs font-bold num-tabular">
+            <span class="flex items-center gap-1 text-amber-800"><span>🪙</span><span id="hudGold">150</span>g</span>
+            <span id="hudShippedWrap" class="hidden items-center gap-0.5 text-emerald-700 text-[11px]"><span>📦</span>+<span id="hudPendingGold">0</span>g</span>
+            <span class="opacity-25">|</span>
+            <span class="flex items-center gap-0.5 text-[#7a542e]" title="Animal Feed / 牧草饲料"><span>🌾</span><span id="hudFeed">5</span></span>
+          </div>
+
+          <div class="parchment rounded-xl px-2.5 py-1.5 flex items-center gap-1.5 text-xs font-semibold">
+            <span>🍀</span>
+            <div class="w-14 sm:w-16 h-2.5 bg-[#e5d5b7] rounded-full overflow-hidden border border-[#bfa078]">
+              <div id="hudEnergyBar" class="h-full bg-emerald-500 transition-all duration-150" style="width:100%"></div>
+            </div>
+            <span id="hudEnergyText" class="num-tabular text-[11px] w-6 text-right">100</span>
+          </div>
+
+          <div class="parchment rounded-xl px-2.5 py-1.5 flex items-center gap-1.5 text-xs font-semibold">
+            <span>💧</span>
+            <div class="w-12 sm:w-14 h-2.5 bg-[#e5d5b7] rounded-full overflow-hidden border border-[#bfa078]">
+              <div id="hudWaterBar" class="h-full bg-sky-400 transition-all duration-150" style="width:100%"></div>
+            </div>
+            <span id="hudWaterText" class="num-tabular text-[11px]">20/20</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas Container -->
+      <div class="relative rounded-2xl overflow-hidden bg-[#7ab464] border-2 border-[#6e4c30]">
+        <canvas id="gameCanvas" width="768" height="512"></canvas>
+
+        <!-- Contextual Action Pill -->
+        <div id="contextHint" class="hidden absolute bottom-2.5 left-2.5 parchment rounded-xl px-3 py-1.5 text-xs font-semibold shadow-md pointer-events-none flex items-center gap-1.5">
+          <span id="contextHintIcon">✨</span>
+          <span id="contextHintText"></span>
+        </div>
+
+        <!-- Top-Right Banner (Seasonal Bonus on Farm / Pasture Status on Pasture) -->
+        <div id="topRightPill" class="absolute top-2.5 right-2.5 parchment rounded-xl px-3 py-1 text-[11px] font-semibold opacity-95 pointer-events-none"></div>
+
+        <!-- Sleep / Area Fade Overlay -->
+        <div id="fadeOverlay" class="fade-overlay absolute inset-0 bg-[#1e1d30] opacity-0 flex items-center justify-center">
+          <div id="fadeMessage" class="text-amber-100 text-base sm:text-lg font-bold tracking-wide px-4 text-center"></div>
+        </div>
+
+        <!-- Modal Overlay Layer -->
+        <div id="modalOverlay" class="hidden absolute inset-0 modal-backdrop flex items-center justify-center p-3 z-20">
+          <div id="modalCard" class="parchment rounded-2xl w-full max-w-[580px] max-h-[93%] flex flex-col overflow-hidden shadow-2xl">
+            <div class="flex items-center justify-between px-4 py-2.5 border-b border-[#d6ba91] bg-[#f4e4c5]">
+              <div class="flex items-center gap-2">
+                <span id="modalIcon" class="text-lg">🌸</span>
+                <h2 id="modalTitle" class="font-bold text-sm sm:text-base text-[#4a3525]"></h2>
+              </div>
+              <button id="modalCloseBtn" class="w-7 h-7 rounded-xl bg-[#e6d0a8] hover:bg-[#dac092] border border-[#b58d60] text-[#4a3525] font-bold text-xs flex items-center justify-center cursor-pointer">✕</button>
+            </div>
+            <div id="modalBody" class="p-3.5 overflow-y-auto cozy-scroll text-xs sm:text-sm space-y-3"></div>
+            <div id="modalFooter" class="px-4 py-2.5 border-t border-[#d6ba91] bg-[#f4e4c5] flex items-center justify-between gap-2 text-xs"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two-Strip Compact Hotbar: Row 1 Tools & Gear + Row 2 All 10 Seeds -->
+      <div class="mt-2 flex flex-col gap-1.5">
+        <div class="flex flex-col sm:flex-row gap-1.5">
+          <div id="hotbarTools" class="grid grid-cols-5 gap-1.5 sm:w-[37%]"></div>
+          <div id="hotbarSeeds" class="grid grid-cols-5 sm:grid-cols-10 gap-1 sm:w-[63%]"></div>
+        </div>
+        <div class="flex items-center justify-between px-1 text-[11px] text-amber-50/95">
+          <span id="selectedToolInfo"></span>
+          <span id="uiHotbarHint" class="hidden sm:inline opacity-85"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subtle Footer Status / Stats -->
+    <div class="flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-[var(--muted-foreground)]">
+      <div class="flex flex-wrap items-center gap-3">
+        <span><span id="uiStatHarvestLabel">🌾 收获</span>: <strong id="statHarvested" class="text-[var(--foreground)] num-tabular">0</strong></span>
+        <span><span id="uiStatAnimalsLabel">🐮 牧场动物</span>: <strong id="statAnimals" class="text-[var(--foreground)] num-tabular">0</strong></span>
+        <span><span id="uiStatDishesLabel">🍳 料理</span>: <strong id="statDishes" class="text-[var(--foreground)] num-tabular">0</strong></span>
+        <span><span id="uiStatGoldLabel">🪙 累计金币</span>: <strong id="statLifetimeGold" class="text-[var(--foreground)] num-tabular">0g</strong></span>
+      </div>
+      <div id="saveStatus" class="text-xs opacity-80"></div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  'use strict';
+
+  // =========================================================================
+  // CONSTANTS, DRESS THEMES, CROPS (10), ANIMALS (4), PANTRY & RECIPES (10)
+  // =========================================================================
+  const COLS = 24;
+  const ROWS = 16;
+  const TILE = 32;
+  const CANVAS_W = COLS * TILE; // 768
+  const CANVAS_H = ROWS * TILE; // 512
+  const SAVE_KEY = 'pocket_valley_storybook_v3';
+  const OLD_SAVE_KEY = 'pocket_valley_storybook_v2';
+
+  const DRESS_THEMES = [
+    {
+      id: 'rose', name: { zh: '樱花粉碎花裙', en: 'Blossom Rose Floral' },
+      skirt: '#f09aa8', skirtShade: '#d97b8c', flowerA: '#fff8d6', flowerB: '#ffe0ec',
+      leaf: '#79b879', ribbon: '#e06478', hair: '#6b422d', hairLight: '#8a583d', preview: '🌸'
+    },
+    {
+      id: 'sky', name: { zh: '雏菊浅蓝碎花裙', en: 'Sky Daisy Floral' },
+      skirt: '#8db9dc', skirtShade: '#6f9ec4', flowerA: '#fffef0', flowerB: '#ffe28a',
+      leaf: '#74b57b', ribbon: '#e68c72', hair: '#5a3a29', hairLight: '#7b523b', preview: '🌼'
+    },
+    {
+      id: 'mint', name: { zh: '薄荷青碎花裙', en: 'Mint Clover Floral' },
+      skirt: '#8fc7a3', skirtShade: '#70ab86', flowerA: '#fff9e6', flowerB: '#f7b2c4',
+      leaf: '#5b9468', ribbon: '#e88b73', hair: '#7c4e32', hairLight: '#9e6844', preview: '🌿'
+    },
+    {
+      id: 'butter', name: { zh: '向日葵鹅黄碎花裙', en: 'Buttercup Floral' },
+      skirt: '#f2cf7e', skirtShade: '#d9b15b', flowerA: '#ffffff', flowerB: '#f4978e',
+      leaf: '#77b377', ribbon: '#d96b52', hair: '#583726', hairLight: '#784e38', preview: '🌻'
+    }
+  ];
+
+  const SEASONS = [
+    {
+      id: 'spring', name: { zh: '春季', en: 'Spring' }, icon: '🌸',
+      bonus: ['turnip', 'radish', 'wheat', 'carrot'],
+      label: { zh: '芜菁、萝卜、小麦、胡萝卜', en: 'Turnip, Radish, Wheat & Carrot' },
+      grassA: '#8ec971', grassB: '#85c168', farmA: '#9cd27d', farmB: '#93ca74',
+      treeA: '#5f9e60', treeB: '#7bbd74', treeHi: '#a2d98f', blossom: '#ffc2d6'
+    },
+    {
+      id: 'summer', name: { zh: '夏季', en: 'Summer' }, icon: '☀️',
+      bonus: ['strawberry', 'blueberry', 'tomato', 'corn'],
+      label: { zh: '番茄、甜玉米、草莓、蓝莓', en: 'Tomato, Corn, Strawberry & Blueberry' },
+      grassA: '#78be6a', grassB: '#6fb561', farmA: '#87c976', farmB: '#7ec16d',
+      treeA: '#4a8f58', treeB: '#63ad6a', treeHi: '#8ccf82', blossom: '#ffe985'
+    },
+    {
+      id: 'autumn', name: { zh: '秋季', en: 'Autumn' }, icon: '🍂',
+      bonus: ['pumpkin', 'starfruit', 'carrot', 'wheat'],
+      label: { zh: '南瓜、杨桃、胡萝卜、小麦', en: 'Pumpkin, Starfruit, Carrot & Wheat' },
+      grassA: '#c6af64', grassB: '#bda55a', farmA: '#d2bc71', farmB: '#cab468',
+      treeA: '#c96f4a', treeB: '#e08d58', treeHi: '#f4b572', blossom: '#f08a5d'
+    }
+  ];
+
+  // 10 CROP SEEDS!
+  const CROPS = {
+    turnip: {
+      id: 'turnip', name: { zh: '芜菁', en: 'Turnip' }, emoji: '🥬',
+      seedPrice: 20, sellPrice: 45, days: 2, regrow: 0, yieldMin: 1, yieldMax: 1, energy: 15,
+      color: '#f8edf8', accent: '#b774cc', leaf: '#62b35b',
+      desc: { zh: '2天速成小白芜菁，做沙拉和炖菜超棒！', en: 'Fast 2-day sweet root, great for salads & stews!' }
+    },
+    wheat: {
+      id: 'wheat', name: { zh: '小麦', en: 'Wheat' }, emoji: '🌾',
+      seedPrice: 25, sellPrice: 55, days: 2, regrow: 0, yieldMin: 1, yieldMax: 1, energy: 12,
+      color: '#f2ca52', accent: '#d9a42b', leaf: '#75b557',
+      desc: { zh: '2天成熟的黄金小麦，烘焙吐司与点心必备！', en: 'Golden 2-day grain essential for baking!' }
+    },
+    radish: {
+      id: 'radish', name: { zh: '樱桃萝卜', en: 'Radish' }, emoji: '🫜',
+      seedPrice: 35, sellPrice: 85, days: 3, regrow: 0, yieldMin: 1, yieldMax: 1, energy: 20,
+      color: '#e85d75', accent: '#fff0f3', leaf: '#52a656',
+      desc: { zh: '3天成熟的脆甜小红萝卜。', en: 'Crisp ruby radish ready in 3 days.' }
+    },
+    carrot: {
+      id: 'carrot', name: { zh: '胡萝卜', en: 'Carrot' }, emoji: '🥕',
+      seedPrice: 40, sellPrice: 95, days: 3, regrow: 0, yieldMin: 1, yieldMax: 1, energy: 22,
+      color: '#f28436', accent: '#ffc285', leaf: '#4da852',
+      desc: { zh: '3天成熟香甜胡萝卜，奶油炖菜主角！', en: 'Sweet 3-day carrot, star of creamy stews!' }
+    },
+    tomato: {
+      id: 'tomato', name: { zh: '小番茄', en: 'Tomato' }, emoji: '🍅',
+      seedPrice: 55, sellPrice: 80, days: 4, regrow: 2, yieldMin: 1, yieldMax: 1, energy: 22,
+      color: '#e84848', accent: '#ff9e9e', leaf: '#4a9e52',
+      desc: { zh: '多汁红番茄，成熟后每2天重复结果！', en: 'Juicy tomatoes that regrow every 2 days!' }
+    },
+    corn: {
+      id: 'corn', name: { zh: '甜玉米', en: 'Corn' }, emoji: '🌽',
+      seedPrice: 65, sellPrice: 105, days: 4, regrow: 3, yieldMin: 1, yieldMax: 1, energy: 26,
+      color: '#ffd447', accent: '#f5a623', leaf: '#52a34e',
+      desc: { zh: '金黄甜玉米，每3天可再次采摘！', en: 'Sweet golden corn that regrows every 3 days!' }
+    },
+    strawberry: {
+      id: 'strawberry', name: { zh: '草莓', en: 'Strawberry' }, emoji: '🍓',
+      seedPrice: 70, sellPrice: 95, days: 4, regrow: 2, yieldMin: 1, yieldMax: 1, energy: 25,
+      color: '#eb5762', accent: '#ffe082', leaf: '#4b9e59',
+      desc: { zh: '香甜草莓丛，每2天复采，做蛋糕绝配！', en: 'Sweet bush regrowing every 2 days—cake favorite!' }
+    },
+    blueberry: {
+      id: 'blueberry', name: { zh: '蓝莓', en: 'Blueberry' }, emoji: '🫐',
+      seedPrice: 100, sellPrice: 55, days: 5, regrow: 3, yieldMin: 2, yieldMax: 3, energy: 22,
+      color: '#5a82dc', accent: '#bdd4ff', leaf: '#459467',
+      desc: { zh: '每次收获2–3颗饱满蓝莓，每3天复采！', en: 'Yields 2–3 berries & regrows every 3 days!' }
+    },
+    pumpkin: {
+      id: 'pumpkin', name: { zh: '南瓜', en: 'Pumpkin' }, emoji: '🎃',
+      seedPrice: 120, sellPrice: 320, days: 6, regrow: 0, yieldMin: 1, yieldMax: 1, energy: 35,
+      color: '#f28c38', accent: '#d1651b', leaf: '#538f48',
+      desc: { zh: '丰收大南瓜，熬成南瓜浓汤价值倍增！', en: 'Giant squash—even richer as Pumpkin Soup!' }
+    },
+    starfruit: {
+      id: 'starfruit', name: { zh: '杨桃', en: 'Starfruit' }, emoji: '⭐',
+      seedPrice: 250, sellPrice: 680, days: 7, regrow: 0, yieldMin: 1, yieldMax: 1, energy: 45,
+      color: '#ffd147', accent: '#fff7bd', leaf: '#54ab68',
+      desc: { zh: '珍稀闪亮杨桃，可烘焙顶级星光水果塔！', en: 'Rare valley fruit for the Starlight Fruit Tart!' }
+    }
+  };
+  const CROP_ORDER = ['turnip', 'wheat', 'radish', 'carrot', 'tomato', 'corn', 'strawberry', 'blueberry', 'pumpkin', 'starfruit'];
+
+  // 4 PASTURE ANIMALS!
+  const ANIMALS = {
+    chicken: {
+      id: 'chicken', name: { zh: '小母鸡', en: 'Chicken' }, emoji: '🐔', price: 80,
+      product: 'egg', desc: { zh: '每天喂饱后会下新鲜鸡蛋！', en: 'Lays a fresh Egg every morning when fed!' }
+    },
+    duck: {
+      id: 'duck', name: { zh: '小白鸭', en: 'Duck' }, emoji: '🦆', price: 110,
+      product: 'duckEgg', desc: { zh: '爱在溪塘玩水，每天产出香浓鸭蛋！', en: 'Loves splashing by the pond & lays Duck Eggs!' }
+    },
+    sheep: {
+      id: 'sheep', name: { zh: '软绵羊', en: 'Sheep' }, emoji: '🐑', price: 200,
+      product: 'wool', desc: { zh: '毛茸茸超温顺，每天产出蓬松羊毛！', en: 'Fluffy friend producing soft Wool every morning!' }
+    },
+    cow: {
+      id: 'cow', name: { zh: '花奶牛', en: 'Cow' }, emoji: '🐄', price: 260,
+      product: 'milk', desc: { zh: '每天产出香醇鲜牛奶，做料理超百搭！', en: 'Produces rich Fresh Milk daily for cooking & shipping!' }
+    }
+  };
+  const ANIMAL_ORDER = ['chicken', 'duck', 'sheep', 'cow'];
+
+  // ANIMAL PRODUCE + BUYABLE PANTRY INGREDIENTS (Unified item registry for Cooking & Basket!)
+  const ITEMS = {
+    // Animal produce (also buyable in pantry for egg & milk!)
+    egg:     { id: 'egg',     name: { zh: '鸡蛋', en: 'Egg' },           emoji: '🥚', buyPrice: 30, sellPrice: 38, energy: 18, pantry: true,  kind: 'produce' },
+    duckEgg: { id: 'duckEgg', name: { zh: '鸭蛋', en: 'Duck Egg' },      emoji: '🪺', buyPrice: 0,  sellPrice: 55, energy: 22, pantry: false, kind: 'produce' },
+    wool:    { id: 'wool',    name: { zh: '羊毛', en: 'Soft Wool' },     emoji: '🧶', buyPrice: 0,  sellPrice: 105, energy: 0, pantry: false, kind: 'produce' },
+    milk:    { id: 'milk',    name: { zh: '鲜牛奶', en: 'Fresh Milk' },  emoji: '🥛', buyPrice: 55, sellPrice: 120, energy: 28, pantry: true, kind: 'produce' },
+    // Pantry staples (buy at Millie's Ranch & Pantry)
+    flour:   { id: 'flour',   name: { zh: '面粉', en: 'Flour' },         emoji: '🥡', buyPrice: 20, sellPrice: 15, energy: 5,  pantry: true,  kind: 'pantry' },
+    sugar:   { id: 'sugar',   name: { zh: '白糖', en: 'Sugar' },         emoji: '🧂', buyPrice: 20, sellPrice: 15, energy: 8,  pantry: true,  kind: 'pantry' },
+    butter:  { id: 'butter',  name: { zh: '黄油', en: 'Butter' },        emoji: '🧈', buyPrice: 35, sellPrice: 25, energy: 12, pantry: true,  kind: 'pantry' },
+    honey:   { id: 'honey',   name: { zh: '百花蜜', en: 'Wild Honey' },  emoji: '🍯', buyPrice: 45, sellPrice: 35, energy: 20, pantry: true,  kind: 'pantry' }
+  };
+  const PANTRY_SHOP_ORDER = ['flour', 'sugar', 'butter', 'honey', 'egg', 'milk'];
+
+  // 10 COOKING RECIPES!
+  const RECIPES = [
+    {
+      id: 'salad', emoji: '🥗', name: { zh: '田园鲜蔬沙拉', en: 'Garden Salad' },
+      ingredients: { turnip: 1, radish: 1 }, sellPrice: 185, energy: 45,
+      desc: { zh: '清脆爽口的农庄开胃沙拉。', en: 'Crisp farm-fresh appetizer salad.' }
+    },
+    {
+      id: 'omelet', emoji: '🍳', name: { zh: '太阳嫩煎蛋卷', en: 'Sunny Omelet' },
+      ingredients: { egg: 2, milk: 1 }, sellPrice: 260, energy: 55,
+      desc: { zh: '奶香十足的软嫩黄金蛋卷。', en: 'Fluffy golden omelet whipped with fresh milk.' }
+    },
+    {
+      id: 'toast', emoji: '🍞', name: { zh: '蜂蜜黄油吐司', en: 'Honey Butter Toast' },
+      ingredients: { wheat: 1, butter: 1, honey: 1 }, sellPrice: 220, energy: 50,
+      desc: { zh: '烤得外酥里软，淋上香甜百花蜜！', en: 'Warm golden toast glazed with butter & wild honey.' }
+    },
+    {
+      id: 'stew', emoji: '🍲', name: { zh: '奶油胡萝卜炖菜', en: 'Creamy Carrot Stew' },
+      ingredients: { carrot: 1, turnip: 1, butter: 1 }, sellPrice: 265, energy: 60,
+      desc: { zh: '咕嘟咕嘟慢炖出的治愈暖胃汤菜。', en: 'Hearty comforting cottage vegetable stew.' }
+    },
+    {
+      id: 'cornSoup', emoji: '🥣', name: { zh: '番茄玉米浓汤', en: 'Tomato Corn Soup' },
+      ingredients: { tomato: 1, corn: 1, milk: 1 }, sellPrice: 385, energy: 65,
+      desc: { zh: '酸甜鲜香的田园浓汤，超受欢迎！', en: 'Velvety sweet-corn & garden tomato soup.' }
+    },
+    {
+      id: 'shortcake', emoji: '🍰', name: { zh: '草莓奶油小蛋糕', en: 'Strawberry Shortcake' },
+      ingredients: { strawberry: 1, flour: 1, egg: 1, sugar: 1 }, sellPrice: 295, energy: 70,
+      desc: { zh: '下午茶人气第一的松软草莓蛋糕！', en: 'Light sponge cake layered with sweet strawberries.' }
+    },
+    {
+      id: 'blueberryPie', emoji: '🥧', name: { zh: '蓝莓酥皮派', en: 'Blueberry Pie' },
+      ingredients: { blueberry: 2, flour: 1, butter: 1, sugar: 1 }, sellPrice: 325, energy: 75,
+      desc: { zh: '切开会爆浆的紫宝石蓝莓派！', en: 'Flaky golden crust brimming with wild blueberries.' }
+    },
+    {
+      id: 'pudding', emoji: '🍮', name: { zh: '焦糖鸭蛋布丁', en: 'Caramel Egg Pudding' },
+      ingredients: { duckEgg: 1, milk: 1, sugar: 1, honey: 1 }, sellPrice: 365, energy: 75,
+      desc: { zh: '用鸭蛋做的丝滑浓郁焦糖布丁。', en: 'Silky rich custard made with pasture duck eggs.' }
+    },
+    {
+      id: 'pumpkinSoup', emoji: '🎃', name: { zh: '黄金南瓜浓汤', en: 'Golden Pumpkin Soup' },
+      ingredients: { pumpkin: 1, milk: 1, butter: 1 }, sellPrice: 590, energy: 85,
+      desc: { zh: '秋日童话般的金黄丝滑南瓜汤！', en: 'Rich velvety storybook autumn pumpkin soup.' }
+    },
+    {
+      id: 'starTart', emoji: '✨', name: { zh: '星光水果塔', en: 'Starlight Fruit Tart' },
+      ingredients: { starfruit: 1, strawberry: 1, flour: 1, honey: 1 }, sellPrice: 1220, energy: 100,
+      desc: { zh: '闪耀山谷星光的梦幻甜品，天价珍品！', en: 'Dazzling signature valley tart worth a fortune!' }
+    }
+  ];
+  const RECIPE_MAP = Object.fromEntries(RECIPES.map(r => [r.id, r]));
+
+  const TILE_TYPE = { GRASS: 0, FARMABLE: 1, PATH: 2, WATER: 3, DOCK: 4, WALL: 5, PASTURE: 6 };
+
+  // =========================================================================
+  // BILINGUAL I18N (ZH / EN)
+  // =========================================================================
+  const I18N = {
+    zh: {
+      gameTitle: '口袋山谷 · 绘本田园与牧场',
+      controlsLine: 'WASD 散步 · 点击/空格耕种 · E 采摘/喂动物/互动 · 向东走到阳光牧场',
+      langSwitch: 'EN',
+      dressBtn: '换装',
+      shopBtn: '花种铺',
+      ranchShopBtn: '牧场铺',
+      kitchenBtn: '厨房',
+      satchelBtn: '花篮',
+      toPasture: '去牧场',
+      toFarm: '回农庄',
+      areaFarm: '🏡 田园农庄',
+      areaPasture: '🐮 阳光牧场',
+      forecast: '明日:',
+      hotbarHint: '数字键 1–9, 0 / 滚轮切换 · 点远处可自动走过去',
+      statHarvest: '🌾 收获',
+      statAnimals: '🐮 动物',
+      statDishes: '🍳 料理',
+      statGold: '🪙 累计金币',
+      autoSaveIdle: '每天清晨自动存档',
+      savedAt: (s, d) => `已存档 · ${s} 第${d}天`,
+      dateFmt: (s, d) => `${s} 第${d}天`,
+      seasonBonus: (i, s, c) => `${i} ${s}当季加成 (+20%): ${c}`,
+      pastureBanner: (fed, total, drops) => `🐮 牧场动物 ${total} 只（今日已喂 ${fed}/${total}）${drops > 0 ? ` · ✨ 有 ${drops} 件产出可收！` : ''}`,
+      weather: { sunny: '晴朗', breezy: '微风', rainy: '小雨' },
+      ampm: { am: '上午', pm: '下午' },
+      shopSign: '花种铺',
+      ranchSign: '牧场杂货',
+      gateToPasture: '牧场 →',
+      gateToFarm: '← 农庄',
+      tools: {
+        hoe: ['小锄头', '红铜锄头', '精铁锄头'],
+        can: ['小水壶', '红铜水壶', '精铁水壶'],
+        scythe: '小镰刀',
+        sprinkler: '洒水器',
+        lantern: '提灯',
+        hoeDesc: ['翻耕 1 格松软田土', '一次翻耕前方 3 格田土！', '一次翻耕 3×3 九宫格田土！'],
+        canDesc: ['浇水 1 格（可在池塘打水）', '一次浇水前方 3 格（容量 36）', '一次浇水 3×3 范围（容量 60）'],
+        scytheDesc: '清理杂草/树枝/石头，或采摘成熟作物',
+        sprinklerDesc: (n) => `精致洒水器 (${n}) — 放在田里，每天清晨自动给周围 8 格浇水！`,
+        lanternDesc: (n) => `花园提灯 (${n}) — 放在田边，夜晚亮起暖暖的萤火灯光！`,
+        seedDesc: (name, n, days, sell, regrow) => `${name}种子 (${n}) — ${days}天成熟 · 售价 ${sell}g${regrow ? ` · 每${regrow}天复采` : ''}`
+      },
+      ctx: {
+        cottage: (k) => k ? '按 E — 进入小屋（🍳 做饭 / 🌙 睡觉）' : '按 E — 进入温暖小屋休息（进入明天）',
+        shop: '按 E — 逛皮普的花种与工具小铺',
+        ranchShop: '按 E — 逛米莉的牧场与食材杂货铺',
+        barn: '按 E — 查看牧场谷仓（一键喂食 / 收取产出）',
+        trough: (hungry) => hungry > 0 ? `按 E — 往草料槽添草料喂饱 ${hungry} 只动物` : '草料槽满满的，小动物们都吃饱啦！',
+        shippingSome: (n) => `按 E — 把花篮里的 ${n} 件收获/料理放进出货箱`,
+        shippingEmpty: '出货箱 — 放入蔬果、蛋奶羊毛或料理，夜晚结算金币',
+        mailUnread: '按 E — 拆开新信件！',
+        mailRead: '按 E — 查看田园信箱',
+        refill: '按 E — 在荷花池塘装满小水壶',
+        harvest: (name) => `按 E — 采摘成熟的${name}`,
+        gateToPasture: '向东走或按 E — 前往阳光牧场 🐮',
+        gateToFarm: '向西走或按 E — 回到田园农庄 🏡',
+        collectDrop: (name) => `按 E — 拾取新鲜的${name}`,
+        petAnimal: (name, fed) => fed ? `按 E — 摸摸可爱的${name} ♥` : `按 E — 摸摸${name}（记得喂牧草哦！）`
+      },
+      floats: {
+        tooTired: '有点累啦，吃点蔬果料理或回屋睡一觉吧',
+        useScythe: '先用小镰刀 (3) 清理一下哦',
+        canEmpty: '水壶空啦！去池塘打水吧 💧',
+        canFull: '小水壶已经装满啦！',
+        refilled: (cap) => `💧 水壶装满啦 (${cap}/${cap})`,
+        woodGain: '+2 木材 🪵',
+        stoneGain: '+2 石料 🪨',
+        wildSeed: '+1 野生芜菁种子 🌱',
+        cleared: '清理干净啦 ✨',
+        noSeeds: (name) => `${name}种子用完啦，去花种铺买点吧`,
+        tillFirst: '先用小锄头 (1) 翻地哦！',
+        planted: (emoji) => `种下啦 ${emoji}`,
+        buyPlaceable: '去皮普的小铺买洒水器或提灯吧',
+        placeOnFarm: '要放在农庄中央的农田里哦',
+        tileOccupied: '这一格已经有东西啦',
+        placedSprinkler: '💦 放好洒水器啦！',
+        placedLantern: '🏮 挂好花园提灯啦！',
+        pickedUp: (name) => `收起了${name}`,
+        shipEmpty: '花篮里还没有可出货的蔬果、蛋奶或料理哦！',
+        shipped: (n, g) => `📦 放入 ${n} 件（今晚 +${g}g）`,
+        freshStart: '🌼 欢迎来到崭新的口袋山谷！',
+        dressChanged: (name) => `👗 换上了${name}！`,
+        noFeed: '牧草饲料不够啦！去米莉的牧场铺买些吧 🌾',
+        fedAnimals: (n) => `🌾 喂饱了 ${n} 只小动物！明天有收获哦`,
+        allFed: '小动物们今天都已经吃得饱饱啦！',
+        noAnimals: '牧场还没有小动物，去米莉的牧场铺领养几只吧！',
+        petHeart: '♥ 开心得蹭了蹭你！',
+        collectedDrop: (emoji, name, gold) => `+1 ${emoji} ${name}${gold ? ' ⭐' : ''}`,
+        cookedDish: (emoji, name) => `🍳 做好了 ${emoji} ${name}！`,
+        needKitchen: '先去花种铺升级「温馨田园厨房」就能自己做饭啦！'
+      },
+      modals: {
+        shopTitle: '皮普的花种与升级小铺',
+        tabSeeds: '🌱 10种田园种子',
+        tabUpgrades: '⚒️ 工具、厨房与小物',
+        ranchShopTitle: '米莉的牧场与食材杂货铺',
+        tabAnimals: '🐮 领养小动物',
+        tabFeed: '🌾 牧草饲料与设施',
+        tabPantry: '🧂 烘焙与烹饪食材',
+        bag: '持有',
+        sells: '售价',
+        buy1: '买 1',
+        owned: '✓ 已拥有',
+        adopt: '领养',
+        pastureFull: '牧场满员 (12只)',
+        yourGold: '当前金币',
+        pipQuote: '皮普：“升级小屋厨房后，就能把蔬果和牛奶做成美味料理啦！”',
+        millieQuote: '米莉：“牛羊鸡鸭只要喂饱牧草，每天清晨都会送上新鲜好礼哦！”',
+        upg: {
+          kitchen: '温馨田园厨房升级', kitchenOwned: '温馨田园厨房（已建成）',
+          kitchenD: '解锁小屋厨房！可用自己种的蔬果、牧场蛋奶或购买的食材按 10 种菜谱烹饪美味料理！',
+          hoe2: '红铜锄头 (Lv.2)', hoe3: '精铁锄头 (Lv.3)', hoeMax: '精铁锄头 (满级)',
+          hoe2d: '一锄头翻耕前方 3 格田土！', hoe3d: '一锄头翻耕 3×3 一大片！', hoeMaxd: '已升到最高级！',
+          can2: '红铜水壶 (Lv.2)', can3: '精铁水壶 (Lv.3)', canMax: '精铁水壶 (满级)',
+          can2d: '一次浇水 3 格，容量 36！', can3d: '一次浇水 3×3，容量 60！', canMaxd: '已升到最高级！',
+          sprinkler: (n) => `精致洒水器（拥有 ${n}）`, sprinklerD: '放在农田里，每天清晨自动给周围 8 格浇水。',
+          charm: '山谷四叶草护身符', charmOwned: '四叶草护身符（已佩戴）',
+          charmD: '⭐ 金星高品质作物与畜产品概率提升至 40%（售价 1.5 倍）！',
+          lantern: (n) => `花园萤火提灯（拥有 ${n}）`, lanternD: '放在田边，傍晚与夜晚亮起暖暖光晕。',
+          autoFeeder: '牧场自动投喂机', autoFeederOwned: '自动投喂机（已安装）',
+          autoFeederD: '每天清晨自动消耗库存牧草，帮所有牛羊鸡鸭填满草料槽！'
+        },
+        feedTitle: '新鲜牧草饲料',
+        feedDesc: '每只牛、羊、鸡、鸭每天需要 1 份牧草。喂饱后次日清晨产出蛋、奶或羊毛！',
+        feedOwned: (n) => `库存饲料：${n} 份`,
+        kitchenTitle: '温暖小屋厨房 · 菜谱烹饪',
+        kitchenLockedTitle: '厨房还没装修好呢！',
+        kitchenLockedDesc: '去皮普的花种铺 →「工具、厨房与小物」花 250g 升级温馨田园厨房，就能用农田作物、牧场蛋奶和杂货铺食材大展厨艺啦！',
+        goBuyKitchen: '去花种铺升级厨房 →',
+        cookBtn: '🍳 烹饪这份料理',
+        missingIng: '食材不足',
+        openPantryLink: '缺基础食材？去米莉杂货铺买 →',
+        dishCount: (n) => `已有 ${n} 份`,
+        barnTitle: '红顶牧场谷仓',
+        barnEmpty: '谷仓里还空荡荡的！去旁边的米莉牧场铺领养几只小鸡、小鸭、绵羊或奶牛吧～',
+        barnFeedAll: (n) => `🌾 喂饱所有饥饿动物 (消耗 ${n} 饲料)`,
+        barnCollectAll: (n) => `✨ 一键收取 ${n} 件牧场产出`,
+        barnFedTag: '已吃饱',
+        barnHungryTag: '肚子饿',
+        barnPetTag: '好感度',
+        satchelTitle: '编织花篮与储物袋',
+        tabBasketFarm: '🌾 蔬果与畜产品',
+        tabBasketDishes: '🍳 做好的料理',
+        tabBasketPantry: '🧂 烹饪食材',
+        satchelEmptyTitle: '这里空空的',
+        satchelEmptyDesc: '去农庄种菜、牧场收蛋奶，或升级厨房做香喷喷的料理吧！',
+        shipVal: '出货价',
+        eatVal: '食用',
+        eatBtn: (e) => `品尝 (+${e}🍀)`,
+        sellAllBtn: (g) => `立刻卖 (${g}g)`,
+        binTonight: '📦 今晚出货箱待结算',
+        moveToBin: '全部放进出货箱',
+        binTip: '小贴士：出货箱享 100% 全价，食材留着做饭更赚哦',
+        cottageTitle: '温暖田园小屋',
+        cottageAsk: '回到温暖的小屋啦，想先下厨做点好吃的，还是直接睡一觉到明天？',
+        openKitchenNow: '🍳 进入厨房做饭',
+        sleepBin: (g) => `📦 出货箱今晚将结算：<strong>+${g}g</strong>`,
+        sleepGrow: '💧 浇过水的作物会长大，喂饱的牧场动物会在清晨送来新鲜产出！',
+        sleepSatchelWarn: (n) => `💡 你的花篮里还有 ${n} 件可出货的物品还没放进出货箱哦！`,
+        stayAwake: '再逛一会儿',
+        shipAndSleep: '📦 出货并睡觉',
+        goSleep: '🌙 安心入睡',
+        fadePassedOut: '🌙 夜深啦，踩着星光慢慢走回小屋……',
+        fadeSleeping: '🌙 伴着虫鸣、奶香与花香进入甜美梦乡……',
+        morningTitle: (s, d) => `早安！${s} 第${d}天`,
+        passedOutNote: '🌙 昨晚玩到午夜有点犯困，自动回屋休息啦（恢复 80% 体力）。',
+        seasonWelcome: (i, s, c) => `🎉 迎来美丽的 ${i} ${s}！当季加成 (+20%)：${c}！`,
+        ledgerHeader: '昨夜出货账单',
+        ledgerNone: '昨晚出货箱里没有放东西哦。',
+        each: '每个',
+        totalEarned: '总计收入',
+        todayWeather: '今日天气',
+        weatherDetail: {
+          rainy: '🌧️ 细雨绵绵（所有农田已自动浇满水啦！）',
+          breezy: '🍃 微风和煦（花瓣随风飘落）',
+          sunny: '☀️ 阳光明媚'
+        },
+        sprinklerNote: (n) => `💦 精致洒水器在清晨自动浇灌了 <strong>${n}</strong> 格农田！`,
+        pastureMorningNote: (n) => `🐮 牧场的小动物们为你准备了 <strong>${n}</strong> 件新鲜蛋奶/羊毛，快去牧场收吧！`,
+        autoFedNote: (n) => `🌾 自动投喂机已帮 <strong>${n}</strong> 只小动物添好了今天的牧草！`,
+        wallet: '钱包余额',
+        startDayBtn: (s, d) => `开启 ${s} 第${d}天 →`,
+        mailTitle: '田园小信箱',
+        mailChecked: '已阅信件',
+        mailOk: '收好啦！',
+        mailDay1: `
+          <p><strong>亲爱的新邻居，欢迎来到口袋山谷！</strong></p>
+          <ul class="list-disc pl-4 space-y-1">
+            <li><strong>农庄种田</strong>：有 10 种田园种子可选！翻地、播种、浇水，成熟后采摘。</li>
+            <li><strong>阳光牧场</strong>：往东穿过木门（或点顶部 <strong>🐮 去牧场</strong>）就能去牧场养<strong>鸡、鸭、绵羊和奶牛</strong>，还能在米莉的杂货铺买牧草饲料和烘焙食材！</li>
+            <li><strong>小屋做饭</strong>：攒够 250g 在花种铺升级<strong>温馨厨房</strong>，就能按 10 种菜谱亲手做蛋糕、浓汤和水果塔啦！</li>
+          </ul>
+          <p class="italic text-[#7c5c40]">—— 皮普 & 米莉 🌼</p>
+        `,
+        mailGazette: (i, s, d, c, nextW) => `
+          <p><strong>山谷晨报 · ${i} ${s} 第${d}天</strong></p>
+          <p>本季加成蔬果：<strong>${c}</strong>（+20% 出货金币）。</p>
+          <p><strong>致富小窍门：</strong> 养牛羊鸡鸭收集鲜奶与鸡蛋，升级厨房把南瓜做成<strong>黄金南瓜浓汤</strong>、把杨桃做成<strong>星光水果塔</strong>，利润超高哦！</p>
+          <p class="italic text-[#7c5c40]">—— 明日天气预报：${nextW}</p>
+        `,
+        nextForecastText: { rainy: '🌧️ 小雨（免浇水！）', breezy: '🍃 微风', sunny: '☀️ 晴朗' },
+        dressTitle: '衣橱 · 选一条碎花小裙子',
+        dressHint: '小草帽配双麻花小辫和碎花农妇裙，随时换颜色哦！',
+        dressDone: '就穿这条！',
+        helpTitle: '口袋山谷田园与牧场手册',
+        helpBody: `
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs leading-relaxed">
+            <div class="rounded-xl p-3 bg-[#fffaf0] border border-[#d6ba91]">
+              <div class="font-bold mb-1.5">🎮 操作与区域</div>
+              <ul class="space-y-1">
+                <li><strong>WASD / 方向键</strong> — 散步移动</li>
+                <li><strong>左键 / 空格</strong> — 耕种 / 浇水 / 播种</li>
+                <li><strong>E / 右键</strong> — 采摘 / 抚摸动物 / 拾取蛋奶 / 互动</li>
+                <li><strong>往东走出木门</strong>（或点顶部按钮）即可往返<strong>田园农庄</strong>与<strong>阳光牧场</strong>！</li>
+              </ul>
+            </div>
+            <div class="rounded-xl p-3 bg-[#fffaf0] border border-[#d6ba91]">
+              <div class="font-bold mb-1.5">🐮 养殖与做饭</div>
+              <ul class="space-y-1">
+                <li>在<strong>米莉的牧场铺</strong>领养鸡鸭羊牛、买牧草饲料和面粉/黄油/白糖/蜂蜜。</li>
+                <li>点击草料槽或谷仓喂饱动物，次日清晨产出鸡蛋、鸭蛋、羊毛、鲜奶！</li>
+                <li>在<strong>皮普的花种铺</strong>升级<strong>温馨厨房 (250g)</strong> 后，即可按 10 种菜谱烹饪美味料理！</li>
+              </ul>
+            </div>
+          </div>
+        `,
+        helpFooter: '游戏进度会在每天清晨自动保存在本地',
+        backToFarm: '回到山谷',
+        resetTitle: '重新开始一座新农场？',
+        resetBody: '这会清空当前的农田、牧场动物、料理和金币，回到 <strong>春季 第1天</strong>，确定吗？',
+        keepPlaying: '继续游玩',
+        confirmReset: '确定重新开始'
+      }
+    },
+    en: {
+      gameTitle: 'Pocket Valley · Farm, Ranch & Kitchen',
+      controlsLine: 'WASD to walk · Click/Space to farm · E interact/pet/collect · Walk East to Pasture',
+      langSwitch: '中文',
+      dressBtn: 'Dress',
+      shopBtn: 'Seeds',
+      ranchShopBtn: 'Ranch Shop',
+      kitchenBtn: 'Kitchen',
+      satchelBtn: 'Basket',
+      toPasture: 'Pasture',
+      toFarm: 'Farm',
+      areaFarm: '🏡 Home Farm',
+      areaPasture: '🐮 Sunny Pasture',
+      forecast: 'Next:',
+      hotbarHint: 'Keys 1–9, 0 / Scroll · Click anywhere to walk & act',
+      statHarvest: '🌾 Harvested',
+      statAnimals: '🐮 Animals',
+      statDishes: '🍳 Cooked',
+      statGold: '🪙 Lifetime Gold',
+      autoSaveIdle: 'Auto-saves every morning',
+      savedAt: (s, d) => `Saved · ${s} Day ${d}`,
+      dateFmt: (s, d) => `${s} Day ${d}`,
+      seasonBonus: (i, s, c) => `${i} ${s} Bonus (+20%): ${c}`,
+      pastureBanner: (fed, total, drops) => `🐮 Animals: ${total} (Fed ${fed}/${total})${drops > 0 ? ` · ✨ ${drops} fresh drop${drops>1?'s':''}!` : ''}`,
+      weather: { sunny: 'Sunny', breezy: 'Breezy', rainy: 'Rainy' },
+      ampm: { am: 'AM', pm: 'PM' },
+      shopSign: 'SEEDS',
+      ranchSign: 'RANCH',
+      gateToPasture: 'Ranch →',
+      gateToFarm: '← Farm',
+      tools: {
+        hoe: ['Hoe', 'Copper Hoe', 'Iron Hoe'],
+        can: ['Water Can', 'Copper Can', 'Iron Can'],
+        scythe: 'Scythe',
+        sprinkler: 'Sprinkler',
+        lantern: 'Lantern',
+        hoeDesc: ['Till 1 tile of soft soil', 'Tills 3 tiles ahead in a row!', 'Tills a full 3×3 garden patch!'],
+        canDesc: ['Water 1 tile (refill at pond)', 'Waters 3 tiles ahead (36 cap)', 'Waters a 3×3 patch (60 cap)'],
+        scytheDesc: 'Clear weeds, twigs & stones, or harvest ripe crops',
+        sprinklerDesc: (n) => `Quality Sprinkler (${n}) — Place on farm to auto-water 8 surrounding tiles at dawn!`,
+        lanternDesc: (n) => `Garden Lantern (${n}) — Place on farm for warm golden glow at night!`,
+        seedDesc: (name, n, days, sell, regrow) => `${name} Seeds (${n}) — ${days}d grow · Sells ${sell}g${regrow ? ` · Regrows ${regrow}d` : ''}`
+      },
+      ctx: {
+        cottage: (k) => k ? 'Press E — Enter Cottage (🍳 Cook / 🌙 Sleep)' : 'Press E — Rest in Cottage (End Day)',
+        shop: "Press E — Visit Pip's Seed & Upgrade Stall",
+        ranchShop: "Press E — Visit Millie's Ranch & Pantry Shop",
+        barn: 'Press E — Open Pasture Barn (Feed All / Collect All)',
+        trough: (h) => h > 0 ? `Press E — Fill Trough to feed ${h} hungry animal${h>1?'s':''}` : 'Feed Trough is full—everyone is happy!',
+        shippingSome: (n) => `Press E — Ship ${n} item${n>1?'s':''} from your basket`,
+        shippingEmpty: 'Shipping Bin — Drop crops, eggs, milk, wool or cooked dishes to cash out overnight',
+        mailUnread: 'Press E — Read a new letter!',
+        mailRead: 'Press E — Check Meadow Mailbox',
+        refill: 'Press E — Refill Watering Can at the Lotus Pond',
+        harvest: (name) => `Press E — Harvest ripe ${name}`,
+        gateToPasture: 'Walk East or Press E — Go to Sunny Pasture 🐮',
+        gateToFarm: 'Walk West or Press E — Return to Home Farm 🏡',
+        collectDrop: (name) => `Press E — Pick up fresh ${name}`,
+        petAnimal: (name, fed) => fed ? `Press E — Pet adorable ${name} ♥` : `Press E — Pet ${name} (Needs feed!)`
+      },
+      floats: {
+        tooTired: 'Getting tired! Eat a dish or rest in the cottage',
+        useScythe: 'Use Scythe (3) to clear this first!',
+        canEmpty: 'Empty! Refill at the pond 💧',
+        canFull: 'Watering can is already full!',
+        refilled: (cap) => `💧 Refilled (${cap}/${cap})`,
+        woodGain: '+2 Wood 🪵',
+        stoneGain: '+2 Stone 🪨',
+        wildSeed: '+1 Wild Turnip Seed 🌱',
+        cleared: 'Cleared! ✨',
+        noSeeds: (name) => `No ${name} seeds! Visit Pip's Shop`,
+        tillFirst: 'Till soil with Hoe (1) first!',
+        planted: (emoji) => `Planted ${emoji}`,
+        buyPlaceable: "Buy Sprinklers or Lanterns at Pip's Shop!",
+        placeOnFarm: 'Place this on the Home Farm plot!',
+        tileOccupied: 'This spot is occupied!',
+        placedSprinkler: '💦 Sprinkler placed!',
+        placedLantern: '🏮 Lantern placed!',
+        pickedUp: (name) => `Picked up ${name}`,
+        shipEmpty: 'No shippable crops, produce, or dishes in your basket yet!',
+        shipped: (n, g) => `📦 Shipped ${n} (+${g}g tonight!)`,
+        freshStart: '🌼 Welcome to a fresh valley!',
+        dressChanged: (name) => `👗 Wearing ${name}!`,
+        noFeed: "Out of Animal Feed! Buy some at Millie's Ranch Shop 🌾",
+        fedAnimals: (n) => `🌾 Fed ${n} animal${n>1?'s':''}! Fresh produce tomorrow`,
+        allFed: 'All your animals are already full & happy today!',
+        noAnimals: "No animals yet—adopt some at Millie's Ranch Shop!",
+        petHeart: '♥ Loves the pets!',
+        collectedDrop: (emoji, name, gold) => `+1 ${emoji} ${name}${gold ? ' ⭐' : ''}`,
+        cookedDish: (emoji, name) => `🍳 Cooked ${emoji} ${name}!`,
+        needKitchen: "Upgrade your Cottage Kitchen at Pip's Shop first!"
+      },
+      modals: {
+        shopTitle: "Pip's Seed & Upgrade Stall",
+        tabSeeds: '🌱 10 Valley Seeds',
+        tabUpgrades: '⚒️ Tools, Kitchen & Decor',
+        ranchShopTitle: "Millie's Ranch & Pantry Shop",
+        tabAnimals: '🐮 Adopt Animals',
+        tabFeed: '🌾 Feed & Ranch Gear',
+        tabPantry: '🧂 Cooking Ingredients',
+        bag: 'Bag',
+        sells: 'Sells',
+        buy1: 'Buy 1',
+        owned: '✓ Owned',
+        adopt: 'Adopt',
+        pastureFull: 'Pasture Full (12 max)',
+        yourGold: 'Your Gold',
+        pipQuote: 'Pip: "Upgrade your Cottage Kitchen to turn crops & milk into gourmet dishes!"',
+        millieQuote: 'Millie: "Keep your cows, sheep, chickens & ducks fed for fresh morning goodies!"',
+        upg: {
+          kitchen: 'Cozy Cottage Kitchen Upgrade', kitchenOwned: 'Cozy Cottage Kitchen (Built)',
+          kitchenD: 'Unlocks home cooking! Use harvested crops, ranch eggs/milk, or bought pantry staples across 10 recipes!',
+          hoe2: 'Copper Hoe (Lv.2)', hoe3: 'Iron Hoe (Lv.3)', hoeMax: 'Iron Hoe (MAX)',
+          hoe2d: 'Till 3 tiles in a row!', hoe3d: 'Till a huge 3×3 patch!', hoeMaxd: 'Fully upgraded!',
+          can2: 'Copper Watering Can (Lv.2)', can3: 'Iron Watering Can (Lv.3)', canMax: 'Iron Watering Can (MAX)',
+          can2d: 'Waters 3 tiles in a row (36 cap)!', can3d: 'Waters a 3×3 patch (60 cap)!', canMaxd: 'Maxed out!',
+          sprinkler: (n) => `Quality Sprinkler (Owned: ${n})`, sprinklerD: 'Auto-waters all 8 surrounding tiles every morning.',
+          charm: 'Clover Lucky Charm', charmOwned: 'Clover Lucky Charm (Owned)',
+          charmD: 'Boosts ⭐ Gold Star crop & ranch produce chance to 40% (1.5× value!).',
+          lantern: (n) => `Firefly Lantern (Owned: ${n})`, lanternD: 'Casts a warm golden glow at dusk & night.',
+          autoFeeder: 'Pasture Auto-Feeder', autoFeederOwned: 'Auto-Feeder (Installed)',
+          autoFeederD: 'Automatically feeds all pasture animals each morning using your feed stock!'
+        },
+        feedTitle: 'Golden Pasture Feed',
+        feedDesc: 'Each cow, sheep, chicken, or duck eats 1 feed per day and produces fresh goods next morning!',
+        feedOwned: (n) => `Feed in stock: ${n}`,
+        kitchenTitle: 'Cozy Cottage Kitchen · Recipes',
+        kitchenLockedTitle: 'Your Kitchen isn\'t built yet!',
+        kitchenLockedDesc: "Visit Pip's Seed Stall → Tools & Kitchen to build your Cozy Cottage Kitchen (250g) and cook 10 delicious recipes!",
+        goBuyKitchen: "Go to Pip's Shop to Upgrade →",
+        cookBtn: '🍳 Cook Dish',
+        missingIng: 'Missing ingredients',
+        openPantryLink: "Need pantry staples? Visit Millie's Shop →",
+        dishCount: (n) => `Cooked: ${n}`,
+        barnTitle: 'Storybook Pasture Barn',
+        barnEmpty: "Your pasture is quiet! Visit Millie's Ranch Shop nearby to adopt chickens, ducks, sheep, or cows.",
+        barnFeedAll: (n) => `🌾 Feed All Hungry (${n} feed)`,
+        barnCollectAll: (n) => `✨ Collect ${n} Fresh Drop${n>1?'s':''}`,
+        barnFedTag: 'Fed',
+        barnHungryTag: 'Hungry',
+        barnPetTag: 'Hearts',
+        satchelTitle: 'Woven Basket & Pantry',
+        tabBasketFarm: '🌾 Crops & Ranch',
+        tabBasketDishes: '🍳 Cooked Dishes',
+        tabBasketPantry: '🧂 Pantry Staples',
+        satchelEmptyTitle: 'Nothing here yet',
+        satchelEmptyDesc: 'Harvest crops, collect pasture eggs & milk, or cook delicious recipes in your kitchen!',
+        shipVal: 'Ship',
+        eatVal: 'Eat',
+        eatBtn: (e) => `Eat (+${e}🍀)`,
+        sellAllBtn: (g) => `Sell (${g}g)`,
+        binTonight: '📦 Queued in Shipping Bin',
+        moveToBin: 'Move All to Shipping Bin',
+        binTip: 'Tip: Shipping Bin pays 100%; save staples for cooking!',
+        cottageTitle: 'Cozy Storybook Cottage',
+        cottageAsk: 'Home sweet home! Would you like to cook in your kitchen or turn in for the night?',
+        openKitchenNow: '🍳 Open Kitchen',
+        sleepBin: (g) => `📦 Shipping Bin tonight: <strong>+${g}g</strong>`,
+        sleepGrow: '💧 Watered crops will grow & fed pasture animals will leave fresh produce at dawn!',
+        sleepSatchelWarn: (n) => `💡 You still have ${n} shippable item(s) in your basket!`,
+        stayAwake: 'Stay Awake',
+        shipAndSleep: '📦 Ship & Sleep',
+        goSleep: '🌙 Go to Sleep',
+        fadePassedOut: '🌙 Getting sleepy under the starlight...',
+        fadeSleeping: '🌙 Drifting into sweet meadow dreams...',
+        morningTitle: (s, d) => `Good Morning! ${s} Day ${d}`,
+        passedOutNote: '🌙 Stayed out past midnight! Restored 80% energy.',
+        seasonWelcome: (i, s, c) => `🎉 Welcome to ${i} ${s}! Seasonal bonus (+20%): ${c}!`,
+        ledgerHeader: 'Shipping Ledger',
+        ledgerNone: 'Nothing shipped last night.',
+        each: 'ea',
+        totalEarned: 'Total Earned',
+        todayWeather: "Today's Weather",
+        weatherDetail: {
+          rainy: '🌧️ Gentle Rain (All tilled crops watered automatically!)',
+          breezy: '🍃 Breezy & Mild',
+          sunny: '☀️ Bright & Sunny'
+        },
+        sprinklerNote: (n) => `💦 Your Sprinklers watered <strong>${n}</strong> tile${n>1?'s':''} at dawn!`,
+        pastureMorningNote: (n) => `🐮 Your pasture animals left <strong>${n}</strong> fresh morning drop${n>1?'s':''}!`,
+        autoFedNote: (n) => `🌾 Auto-Feeder fed <strong>${n}</strong> pasture animal${n>1?'s':''} this morning!`,
+        wallet: 'Wallet',
+        startDayBtn: (s, d) => `Start ${s} Day ${d} →`,
+        mailTitle: 'Meadow Mailbox',
+        mailChecked: 'Mailbox checked',
+        mailOk: 'Got it!',
+        mailDay1: `
+          <p><strong>Welcome to Pocket Valley, neighbor!</strong></p>
+          <ul class="list-disc pl-4 space-y-1">
+            <li><strong>Home Farm</strong>: Choose from 10 seeds! Till, plant, water, and harvest.</li>
+            <li><strong>Sunny Pasture</strong>: Walk East through the garden gate (or click <strong>🐮 Pasture</strong>) to raise <strong>Chickens, Ducks, Sheep & Cows</strong> and shop for feed & cooking ingredients at Millie's Stall!</li>
+            <li><strong>Home Cooking</strong>: Build your <strong>Cozy Cottage Kitchen (250g)</strong> at Pip's Stall to cook 10 delicious recipes!</li>
+          </ul>
+          <p class="italic text-[#7c5c40]">— Pip & Millie 🌼</p>
+        `,
+        mailGazette: (i, s, d, c, nextW) => `
+          <p><strong>Valley Gazette · ${i} ${s} Day ${d}</strong></p>
+          <p>Seasonal bonus crops (+20%): <strong>${c}</strong>.</p>
+          <p><strong>Chef Tip:</strong> Combine fresh cow milk & pasture eggs with pumpkins or starfruit in your Cottage Kitchen for huge payouts!</p>
+          <p class="italic text-[#7c5c40]">— Tomorrow's forecast: ${nextW}</p>
+        `,
+        nextForecastText: { rainy: '🌧️ Rainy (free watering!)', breezy: '🍃 Breezy', sunny: '☀️ Sunny' },
+        dressTitle: 'Wardrobe · Pick a Floral Dress',
+        dressHint: 'Twin braided pigtails + straw sunhat + floral cottage dress!',
+        dressDone: 'Wear This!',
+        helpTitle: 'Pocket Valley Guide',
+        helpBody: `
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs leading-relaxed">
+            <div class="rounded-xl p-3 bg-[#fffaf0] border border-[#d6ba91]">
+              <div class="font-bold mb-1.5">🎮 Controls & Areas</div>
+              <ul class="space-y-1">
+                <li><strong>WASD / Arrows</strong> — Walk around</li>
+                <li><strong>Left-Click / Space</strong> — Till, water, plant</li>
+                <li><strong>E / Right-Click</strong> — Harvest, pet animals, collect drops, interact</li>
+                <li>Walk through the <strong>East Gate</strong> (or click top bar) to travel between <strong>Home Farm</strong> & <strong>Sunny Pasture</strong>!</li>
+              </ul>
+            </div>
+            <div class="rounded-xl p-3 bg-[#fffaf0] border border-[#d6ba91]">
+              <div class="font-bold mb-1.5">🐮 Ranching & Cooking</div>
+              <ul class="space-y-1">
+                <li>Visit <strong>Millie's Ranch Shop</strong> to adopt Chickens, Ducks, Sheep & Cows, and buy Feed & Pantry Staples.</li>
+                <li>Feed animals at the Trough/Barn so they drop fresh Eggs, Milk & Wool each morning!</li>
+                <li>Upgrade your <strong>Cottage Kitchen (250g)</strong> at Pip's Shop to cook 10 recipes!</li>
+              </ul>
+            </div>
+          </div>
+        `,
+        helpFooter: 'Auto-saves locally every morning',
+        backToFarm: 'Back to Valley',
+        resetTitle: 'Start a New Valley?',
+        resetBody: 'Resets farm, animals, kitchen, and gold back to <strong>Spring Day 1</strong>. Continue?',
+        keepPlaying: 'Keep Playing',
+        confirmReset: 'Yes, New Farm'
+      }
+    }
+  };
+
+  // =========================================================================
+  // COZY AUDIO ENGINE
+  // =========================================================================
+  const AudioFX = {
+    ctx: null, muted: false,
+    ensure() {
+      if (this.muted) return null;
+      if (!this.ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null; this.ctx = new AC(); }
+      if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+      return this.ctx;
+    },
+    tone(freq, dur = 0.08, type = 'sine', vol = 0.1, slideTo = null, delay = 0) {
+      const ctx = this.ensure(); if (!ctx) return;
+      const now = ctx.currentTime + delay;
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.type = type; osc.frequency.setValueAtTime(freq, now);
+      if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, now + dur);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.linearRampToValueAtTime(vol, now + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(now); osc.stop(now + dur + 0.02);
+    },
+    noise(dur = 0.08, vol = 0.07, filterFreq = 900) {
+      const ctx = this.ensure(); if (!ctx) return;
+      const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * dur), ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+      const src = ctx.createBufferSource(); src.buffer = buf;
+      const filter = ctx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = filterFreq;
+      const gain = ctx.createGain(); const now = ctx.currentTime;
+      gain.gain.setValueAtTime(vol, now); gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+      src.connect(filter); filter.connect(gain); gain.connect(ctx.destination); src.start(now);
+    },
+    hoe() { this.noise(0.08, 0.09, 580); this.tone(160, 0.07, 'triangle', 0.1, 95); },
+    water() { this.noise(0.14, 0.08, 1900); this.tone(460, 0.1, 'sine', 0.06, 720); },
+    plant() { this.tone(392, 0.06, 'sine', 0.09, 523); },
+    harvest() { this.tone(587, 0.08, 'triangle', 0.11, 740); this.tone(880, 0.13, 'sine', 0.11, 987, 0.06); },
+    cook() { [523, 659, 784, 1046].forEach((f, i) => this.tone(f, 0.14, 'triangle', 0.09, null, i * 0.07)); },
+    pet() { this.tone(680, 0.07, 'sine', 0.09, 920); this.tone(880, 0.09, 'sine', 0.08, 1080, 0.06); },
+    coin() { this.tone(1046, 0.07, 'sine', 0.09); this.tone(1396, 0.14, 'sine', 0.1, null, 0.06); },
+    chop() { this.noise(0.06, 0.1, 780); this.tone(210, 0.06, 'triangle', 0.08, 120); },
+    error() { this.tone(200, 0.09, 'triangle', 0.06, 150); },
+    ui() { this.tone(660, 0.04, 'sine', 0.05, 780); },
+    morning() { [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => this.tone(f, 0.24, 'sine', 0.08, null, i * 0.09)); },
+    place() { this.tone(300, 0.08, 'triangle', 0.09, 390); }
+  };
+
+  // =========================================================================
+  // MAPS: HOME FARM & SUNNY PASTURE
+  // =========================================================================
+  function hash2(x, y) {
+    let n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453123;
+    return n - Math.floor(n);
+  }
+
+  function buildFarmMap() {
+    const map = Array.from({ length: ROWS }, () => Array(COLS).fill(TILE_TYPE.GRASS));
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        if (y === 0 || y === ROWS - 1 || x === 0 || x === COLS - 1) map[y][x] = TILE_TYPE.WALL;
+      }
+    }
+    // Open East Gate to Sunny Pasture at x=23, y=5..7!
+    map[5][23] = TILE_TYPE.PATH;
+    map[6][23] = TILE_TYPE.PATH;
+    map[7][23] = TILE_TYPE.GRASS;
+
+    const extraTrees = [
+      [1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[7,1],[8,1],[9,1],[10,1],[13,1],[14,1],[15,1],[16,1],[17,1],[18,1],[19,1],[20,1],[21,1],[22,1],
+      [1,2],[1,3],[1,4],[22,2],[22,3],[22,14],[1,14],[2,14]
+    ];
+    for (const [x, y] of extraTrees) map[y][x] = TILE_TYPE.WALL;
+
+    // Cottage (2..5, 2..4), Mailbox (6,4), Shipping Bin (7,4), Pip's Shop (16..20, 2..4), Signpost (22,4)
+    for (let y = 2; y <= 4; y++) for (let x = 2; x <= 5; x++) map[y][x] = TILE_TYPE.WALL;
+    map[4][6] = TILE_TYPE.WALL;
+    map[4][7] = TILE_TYPE.WALL;
+    map[4][22] = TILE_TYPE.WALL; // signpost to pasture
+    for (let y = 2; y <= 4; y++) for (let x = 16; x <= 20; x++) map[y][x] = TILE_TYPE.WALL;
+
+    // Paths (extending to East Gate!)
+    for (let x = 3; x <= 23; x++) map[5][x] = TILE_TYPE.PATH;
+    map[6][11] = TILE_TYPE.PATH;
+    map[6][12] = TILE_TYPE.PATH;
+    map[6][18] = TILE_TYPE.PATH;
+    map[6][22] = TILE_TYPE.PATH;
+
+    // Farmable meadow (3..15, 7..13)
+    for (let y = 7; y <= 13; y++) for (let x = 3; x <= 15; x++) map[y][x] = TILE_TYPE.FARMABLE;
+
+    // Lotus Pond (18..21, 9..13) + Dock
+    for (let y = 9; y <= 13; y++) {
+      for (let x = 18; x <= 21; x++) {
+        if ((x === 18 && y === 9) || (x === 21 && y === 13)) continue;
+        map[y][x] = TILE_TYPE.WATER;
+      }
+    }
+    map[11][17] = TILE_TYPE.DOCK;
+    map[11][18] = TILE_TYPE.DOCK;
+    return map;
+  }
+
+  function buildPastureMap() {
+    const map = Array.from({ length: ROWS }, () => Array(COLS).fill(TILE_TYPE.GRASS));
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        if (y === 0 || y === ROWS - 1 || x === 0 || x === COLS - 1) map[y][x] = TILE_TYPE.WALL;
+      }
+    }
+    // Open West Gate back to Home Farm at x=0, y=5..7!
+    map[5][0] = TILE_TYPE.PATH;
+    map[6][0] = TILE_TYPE.PATH;
+    map[7][0] = TILE_TYPE.GRASS;
+
+    const trees = [
+      [1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[7,1],[8,1],[9,1],[10,1],[11,1],[12,1],[13,1],[14,1],[15,1],[16,1],[17,1],[18,1],[19,1],[20,1],[21,1],[22,1],
+      [1,2],[1,3],[22,2],[22,3],[22,4],[22,14],[1,14],[2,14],[21,14]
+    ];
+    for (const [x, y] of trees) map[y][x] = TILE_TYPE.WALL;
+
+    // Signpost back to farm (1,4)
+    map[4][1] = TILE_TYPE.WALL;
+    // Storybook Red Barn (3..7, 2..4)
+    for (let y = 2; y <= 4; y++) for (let x = 3; x <= 7; x++) map[y][x] = TILE_TYPE.WALL;
+    // Feed Trough (9..10, 4)
+    map[4][9] = TILE_TYPE.WALL;
+    map[4][10] = TILE_TYPE.WALL;
+    // Millie's Ranch & Pantry Shop (15..20, 2..4)
+    for (let y = 2; y <= 4; y++) for (let x = 15; x <= 20; x++) map[y][x] = TILE_TYPE.WALL;
+
+    // Stone path from West Gate across Barn, Trough, Shop
+    for (let x = 0; x <= 20; x++) map[5][x] = TILE_TYPE.PATH;
+    map[6][1] = TILE_TYPE.PATH;
+    map[6][9] = TILE_TYPE.PATH;
+    map[6][10] = TILE_TYPE.PATH;
+    map[6][17] = TILE_TYPE.PATH;
+
+    // Clover Animal Pasture (3..16, 7..13)
+    for (let y = 7; y <= 13; y++) for (let x = 3; x <= 16; x++) map[y][x] = TILE_TYPE.PASTURE;
+
+    // Duck Stream Pond (18..21, 8..13)
+    for (let y = 8; y <= 13; y++) {
+      for (let x = 18; x <= 21; x++) {
+        if ((x === 18 && y === 8) || (x === 21 && y === 13) || (x === 18 && y === 13)) continue;
+        map[y][x] = TILE_TYPE.WATER;
+      }
+    }
+    return map;
+  }
+
+  const MAPS = { farm: buildFarmMap(), pasture: buildPastureMap() };
+  function curMap() { return MAPS[state.area] || MAPS.farm; }
+
+  // =========================================================================
+  // STATE MANAGEMENT
+  // =========================================================================
+  function createInitialState(keepLang = 'zh', keepDress = 0) {
+    const farm = {};
+    for (let y = 8; y <= 9; y++) {
+      for (let x = 6; x <= 9; x++) {
+        farm[`${x},${y}`] = { tilled: true, watered: false, crop: null, debris: null, placeable: null };
+      }
+    }
+    farm['6,8'].crop = { id: 'turnip', daysGrown: 1 };
+    farm['7,8'].crop = { id: 'wheat', daysGrown: 1 };
+
+    const debrisList = [
+      [3,7,'weed'], [4,7,'twig'], [14,7,'stone'], [15,7,'weed'],
+      [3,12,'stone'], [4,13,'twig'], [13,13,'stone'], [15,12,'twig'],
+      [14,13,'weed'], [3,10,'weed'], [15,9,'stone'], [12,7,'twig']
+    ];
+    for (const [x, y, type] of debrisList) {
+      farm[`${x},${y}`] = { tilled: false, watered: false, crop: null, debris: type, placeable: null };
+    }
+
+    const seeds = {};
+    for (const cid of CROP_ORDER) seeds[cid] = 0;
+    seeds.turnip = 5;
+    seeds.wheat = 3;
+
+    // Start with 1 friendly starter Chicken in the pasture so the ranch already feels alive!
+    const starterAnimals = [
+      { id: 'a1', type: 'chicken', x: 7.5 * TILE, y: 9.5 * TILE, tx: 8.5 * TILE, ty: 10 * TILE, wait: 1.5, dir: 1, fed: false, petted: false, hearts: 1 }
+    ];
+
+    return {
+      lang: keepLang,
+      dressIdx: keepDress,
+      area: 'farm',
+      day: 1,
+      seasonIdx: 0,
+      timeMinutes: 6 * 60,
+      weather: 'sunny',
+      nextWeather: 'sunny',
+      gold: 200,
+      lifetimeGold: 0,
+      totalHarvested: 0,
+      totalCooked: 0,
+      wood: 0,
+      stone: 0,
+      energy: 100,
+      maxEnergy: 100,
+      water: 20,
+      hoeLevel: 1,
+      canLevel: 1,
+      luckyCharm: false,
+      kitchenUnlocked: false,
+      autoFeeder: false,
+      feed: 5,
+      selectedSlot: 0,
+      seeds,
+      placeables: { sprinkler: 0, lantern: 0 },
+      satchel: {},      // crops & produce: `${id}_${quality}` -> count
+      pantry: {},       // bought staples: `${itemId}` -> count (flour, sugar, butter, honey)
+      dishes: {},       // cooked dishes: `${recipeId}` -> count
+      shippingBin: {},  // `crop:${id}_${q}` or `prod:${id}_${q}` or `dish:${id}` -> count
+      animals: starterAnimals,
+      pastureDrops: [], // { id, itemId, quality, x, y }
+      farm,
+      unreadMail: true,
+      player: { x: 4.5 * TILE, y: 6.2 * TILE, dir: 'down', walkFrame: 0, swingTimer: 0, swingTool: null }
+    };
+  }
+
+  let state = loadState();
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(SAVE_KEY) || localStorage.getItem(OLD_SAVE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed.day === 'number' && parsed.farm) {
+          const base = createInitialState(parsed.lang || 'zh', parsed.dressIdx || 0);
+          return {
+            ...base,
+            ...parsed,
+            seeds: { ...base.seeds, ...(parsed.seeds || {}) },
+            placeables: { ...base.placeables, ...(parsed.placeables || {}) },
+            pantry: { ...(parsed.pantry || {}) },
+            dishes: { ...(parsed.dishes || {}) },
+            animals: Array.isArray(parsed.animals) ? parsed.animals : base.animals,
+            pastureDrops: Array.isArray(parsed.pastureDrops) ? parsed.pastureDrops : [],
+            player: { ...base.player, ...(parsed.player || {}) }
+          };
+        }
+      }
+    } catch (e) {}
+    return createInitialState('zh', 0);
+  }
+
+  function saveState(quiet = false) {
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+      if (!quiet) {
+        const el = document.getElementById('saveStatus');
+        if (el) el.textContent = T().savedAt(getSeasonName(), state.day);
+      }
+    } catch (e) {}
+  }
+
+  function T() { return I18N[state.lang === 'en' ? 'en' : 'zh']; }
+  function L(obj) { return obj[state.lang === 'en' ? 'en' : 'zh']; }
+  function getSeason() { return SEASONS[state.seasonIdx % SEASONS.length]; }
+  function getSeasonName() { return L(getSeason().name); }
+  function getDress() { return DRESS_THEMES[state.dressIdx % DRESS_THEMES.length]; }
+  function getCanCapacity() { return state.canLevel === 1 ? 20 : state.canLevel === 2 ? 36 : 60; }
+  function getTileData(x, y) { return state.farm[`${x},${y}`] || null; }
+  function ensureTileData(x, y) {
+    const k = `${x},${y}`;
+    if (!state.farm[k]) state.farm[k] = { tilled: false, watered: false, crop: null, debris: null, placeable: null };
+    return state.farm[k];
+  }
+
+  function getItemMeta(id) {
+    if (CROPS[id]) return { ...CROPS[id], source: 'crop' };
+    if (ITEMS[id]) return { ...ITEMS[id], source: ITEMS[id].kind };
+    if (RECIPE_MAP[id]) return { ...RECIPE_MAP[id], source: 'dish' };
+    return null;
+  }
+
+  function getSellValue(id, quality = 0) {
+    if (CROPS[id]) {
+      let val = CROPS[id].sellPrice;
+      if (getSeason().bonus.includes(id)) val = Math.round(val * 1.2);
+      if (quality === 1) val = Math.round(val * 1.5);
+      return val;
+    }
+    if (ITEMS[id]) {
+      let val = ITEMS[id].sellPrice;
+      if (quality === 1) val = Math.round(val * 1.5);
+      return val;
+    }
+    if (RECIPE_MAP[id]) return RECIPE_MAP[id].sellPrice;
+    return 0;
+  }
+
+  // Ingredient counting & consumption for cooking (works across crops, produce, and bought pantry!)
+  function getAvailableIngredientCount(ingId) {
+    if (ITEMS[ingId] && ITEMS[ingId].kind === 'pantry') {
+      return state.pantry[ingId] || 0;
+    }
+    // Crops & produce (egg, milk, duckEgg, turnip, etc.): count normal + gold quality in satchel (+ pantry fallback if bought)
+    const normal = state.satchel[`${ingId}_0`] || 0;
+    const gold = state.satchel[`${ingId}_1`] || 0;
+    const pantryExtra = state.pantry[ingId] || 0;
+    return normal + gold + pantryExtra;
+  }
+
+  function consumeIngredient(ingId, qty) {
+    let rem = qty;
+    // Prefer bought pantry stock first, then normal satchel, then gold satchel
+    if (state.pantry[ingId]) {
+      const take = Math.min(rem, state.pantry[ingId]);
+      state.pantry[ingId] -= take;
+      if (state.pantry[ingId] <= 0) delete state.pantry[ingId];
+      rem -= take;
+    }
+    for (const q of [0, 1]) {
+      if (rem <= 0) break;
+      const k = `${ingId}_${q}`;
+      if (state.satchel[k]) {
+        const take = Math.min(rem, state.satchel[k]);
+        state.satchel[k] -= take;
+        if (state.satchel[k] <= 0) delete state.satchel[k];
+        rem -= take;
+      }
+    }
+  }
+
+  function canCookRecipe(recipe) {
+    for (const [ing, qty] of Object.entries(recipe.ingredients)) {
+      if (getAvailableIngredientCount(ing) < qty) return false;
+    }
+    return true;
+  }
+
+  // =========================================================================
+  // HOTBAR SLOTS (5 tools/placeables + 10 seeds = 15 clean slots!)
+  // =========================================================================
+  function getAllHotbarSlots() {
+    const tr = T().tools;
+    const hoeName = tr.hoe[state.hoeLevel - 1];
+    const canName = tr.can[state.canLevel - 1];
+    const sprCount = state.placeables.sprinkler || 0;
+    const lanCount = state.placeables.lantern || 0;
+
+    const toolSlots = [
+      { id: 'hoe', kind: 'tool', label: hoeName, icon: '⛏️', count: null, desc: `${hoeName} (Lv.${state.hoeLevel}) — ${tr.hoeDesc[state.hoeLevel - 1]}` },
+      { id: 'can', kind: 'tool', label: canName, icon: '🚿', count: `${state.water}`, desc: `${canName} (${state.water}/${getCanCapacity()}) — ${tr.canDesc[state.canLevel - 1]}` },
+      { id: 'scythe', kind: 'tool', label: tr.scythe, icon: '🌿', count: null, desc: `${tr.scythe} — ${tr.scytheDesc}` },
+      { id: 'sprinkler', kind: 'placeable', label: tr.sprinkler, icon: '💦', count: sprCount, desc: tr.sprinklerDesc(sprCount) },
+      { id: 'lantern', kind: 'placeable', label: tr.lantern, icon: '🏮', count: lanCount, desc: tr.lanternDesc(lanCount) }
+    ];
+
+    const seedSlots = CROP_ORDER.map(cid => {
+      const c = CROPS[cid], cname = L(c.name), cnt = state.seeds[cid] || 0;
+      return {
+        id: cid, kind: 'seed', label: cname, icon: c.emoji, count: cnt,
+        desc: tr.seedDesc(cname, cnt, c.days, getSellValue(cid, 0), c.regrow)
+      };
+    });
+
+    return { toolSlots, seedSlots, all: [...toolSlots, ...seedSlots] };
+  }
+
+  // =========================================================================
+  // PARTICLES, FLOATING TEXT & AMBIENT
+  // =========================================================================
+  const particles = [];
+  const floatingTexts = [];
+  const ambientDrops = [];
+  const smokePuffs = [];
+
+  function spawnParticles(wx, wy, color, count = 8, speed = 1.6, size = 3.5) {
+    for (let i = 0; i < count; i++) {
+      const a = Math.random() * Math.PI * 2, s = (0.4 + Math.random() * 0.9) * speed;
+      particles.push({ x: wx, y: wy, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 1.2, g: 0.11, life: 1, decay: 0.028 + Math.random() * 0.024, color, size: size + Math.random() * 1.4 });
+    }
+  }
+  function addFloatText(wx, wy, text, color = '#fffdf2') {
+    floatingTexts.push({ x: wx, y: wy, text, color, life: 1, vy: -0.5 });
+  }
+
+  // =========================================================================
+  // CANVAS SETUP & INPUT
+  // =========================================================================
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const DPR = Math.min(2, window.devicePixelRatio || 1);
+  canvas.width = CANVAS_W * DPR;
+  canvas.height = CANVAS_H * DPR;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+  const keys = {};
+  let mouseTile = { x: -1, y: -1, inside: false };
+  let walkTarget = null;
+  let modalOpen = false;
+  let isTransitioning = false;
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modalOpen) { closeModal(); return; }
+    if (modalOpen || isTransitioning) return;
+    const k = e.key.toLowerCase();
+    if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k) || e.key === ' ') e.preventDefault();
+    keys[k] = true;
+    if (['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(k)) walkTarget = null;
+
+    if (k >= '1' && k <= '9') selectSlot(parseInt(k, 10) - 1);
+    else if (k === '0') selectSlot(9);
+    else if (k === ' ') performPrimaryAction(getFacedTile().x, getFacedTile().y);
+    else if (k === 'e') performSmartInteract();
+    else if (k === 'b') state.area === 'pasture' ? openRanchShopModal() : openShopModal();
+    else if (k === 'c') openKitchenModal();
+    else if (k === 'i' || k === 'tab') { e.preventDefault(); openSatchelModal(); }
+    else if (k === 'm') toggleSound();
+  });
+  window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mouseTile.x = Math.floor(((e.clientX - rect.left) * (CANVAS_W / rect.width)) / TILE);
+    mouseTile.y = Math.floor(((e.clientY - rect.top) * (CANVAS_H / rect.height)) / TILE);
+    mouseTile.inside = true;
+  });
+  canvas.addEventListener('mouseleave', () => { mouseTile.inside = false; });
+  canvas.addEventListener('wheel', (e) => {
+    if (modalOpen) return;
+    e.preventDefault();
+    const len = getAllHotbarSlots().all.length;
+    selectSlot((state.selectedSlot + (e.deltaY > 0 ? 1 : -1) + len) % len);
+  }, { passive: false });
+  canvas.addEventListener('contextmenu', (e) => { e.preventDefault(); if (!modalOpen && !isTransitioning) handleCanvasClick(e, true); });
+  canvas.addEventListener('mousedown', (e) => { if (!modalOpen && !isTransitioning && e.button === 0) handleCanvasClick(e, false); });
+
+  function switchArea(targetArea, spawnX = null, spawnY = null) {
+    if (state.area === targetArea || isTransitioning) return;
+    state.area = targetArea;
+    walkTarget = null;
+    particles.length = 0;
+    if (spawnX !== null && spawnY !== null) {
+      state.player.x = spawnX; state.player.y = spawnY;
+    } else if (targetArea === 'pasture') {
+      state.player.x = 1.6 * TILE; state.player.y = 5.6 * TILE; state.player.dir = 'right';
+    } else {
+      state.player.x = 22.2 * TILE; state.player.y = 5.6 * TILE; state.player.dir = 'left';
+    }
+    AudioFX.ui();
+    updateHUD();
+  }
+
+  function handleCanvasClick(e, isRightClick) {
+    AudioFX.ensure();
+    const rect = canvas.getBoundingClientRect();
+    const sx = (e.clientX - rect.left) * (CANVAS_W / rect.width);
+    const sy = (e.clientY - rect.top) * (CANVAS_H / rect.height);
+    const tx = Math.floor(sx / TILE), ty = Math.floor(sy / TILE);
+    if (tx < 0 || tx >= COLS || ty < 0 || ty >= ROWS) return;
+
+    const ptx = state.player.x / TILE, pty = state.player.y / TILE;
+    const dist = Math.hypot(tx + 0.5 - ptx, ty + 0.5 - pty);
+
+    // Check Pasture drops or Animals clicked directly!
+    if (state.area === 'pasture') {
+      const drop = state.pastureDrops.find(d => Math.hypot(d.x - sx, d.y - sy) < 22);
+      if (drop) {
+        if (Math.hypot(drop.x - state.player.x, drop.y - state.player.y) < 70) collectDrop(drop.id);
+        else walkTarget = { x: drop.x, y: drop.y, stopDist: 0.4, onArrive: () => collectDrop(drop.id) };
+        return;
+      }
+      const ani = state.animals.find(a => Math.hypot(a.x - sx, a.y - sy) < 24);
+      if (ani) {
+        if (Math.hypot(ani.x - state.player.x, ani.y - state.player.y) < 75) petOrFeedAnimal(ani);
+        else walkTarget = { x: ani.x, y: ani.y, stopDist: 0.9, onArrive: () => petOrFeedAnimal(ani) };
+        return;
+      }
+    }
+
+    const lm = getLandmarkAt(tx, ty);
+    if (lm) {
+      if (dist <= 3.2) { faceToward(tx, ty); triggerLandmark(lm); }
+      else {
+        const dest = getLandmarkStandTile(lm);
+        walkTarget = { x: (dest.x + 0.5) * TILE, y: (dest.y + 0.5) * TILE, onArrive: () => { faceToward(tx, ty); triggerLandmark(lm); } };
+      }
+      return;
+    }
+
+    if (curMap()[ty][tx] === TILE_TYPE.WATER) {
+      if (dist <= 2.6) { faceToward(tx, ty); refillWater(); }
+      else walkTarget = { x: (state.area === 'farm' ? 17.5 : 17.2) * TILE, y: 11.5 * TILE, onArrive: () => { faceToward(18, 11); refillWater(); } };
+      return;
+    }
+
+    if (state.area === 'farm' && dist <= 2.15) {
+      faceToward(tx, ty);
+      if (isRightClick) tryHarvestOrInteractTile(tx, ty);
+      else performPrimaryAction(tx, ty);
+    } else {
+      const stopDist = (state.area === 'farm' && curMap()[ty][tx] === TILE_TYPE.FARMABLE) ? 1.05 : 0.2;
+      walkTarget = {
+        x: (tx + 0.5) * TILE, y: (ty + 0.5) * TILE, stopDist,
+        onArrive: () => {
+          if (state.area === 'farm' && curMap()[ty][tx] === TILE_TYPE.FARMABLE) {
+            faceToward(tx, ty);
+            if (isRightClick) tryHarvestOrInteractTile(tx, ty);
+            else performPrimaryAction(tx, ty);
+          }
+        }
+      };
+    }
+  }
+
+  function faceToward(tx, ty) {
+    const dx = (tx + 0.5) * TILE - state.player.x, dy = (ty + 0.5) * TILE - state.player.y;
+    if (Math.abs(dx) > Math.abs(dy)) state.player.dir = dx >= 0 ? 'right' : 'left';
+    else state.player.dir = dy >= 0 ? 'down' : 'up';
+  }
+  function getFacedTile() {
+    const cx = Math.floor(state.player.x / TILE), cy = Math.floor(state.player.y / TILE);
+    if (state.player.dir === 'up') return { x: cx, y: cy - 1 };
+    if (state.player.dir === 'down') return { x: cx, y: cy + 1 };
+    if (state.player.dir === 'left') return { x: cx - 1, y: cy };
+    return { x: cx + 1, y: cy };
+  }
+
+  // =========================================================================
+  // LANDMARKS & INTERACTION (Both Areas)
+  // =========================================================================
+  function getLandmarkAt(tx, ty) {
+    if (state.area === 'farm') {
+      if (tx >= 2 && tx <= 5 && ty >= 2 && ty <= 4) return 'cottage';
+      if (tx === 6 && ty === 4) return 'mailbox';
+      if (tx === 7 && ty === 4) return 'shipping';
+      if (tx >= 16 && tx <= 20 && ty >= 2 && ty <= 4) return 'shop';
+      if ((tx === 22 && ty === 4) || (tx === 23 && ty >= 5 && ty <= 7)) return 'gateToPasture';
+    } else {
+      if (tx >= 3 && tx <= 7 && ty >= 2 && ty <= 4) return 'barn';
+      if ((tx === 9 || tx === 10) && ty === 4) return 'trough';
+      if (tx >= 15 && tx <= 20 && ty >= 2 && ty <= 4) return 'ranchShop';
+      if ((tx === 1 && ty === 4) || (tx === 0 && ty >= 5 && ty <= 7)) return 'gateToFarm';
+    }
+    return null;
+  }
+
+  function getLandmarkStandTile(lm) {
+    const map = {
+      cottage: { x: 3.5, y: 5 }, mailbox: { x: 6, y: 5 }, shipping: { x: 7, y: 5 },
+      shop: { x: 18, y: 5 }, gateToPasture: { x: 22.2, y: 5.5 },
+      barn: { x: 5, y: 5 }, trough: { x: 9.5, y: 5 }, ranchShop: { x: 17.5, y: 5 },
+      gateToFarm: { x: 1.5, y: 5.5 }
+    };
+    return map[lm] || { x: 4, y: 6 };
+  }
+
+  function triggerLandmark(lm) {
+    if (lm === 'cottage') openCottageModal();
+    else if (lm === 'shop') openShopModal();
+    else if (lm === 'shipping') shipAllFromSatchel();
+    else if (lm === 'mailbox') openMailboxModal();
+    else if (lm === 'gateToPasture') switchArea('pasture');
+    else if (lm === 'gateToFarm') switchArea('farm');
+    else if (lm === 'barn') openBarnModal();
+    else if (lm === 'trough') feedAllHungryAnimals();
+    else if (lm === 'ranchShop') openRanchShopModal();
+  }
+
+  function getNearbyContext() {
+    const ptx = state.player.x / TILE, pty = state.player.y / TILE;
+    const faced = getFacedTile();
+    const c = T().ctx;
+
+    if (state.area === 'pasture') {
+      // Nearest collectible drop
+      const drop = state.pastureDrops.find(d => Math.hypot(d.x - state.player.x, d.y - state.player.y) < 42);
+      if (drop) return { icon: ITEMS[drop.itemId].emoji, text: c.collectDrop(L(ITEMS[drop.itemId].name)), action: () => collectDrop(drop.id) };
+      // Nearest animal
+      const ani = state.animals.find(a => Math.hypot(a.x - state.player.x, a.y - state.player.y) < 44);
+      if (ani) return { icon: ANIMALS[ani.type].emoji, text: c.petAnimal(L(ANIMALS[ani.type].name), ani.fed), action: () => petOrFeedAnimal(ani) };
+    }
+
+    const lm = getLandmarkAt(faced.x, faced.y);
+    if (lm === 'cottage') return { icon: '🏡', text: c.cottage(state.kitchenUnlocked), action: () => openCottageModal() };
+    if (lm === 'shop') return { icon: '🌸', text: c.shop, action: () => openShopModal() };
+    if (lm === 'ranchShop') return { icon: '🥛', text: c.ranchShop, action: () => openRanchShopModal() };
+    if (lm === 'barn') return { icon: '🏠', text: c.barn, action: () => openBarnModal() };
+    if (lm === 'trough') {
+      const hungry = state.animals.filter(a => !a.fed).length;
+      return { icon: '🌾', text: c.trough(hungry), action: () => feedAllHungryAnimals() };
+    }
+    if (lm === 'gateToPasture') return { icon: '🐮', text: c.gateToPasture, action: () => switchArea('pasture') };
+    if (lm === 'gateToFarm') return { icon: '🏡', text: c.gateToFarm, action: () => switchArea('farm') };
+    if (lm === 'shipping') {
+      const n = getShippableBasketCount();
+      return { icon: '📦', text: n > 0 ? c.shippingSome(n) : c.shippingEmpty, action: () => shipAllFromSatchel() };
+    }
+    if (lm === 'mailbox') return { icon: '📬', text: state.unreadMail ? c.mailUnread : c.mailRead, action: () => openMailboxModal() };
+
+    if (isNearWater(ptx, pty) && state.water < getCanCapacity()) {
+      return { icon: '💧', text: c.refill, action: () => refillWater() };
+    }
+    if (state.area === 'farm') {
+      const td = getTileData(faced.x, faced.y);
+      if (td && td.crop && isCropRipe(td.crop)) {
+        return { icon: CROPS[td.crop.id].emoji, text: c.harvest(L(CROPS[td.crop.id].name)), action: () => harvestTile(faced.x, faced.y) };
+      }
+    }
+    return null;
+  }
+
+  function isNearWater(ptx, pty) {
+    const cx = Math.floor(ptx), cy = Math.floor(pty), m = curMap();
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+      const nx = cx + dx, ny = cy + dy;
+      if (nx >= 0 && nx < COLS && ny >= 0 && ny < ROWS && m[ny][nx] === TILE_TYPE.WATER) return true;
+    }
+    return false;
+  }
+
+  function performSmartInteract() {
+    const hint = getNearbyContext();
+    if (hint && hint.action) { hint.action(); return; }
+    const f = getFacedTile();
+    tryHarvestOrInteractTile(f.x, f.y);
+  }
+
+  function tryHarvestOrInteractTile(tx, ty) {
+    const lm = getLandmarkAt(tx, ty);
+    if (lm) { triggerLandmark(lm); return; }
+    if (tx >= 0 && tx < COLS && ty >= 0 && ty < ROWS && curMap()[ty][tx] === TILE_TYPE.WATER) { refillWater(); return; }
+    if (state.area === 'farm') {
+      const td = getTileData(tx, ty);
+      if (td && td.crop && isCropRipe(td.crop)) { harvestTile(tx, ty); return; }
+      if (td && td.placeable) {
+        const p = td.placeable; td.placeable = null;
+        state.placeables[p] = (state.placeables[p] || 0) + 1;
+        AudioFX.place();
+        addFloatText((tx + 0.5) * TILE, ty * TILE, T().floats.pickedUp(p === 'sprinkler' ? T().tools.sprinkler : T().tools.lantern), '#fff3c4');
+        renderHotbar(); return;
+      }
+      performPrimaryAction(tx, ty);
+    }
+  }
+
+  // =========================================================================
+  // PASTURE ANIMAL CARE (Feed, Pet, Collect Drops)
+  // =========================================================================
+  function feedAllHungryAnimals() {
+    if (state.animals.length === 0) {
+      AudioFX.error(); addFloatText(9.5 * TILE, 4 * TILE, T().floats.noAnimals, '#fde68a'); return;
+    }
+    const hungry = state.animals.filter(a => !a.fed);
+    if (hungry.length === 0) {
+      AudioFX.ui(); addFloatText(9.5 * TILE, 4 * TILE, T().floats.allFed, '#bbf7d0'); return;
+    }
+    if (state.feed <= 0) {
+      AudioFX.error(); addFloatText(9.5 * TILE, 4 * TILE, T().floats.noFeed, '#fecaca'); return;
+    }
+    let fedCount = 0;
+    for (const a of hungry) {
+      if (state.feed <= 0) break;
+      state.feed -= 1;
+      a.fed = true;
+      fedCount++;
+      spawnParticles(a.x, a.y - 10, '#fde047', 6, 1.4, 3);
+    }
+    AudioFX.harvest();
+    addFloatText(9.5 * TILE, 3.8 * TILE, T().floats.fedAnimals(fedCount), '#fef08a');
+    updateHUD();
+  }
+
+  function petOrFeedAnimal(ani) {
+    if (!ani.fed && state.feed > 0) {
+      state.feed -= 1;
+      ani.fed = true;
+      AudioFX.harvest();
+      spawnParticles(ani.x, ani.y - 10, '#fde047', 7, 1.5, 3);
+      addFloatText(ani.x, ani.y - 22, '🌾 😋', '#fef08a');
+      updateHUD();
+    } else {
+      if (!ani.petted) {
+        ani.petted = true;
+        ani.hearts = Math.min(5, (ani.hearts || 0) + 1);
+      }
+      AudioFX.pet();
+      spawnParticles(ani.x, ani.y - 12, '#ff8fab', 8, 1.6, 3.2);
+      addFloatText(ani.x, ani.y - 24, T().floats.petHeart, '#ffd6e0');
+    }
+  }
+
+  function collectDrop(dropId) {
+    const idx = state.pastureDrops.findIndex(d => d.id === dropId);
+    if (idx === -1) return;
+    const drop = state.pastureDrops[idx];
+    state.pastureDrops.splice(idx, 1);
+    const key = `${drop.itemId}_${drop.quality}`;
+    state.satchel[key] = (state.satchel[key] || 0) + 1;
+    state.totalHarvested += 1;
+    AudioFX.harvest();
+    const item = ITEMS[drop.itemId];
+    spawnParticles(drop.x, drop.y, drop.quality ? '#fde047' : '#ffffff', 10, 1.8, 3.2);
+    addFloatText(drop.x, drop.y - 12, T().floats.collectedDrop(item.emoji, L(item.name), drop.quality === 1), drop.quality ? '#fef08a' : '#ffffff');
+    updateHUD();
+  }
+
+  function collectAllPastureDrops() {
+    while (state.pastureDrops.length > 0) collectDrop(state.pastureDrops[0].id);
+  }
+
+  // =========================================================================
+  // FARMING ACTIONS
+  // =========================================================================
+  function isCropRipe(cropObj) { return cropObj.daysGrown >= CROPS[cropObj.id].days; }
+
+  function getAreaTiles(tx, ty, level) {
+    if (level <= 1) return [[tx, ty]];
+    if (level === 2) {
+      const d = state.player.dir;
+      const dx = d === 'right' ? 1 : d === 'left' ? -1 : 0;
+      const dy = d === 'down' ? 1 : d === 'up' ? -1 : 0;
+      return [[tx, ty], [tx + dx, ty + dy], [tx + dx * 2, ty + dy * 2]];
+    }
+    const list = [];
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) list.push([tx + dx, ty + dy]);
+    return list;
+  }
+
+  function performPrimaryAction(tx, ty) {
+    if (state.area !== 'farm') { performSmartInteract(); return; }
+    if (tx < 0 || tx >= COLS || ty < 0 || ty >= ROWS) return;
+    const slots = getAllHotbarSlots().all;
+    const slot = slots[state.selectedSlot] || slots[0];
+    const existing = getTileData(tx, ty);
+    if (existing && existing.crop && isCropRipe(existing.crop)) { harvestTile(tx, ty); return; }
+    if (slot.id === 'can' && curMap()[ty][tx] === TILE_TYPE.WATER) { refillWater(); return; }
+
+    state.player.swingTimer = 0.22;
+    state.player.swingTool = slot.id;
+
+    if (slot.kind === 'tool') {
+      if (slot.id === 'hoe') doHoe(tx, ty);
+      else if (slot.id === 'can') doWater(tx, ty);
+      else if (slot.id === 'scythe') doClearDebris(tx, ty);
+    } else if (slot.kind === 'seed') doPlant(tx, ty, slot.id);
+    else if (slot.kind === 'placeable') doPlace(tx, ty, slot.id);
+  }
+
+  function spendEnergy(amount) {
+    if (state.energy < amount) {
+      AudioFX.error(); addFloatText(state.player.x, state.player.y - 24, T().floats.tooTired, '#ffd1d1'); return false;
+    }
+    state.energy = Math.max(0, state.energy - amount);
+    updateHUD();
+    return true;
+  }
+
+  function doHoe(tx, ty) {
+    const targets = getAreaTiles(tx, ty, state.hoeLevel);
+    let tilledAny = false;
+    for (const [x, y] of targets) {
+      if (x < 0 || x >= COLS || y < 0 || y >= ROWS || MAPS.farm[y][x] !== TILE_TYPE.FARMABLE) continue;
+      const td = ensureTileData(x, y);
+      if (td.debris || td.placeable || td.tilled) continue;
+      if (!tilledAny && !spendEnergy(2)) return;
+      td.tilled = true;
+      if (state.weather === 'rainy') td.watered = true;
+      tilledAny = true;
+      spawnParticles((x + 0.5) * TILE, (y + 0.5) * TILE, '#a6744f', 7, 1.4, 3.2);
+    }
+    if (tilledAny) AudioFX.hoe();
+    else {
+      const td = getTileData(tx, ty);
+      if (td && td.debris) { addFloatText((tx + 0.5) * TILE, ty * TILE, T().floats.useScythe, '#fff2b2'); AudioFX.error(); }
+    }
+  }
+
+  function doWater(tx, ty) {
+    if (state.water <= 0) {
+      AudioFX.error(); addFloatText(state.player.x, state.player.y - 24, T().floats.canEmpty, '#bae6fd'); return;
+    }
+    const targets = getAreaTiles(tx, ty, state.canLevel);
+    let wateredAny = false;
+    for (const [x, y] of targets) {
+      if (x < 0 || x >= COLS || y < 0 || y >= ROWS) continue;
+      const td = getTileData(x, y);
+      if (!td || !td.tilled) continue;
+      if (!wateredAny && !spendEnergy(1)) return;
+      td.watered = true; wateredAny = true;
+      spawnParticles((x + 0.5) * TILE, (y + 0.5) * TILE, '#67d4f6', 8, 1.3, 2.8);
+    }
+    if (wateredAny) {
+      state.water = Math.max(0, state.water - 1);
+      AudioFX.water(); updateHUD(); renderHotbar();
+    } else if (isNearWater(state.player.x / TILE, state.player.y / TILE)) refillWater();
+  }
+
+  function refillWater() {
+    const cap = getCanCapacity();
+    if (state.water >= cap) { addFloatText(state.player.x, state.player.y - 24, T().floats.canFull, '#bae6fd'); return; }
+    state.water = cap;
+    AudioFX.water();
+    spawnParticles(state.player.x, state.player.y, '#67d4f6', 14, 2.0, 3.2);
+    addFloatText(state.player.x, state.player.y - 24, T().floats.refilled(cap), '#bae6fd');
+    updateHUD(); renderHotbar();
+  }
+
+  function doClearDebris(tx, ty) {
+    const td = getTileData(tx, ty);
+    if (!td) return;
+    if (td.crop && isCropRipe(td.crop)) { harvestTile(tx, ty); return; }
+    if (!td.debris || !spendEnergy(2)) return;
+    const type = td.debris; td.debris = null;
+    AudioFX.chop();
+    const wx = (tx + 0.5) * TILE, wy = (ty + 0.5) * TILE;
+    if (type === 'twig') { state.wood += 2; spawnParticles(wx, wy, '#a87548', 9, 1.7, 3); addFloatText(wx, wy - 6, T().floats.woodGain, '#fde6c4'); }
+    else if (type === 'stone') { state.stone += 2; spawnParticles(wx, wy, '#b4b8bf', 9, 1.7, 3); addFloatText(wx, wy - 6, T().floats.stoneGain, '#f1f5f9'); }
+    else {
+      spawnParticles(wx, wy, '#72bf65', 9, 1.6, 3);
+      if (Math.random() < 0.45) { state.seeds.turnip += 1; addFloatText(wx, wy - 6, T().floats.wildSeed, '#dcfce7'); renderHotbar(); }
+      else addFloatText(wx, wy - 6, T().floats.cleared, '#ecfccb');
+    }
+    updateHUD();
+  }
+
+  function doPlant(tx, ty, cropId) {
+    if ((state.seeds[cropId] || 0) <= 0) {
+      AudioFX.error(); addFloatText(state.player.x, state.player.y - 24, T().floats.noSeeds(L(CROPS[cropId].name)), '#fde68a'); return;
+    }
+    if (MAPS.farm[ty][tx] !== TILE_TYPE.FARMABLE) return;
+    const td = getTileData(tx, ty);
+    if (!td || !td.tilled) { AudioFX.error(); addFloatText((tx + 0.5) * TILE, ty * TILE, T().floats.tillFirst, '#fde68a'); return; }
+    if (td.crop || td.placeable || td.debris) return;
+    state.seeds[cropId] -= 1;
+    td.crop = { id: cropId, daysGrown: 0 };
+    AudioFX.plant();
+    spawnParticles((tx + 0.5) * TILE, (ty + 0.5) * TILE, '#b8f078', 6, 1.2, 2.8);
+    addFloatText((tx + 0.5) * TILE, ty * TILE - 2, T().floats.planted(CROPS[cropId].emoji), '#f0fdf4');
+    renderHotbar();
+  }
+
+  function doPlace(tx, ty, itemId) {
+    if ((state.placeables[itemId] || 0) <= 0) { AudioFX.error(); addFloatText(state.player.x, state.player.y - 24, T().floats.buyPlaceable, '#bae6fd'); return; }
+    if (MAPS.farm[ty][tx] !== TILE_TYPE.FARMABLE) { AudioFX.error(); addFloatText((tx + 0.5) * TILE, ty * TILE, T().floats.placeOnFarm, '#fde68a'); return; }
+    const td = ensureTileData(tx, ty);
+    if (td.crop || td.debris || td.placeable) { AudioFX.error(); addFloatText((tx + 0.5) * TILE, ty * TILE, T().floats.tileOccupied, '#fecaca'); return; }
+    state.placeables[itemId] -= 1;
+    td.placeable = itemId; td.tilled = false; td.watered = false;
+    AudioFX.place();
+    spawnParticles((tx + 0.5) * TILE, (ty + 0.5) * TILE, '#93c5fd', 10, 1.6, 3);
+    addFloatText((tx + 0.5) * TILE, ty * TILE - 4, itemId === 'sprinkler' ? T().floats.placedSprinkler : T().floats.placedLantern, '#e0f2fe');
+    renderHotbar();
+  }
+
+  function harvestTile(tx, ty) {
+    const td = getTileData(tx, ty);
+    if (!td || !td.crop || !isCropRipe(td.crop)) return;
+    const crop = CROPS[td.crop.id];
+    const qty = crop.yieldMin + Math.floor(Math.random() * (crop.yieldMax - crop.yieldMin + 1));
+    const goldChance = state.luckyCharm ? 0.40 : 0.16;
+    let goldCount = 0;
+    for (let i = 0; i < qty; i++) {
+      const q = Math.random() < goldChance ? 1 : 0;
+      if (q === 1) goldCount++;
+      const key = `${crop.id}_${q}`;
+      state.satchel[key] = (state.satchel[key] || 0) + 1;
+    }
+    state.totalHarvested += qty;
+    if (crop.regrow > 0) td.crop.daysGrown = crop.days - crop.regrow;
+    else td.crop = null;
+    AudioFX.harvest();
+    const wx = (tx + 0.5) * TILE, wy = (ty + 0.5) * TILE;
+    spawnParticles(wx, wy, crop.color, 12, 1.9, 3.6);
+    if (goldCount > 0) spawnParticles(wx, wy, '#ffe066', 8, 2.2, 3.2);
+    addFloatText(wx, wy - 8, `+${qty} ${crop.emoji} ${L(crop.name)}${goldCount > 0 ? ' ⭐' : ''}`, goldCount > 0 ? '#fef08a' : '#ffffff');
+    updateHUD();
+  }
+
+  // =========================================================================
+  // SHIPPING BIN & SLEEP / NIGHT PROCESSING
+  // =========================================================================
+  function getShippableBasketCount() {
+    const c1 = Object.values(state.satchel).reduce((a, b) => a + b, 0);
+    const c2 = Object.values(state.dishes).reduce((a, b) => a + b, 0);
+    return c1 + c2;
+  }
+  function getBasketBadgeTotal() {
+    return getShippableBasketCount() + Object.values(state.pantry).reduce((a, b) => a + b, 0);
+  }
+  function getShippingPendingGold() {
+    let total = 0;
+    for (const [key, count] of Object.entries(state.shippingBin)) {
+      if (!count) continue;
+      if (key.startsWith('dish:')) total += getSellValue(key.slice(5), 0) * count;
+      else { const [id, q] = key.split('_'); total += getSellValue(id, Number(q || 0)) * count; }
+    }
+    return total;
+  }
+
+  function shipAllFromSatchel() {
+    const count = getShippableBasketCount();
+    if (count === 0) { AudioFX.ui(); addFloatText(7.5 * TILE, 4 * TILE, T().floats.shipEmpty, '#fde68a'); return; }
+    let addedGold = 0;
+    for (const [key, qty] of Object.entries(state.satchel)) {
+      if (!qty) continue;
+      const [id, q] = key.split('_');
+      addedGold += getSellValue(id, Number(q)) * qty;
+      state.shippingBin[key] = (state.shippingBin[key] || 0) + qty;
+    }
+    state.satchel = {};
+    for (const [rid, qty] of Object.entries(state.dishes)) {
+      if (!qty) continue;
+      addedGold += getSellValue(rid, 0) * qty;
+      state.shippingBin[`dish:${rid}`] = (state.shippingBin[`dish:${rid}`] || 0) + qty;
+    }
+    state.dishes = {};
+    AudioFX.coin();
+    spawnParticles(7.5 * TILE, 4.3 * TILE, '#fcd34d', 14, 1.9, 3.2);
+    addFloatText(7.5 * TILE, 3.8 * TILE, T().floats.shipped(count, addedGold), '#bbf7d0');
+    updateHUD();
+  }
+
+  function startSleepSequence(passedOut = false) {
+    if (isTransitioning) return;
+    isTransitioning = true;
+    closeModal();
+    const overlay = document.getElementById('fadeOverlay');
+    document.getElementById('fadeMessage').textContent = passedOut ? T().modals.fadePassedOut : T().modals.fadeSleeping;
+    overlay.style.opacity = '1';
+
+    setTimeout(() => {
+      const shippedEntries = [];
+      let earned = 0;
+      for (const [key, qty] of Object.entries(state.shippingBin)) {
+        if (!qty) continue;
+        let id, q = 0;
+        if (key.startsWith('dish:')) id = key.slice(5);
+        else { const parts = key.split('_'); id = parts[0]; q = Number(parts[1] || 0); }
+        const unit = getSellValue(id, q), sub = unit * qty;
+        earned += sub;
+        shippedEntries.push({ id, quality: q, qty, unit, sub });
+      }
+      state.shippingBin = {};
+      state.gold += earned;
+      state.lifetimeGold += earned;
+
+      const prevSeason = state.seasonIdx;
+      state.day += 1;
+      if (state.day > 14) { state.day = 1; state.seasonIdx = (state.seasonIdx + 1) % SEASONS.length; }
+      const seasonChanged = state.seasonIdx !== prevSeason;
+
+      state.weather = state.nextWeather;
+      const r = Math.random();
+      state.nextWeather = r < 0.28 ? 'rainy' : r < 0.56 ? 'breezy' : 'sunny';
+
+      // Farm growth
+      for (const key of Object.keys(state.farm)) {
+        const td = state.farm[key];
+        if (td.crop && td.watered && td.crop.daysGrown < CROPS[td.crop.id].days) td.crop.daysGrown += 1;
+        td.watered = (state.weather === 'rainy' && td.tilled);
+        if (td.tilled && !td.crop && Math.random() < 0.1) { td.tilled = false; td.watered = false; }
+      }
+
+      let sprinklerWaters = 0;
+      for (const key of Object.keys(state.farm)) {
+        const td = state.farm[key];
+        if (td.placeable === 'sprinkler') {
+          const [sx, sy] = key.split(',').map(Number);
+          for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+            if (dx === 0 && dy === 0) continue;
+            const ntd = getTileData(sx + dx, sy + dy);
+            if (ntd && ntd.tilled) { ntd.watered = true; sprinklerWaters++; }
+          }
+        }
+      }
+
+      // Pasture animal overnight production!
+      let newDrops = 0;
+      let autoFedCount = 0;
+      for (const a of state.animals) {
+        if (a.fed && state.pastureDrops.length < 24) {
+          const meta = ANIMALS[a.type];
+          const goldChance = (state.luckyCharm ? 0.35 : 0.14) + Math.min(0.25, (a.hearts || 0) * 0.05);
+          const q = Math.random() < goldChance ? 1 : 0;
+          state.pastureDrops.push({
+            id: `drop_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+            itemId: meta.product,
+            quality: q,
+            x: Math.max(3.6 * TILE, Math.min(15.4 * TILE, a.x + (Math.random() - 0.5) * 26)),
+            y: Math.max(7.6 * TILE, Math.min(12.6 * TILE, a.y + (Math.random() - 0.5) * 20))
+          });
+          newDrops++;
+        }
+        a.fed = false;
+        a.petted = false;
+        // Auto-feeder refills for today!
+        if (state.autoFeeder && state.feed > 0) {
+          state.feed -= 1;
+          a.fed = true;
+          autoFedCount++;
+        }
+      }
+
+      // Wake up at Home Farm cottage
+      state.area = 'farm';
+      state.timeMinutes = 6 * 60;
+      state.energy = passedOut ? Math.round(state.maxEnergy * 0.8) : state.maxEnergy;
+      state.player.x = 4 * TILE; state.player.y = 5.5 * TILE; state.player.dir = 'down';
+      walkTarget = null;
+      if (state.day === 2 || state.day === 5 || seasonChanged) state.unreadMail = true;
+
+      saveState();
+      updateHUD();
+      renderHotbar();
+
+      overlay.style.opacity = '0';
+      isTransitioning = false;
+      AudioFX.morning();
+      openDaySummaryModal(shippedEntries, earned, passedOut, seasonChanged, sprinklerWaters, newDrops, autoFedCount);
+    }, 600);
+  }
+
+  // =========================================================================
+  // MODALS: SHOP, RANCH SHOP, KITCHEN, BARN, BASKET, COTTAGE, WARDROBE, LEDGER
+  // =========================================================================
+  function openModal(icon, title, bodyHTML, footerHTML = '') {
+    modalOpen = true; walkTarget = null;
+    for (const k in keys) keys[k] = false;
+    document.getElementById('modalIcon').textContent = icon;
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalBody').innerHTML = bodyHTML;
+    document.getElementById('modalFooter').innerHTML = footerHTML;
+    document.getElementById('modalOverlay').classList.remove('hidden');
+  }
+  function closeModal() { modalOpen = false; document.getElementById('modalOverlay').classList.add('hidden'); }
+  document.getElementById('modalCloseBtn').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
+  document.getElementById('modalOverlay').addEventListener('click', (e) => { if (e.target.id === 'modalOverlay') { AudioFX.ui(); closeModal(); } });
+
+  // --- PIP'S SEED & UPGRADE SHOP ---
+  let shopTab = 'seeds';
+  function openShopModal(tab = shopTab) {
+    shopTab = tab; AudioFX.ui();
+    const m = T().modals, season = getSeason();
+    let body = `
+      <div class="flex gap-2 border-b border-[#dcc49e] pb-2">
+        <button data-shoptab="seeds" class="px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer ${shopTab==='seeds'?'btn-peach':'bg-[#efe0c4] text-[#5c4028]'}">${m.tabSeeds}</button>
+        <button data-shoptab="upgrades" class="px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer ${shopTab==='upgrades'?'btn-peach':'bg-[#efe0c4] text-[#5c4028]'}">${m.tabUpgrades}</button>
+      </div>
+    `;
+    if (shopTab === 'seeds') {
+      body += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">`;
+      for (const cid of CROP_ORDER) {
+        const c = CROPS[cid], isBonus = season.bonus.includes(cid), owned = state.seeds[cid] || 0;
+        body += `
+          <div class="rounded-2xl p-2.5 bg-[#fffdf7] border border-[#d6ba91] flex flex-col justify-between gap-1.5">
+            <div>
+              <div class="flex items-center justify-between gap-1">
+                <span class="font-bold text-sm flex items-center gap-1">${c.emoji} ${L(c.name)} ${isBonus ? '<span class="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-600 text-white">+20%</span>' : ''}</span>
+                <span class="text-[11px] font-semibold text-amber-800">${m.bag}: ${owned}</span>
+              </div>
+              <p class="text-[11px] text-[#75583e] mt-0.5 leading-snug">${L(c.desc)}</p>
+              <div class="text-[11px] font-semibold text-[#5c4028] mt-1 flex items-center gap-2">
+                <span>⏱️ ${c.days}d${c.regrow ? ` (↻${c.regrow}d)` : ''}</span>
+                <span>🪙 ${m.sells} ${getSellValue(cid, 0)}g</span>
+              </div>
+            </div>
+            <div class="flex gap-1.5">
+              <button data-buyseed="${cid}" data-qty="1" ${state.gold >= c.seedPrice ? '' : 'disabled'} class="btn-peach flex-1 py-1 rounded-xl text-xs font-bold cursor-pointer">${m.buy1} (${c.seedPrice}g)</button>
+              <button data-buyseed="${cid}" data-qty="5" ${state.gold >= c.seedPrice * 5 ? '' : 'disabled'} class="btn-sage px-2.5 py-1 rounded-xl text-xs font-bold cursor-pointer">×5 (${c.seedPrice*5}g)</button>
+            </div>
+          </div>`;
+      }
+      body += `</div>`;
+    } else {
+      const u = m.upg;
+      const list = [
+        { id: 'kitchen', icon: '🍳', title: state.kitchenUnlocked ? u.kitchenOwned : u.kitchen, desc: u.kitchenD, price: state.kitchenUnlocked ? null : 250, maxed: state.kitchenUnlocked },
+        { id: 'hoe', icon: '⛏️', title: state.hoeLevel===1?u.hoe2:state.hoeLevel===2?u.hoe3:u.hoeMax, desc: state.hoeLevel===1?u.hoe2d:state.hoeLevel===2?u.hoe3d:u.hoeMaxd, price: state.hoeLevel===1?200:state.hoeLevel===2?500:null, maxed: state.hoeLevel>=3 },
+        { id: 'can', icon: '🚿', title: state.canLevel===1?u.can2:state.canLevel===2?u.can3:u.canMax, desc: state.canLevel===1?u.can2d:state.canLevel===2?u.can3d:u.canMaxd, price: state.canLevel===1?220:state.canLevel===2?550:null, maxed: state.canLevel>=3 },
+        { id: 'sprinkler', icon: '💦', title: u.sprinkler(state.placeables.sprinkler || 0), desc: u.sprinklerD, price: 180, maxed: false },
+        { id: 'luckyCharm', icon: '🍀', title: state.luckyCharm ? u.charmOwned : u.charm, desc: u.charmD, price: state.luckyCharm ? null : 350, maxed: state.luckyCharm },
+        { id: 'lantern', icon: '🏮', title: u.lantern(state.placeables.lantern || 0), desc: u.lanternD, price: 90, maxed: false }
+      ];
+      body += `<div class="space-y-2">` + list.map(it => `
+        <div class="rounded-2xl p-2.5 bg-[#fffdf7] border border-[#d6ba91] flex items-center justify-between gap-3">
+          <div class="flex items-start gap-2.5"><span class="text-xl mt-0.5">${it.icon}</span>
+            <div><div class="font-bold text-sm">${it.title}</div><div class="text-[11px] text-[#75583e]">${it.desc}</div></div>
+          </div>
+          ${it.maxed ? `<span class="px-2.5 py-1 rounded-xl bg-emerald-600/15 text-emerald-800 font-bold text-xs shrink-0">${m.owned}</span>`
+            : `<button data-buyupg="${it.id}" ${state.gold >= it.price ? '' : 'disabled'} class="btn-peach px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 cursor-pointer">🪙 ${it.price}g</button>`}
+        </div>`).join('') + `</div>`;
+    }
+    openModal('🌸', m.shopTitle, body,
+      `<span class="font-bold text-amber-900">${m.yourGold}: 🪙 ${state.gold}g</span>
+       <span class="text-[11px] text-[#75583e] hidden sm:inline">${m.pipQuote}</span>`);
+
+    document.querySelectorAll('[data-shoptab]').forEach(b => b.addEventListener('click', () => openShopModal(b.dataset.shoptab)));
+    document.querySelectorAll('[data-buyseed]').forEach(b => b.addEventListener('click', () => {
+      const cid = b.dataset.buyseed, qty = Number(b.dataset.qty), cost = CROPS[cid].seedPrice * qty;
+      if (state.gold < cost) return;
+      state.gold -= cost; state.seeds[cid] = (state.seeds[cid] || 0) + qty;
+      AudioFX.coin(); updateHUD(); renderHotbar(); openShopModal('seeds');
+    }));
+    document.querySelectorAll('[data-buyupg]').forEach(b => b.addEventListener('click', () => {
+      const id = b.dataset.buyupg;
+      if (id === 'kitchen') { if (state.gold < 250 || state.kitchenUnlocked) return; state.gold -= 250; state.kitchenUnlocked = true; }
+      else if (id === 'hoe') { const c = state.hoeLevel === 1 ? 200 : 500; if (state.gold < c || state.hoeLevel >= 3) return; state.gold -= c; state.hoeLevel += 1; }
+      else if (id === 'can') { const c = state.canLevel === 1 ? 220 : 550; if (state.gold < c || state.canLevel >= 3) return; state.gold -= c; state.canLevel += 1; state.water = getCanCapacity(); }
+      else if (id === 'sprinkler') { if (state.gold < 180) return; state.gold -= 180; state.placeables.sprinkler += 1; }
+      else if (id === 'luckyCharm') { if (state.gold < 350 || state.luckyCharm) return; state.gold -= 350; state.luckyCharm = true; }
+      else if (id === 'lantern') { if (state.gold < 90) return; state.gold -= 90; state.placeables.lantern += 1; }
+      AudioFX.coin(); updateHUD(); renderHotbar(); openShopModal('upgrades');
+    }));
+  }
+
+  // --- MILLIE'S RANCH & PANTRY SHOP (Animals + Feed + Cooking Ingredients!) ---
+  let ranchTab = 'animals';
+  function openRanchShopModal(tab = ranchTab) {
+    ranchTab = tab; AudioFX.ui();
+    const m = T().modals;
+    let body = `
+      <div class="flex flex-wrap gap-1.5 border-b border-[#dcc49e] pb-2">
+        <button data-rtab="animals" class="px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer ${ranchTab==='animals'?'btn-peach':'bg-[#efe0c4] text-[#5c4028]'}">${m.tabAnimals}</button>
+        <button data-rtab="feed" class="px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer ${ranchTab==='feed'?'btn-peach':'bg-[#efe0c4] text-[#5c4028]'}">${m.tabFeed}</button>
+        <button data-rtab="pantry" class="px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer ${ranchTab==='pantry'?'btn-peach':'bg-[#efe0c4] text-[#5c4028]'}">${m.tabPantry}</button>
+      </div>
+    `;
+
+    if (ranchTab === 'animals') {
+      const full = state.animals.length >= 12;
+      body += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">`;
+      for (const aid of ANIMAL_ORDER) {
+        const a = ANIMALS[aid], prod = ITEMS[a.product];
+        const count = state.animals.filter(x => x.type === aid).length;
+        body += `
+          <div class="rounded-2xl p-2.5 bg-[#fffdf7] border border-[#d6ba91] flex flex-col justify-between gap-2">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-sm">${a.emoji} ${L(a.name)}</span>
+                <span class="text-[11px] font-semibold text-amber-800">${m.bag}: ${count}</span>
+              </div>
+              <p class="text-[11px] text-[#75583e] mt-0.5">${L(a.desc)}</p>
+              <div class="text-[11px] font-semibold text-[#5c4028] mt-1">→ ${prod.emoji} ${L(prod.name)} (${prod.sellPrice}g)</div>
+            </div>
+            <button data-buyani="${aid}" ${!full && state.gold >= a.price ? '' : 'disabled'} class="btn-peach w-full py-1.5 rounded-xl text-xs font-bold cursor-pointer">
+              ${full ? m.pastureFull : `${m.adopt} (🪙 ${a.price}g)`}
+            </button>
+          </div>`;
+      }
+      body += `</div>`;
+    } else if (ranchTab === 'feed') {
+      const u = m.upg;
+      body += `
+        <div class="rounded-2xl p-3 bg-[#fffdf7] border border-[#d6ba91] space-y-2.5">
+          <div class="flex items-center justify-between">
+            <div class="font-bold text-sm">🌾 ${m.feedTitle}</div>
+            <span class="text-xs font-bold text-amber-900">${m.feedOwned(state.feed)}</span>
+          </div>
+          <p class="text-[11px] text-[#75583e]">${m.feedDesc}</p>
+          <div class="flex flex-wrap gap-2">
+            <button data-buyfeed="1" data-cost="10" ${state.gold >= 10 ? '' : 'disabled'} class="btn-peach flex-1 py-1.5 rounded-xl text-xs font-bold cursor-pointer">+1 (10g)</button>
+            <button data-buyfeed="5" data-cost="45" ${state.gold >= 45 ? '' : 'disabled'} class="btn-sage flex-1 py-1.5 rounded-xl text-xs font-bold cursor-pointer">+5 (45g)</button>
+            <button data-buyfeed="15" data-cost="120" ${state.gold >= 120 ? '' : 'disabled'} class="btn-sage flex-1 py-1.5 rounded-xl text-xs font-bold cursor-pointer">+15 (120g)</button>
+          </div>
+        </div>
+        <div class="rounded-2xl p-3 bg-[#fffdf7] border border-[#d6ba91] flex items-center justify-between gap-3">
+          <div class="flex items-start gap-2.5"><span class="text-xl">⚙️</span>
+            <div><div class="font-bold text-sm">${state.autoFeeder ? u.autoFeederOwned : u.autoFeeder}</div><div class="text-[11px] text-[#75583e]">${u.autoFeederD}</div></div>
+          </div>
+          ${state.autoFeeder ? `<span class="px-2.5 py-1 rounded-xl bg-emerald-600/15 text-emerald-800 font-bold text-xs shrink-0">${m.owned}</span>`
+            : `<button id="btnBuyAutoFeeder" ${state.gold >= 300 ? '' : 'disabled'} class="btn-peach px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 cursor-pointer">🪙 300g</button>`}
+        </div>
+      `;
+    } else {
+      body += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">`;
+      for (const iid of PANTRY_SHOP_ORDER) {
+        const it = ITEMS[iid], owned = getAvailableIngredientCount(iid);
+        body += `
+          <div class="rounded-2xl p-2.5 bg-[#fffdf7] border border-[#d6ba91] flex flex-col justify-between gap-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-sm">${it.emoji} ${L(it.name)}</span>
+              <span class="text-[11px] font-semibold text-amber-800">${m.bag}: ${owned}</span>
+            </div>
+            <div class="flex gap-1.5">
+              <button data-buypantry="${iid}" data-qty="1" ${state.gold >= it.buyPrice ? '' : 'disabled'} class="btn-peach flex-1 py-1 rounded-xl text-xs font-bold cursor-pointer">${m.buy1} (${it.buyPrice}g)</button>
+              <button data-buypantry="${iid}" data-qty="5" ${state.gold >= it.buyPrice * 5 ? '' : 'disabled'} class="btn-sage px-2.5 py-1 rounded-xl text-xs font-bold cursor-pointer">×5 (${it.buyPrice*5}g)</button>
+            </div>
+          </div>`;
+      }
+      body += `</div>`;
+    }
+
+    openModal('🥛', m.ranchShopTitle, body,
+      `<span class="font-bold text-amber-900">${m.yourGold}: 🪙 ${state.gold}g</span>
+       <span class="text-[11px] text-[#75583e] hidden sm:inline">${m.millieQuote}</span>`);
+
+    document.querySelectorAll('[data-rtab]').forEach(b => b.addEventListener('click', () => openRanchShopModal(b.dataset.rtab)));
+    document.querySelectorAll('[data-buyani]').forEach(b => b.addEventListener('click', () => {
+      const aid = b.dataset.buyani, meta = ANIMALS[aid];
+      if (state.gold < meta.price || state.animals.length >= 12) return;
+      state.gold -= meta.price;
+      state.animals.push({
+        id: `ani_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
+        type: aid,
+        x: (5 + Math.random() * 10) * TILE,
+        y: (8 + Math.random() * 4.5) * TILE,
+        tx: (5 + Math.random() * 10) * TILE,
+        ty: (8 + Math.random() * 4.5) * TILE,
+        wait: 1 + Math.random() * 2,
+        dir: Math.random() < 0.5 ? 1 : -1,
+        fed: false, petted: false, hearts: 0
+      });
+      AudioFX.coin(); updateHUD(); openRanchShopModal('animals');
+    }));
+    document.querySelectorAll('[data-buyfeed]').forEach(b => b.addEventListener('click', () => {
+      const qty = Number(b.dataset.buyfeed), cost = Number(b.dataset.cost);
+      if (state.gold < cost) return;
+      state.gold -= cost; state.feed += qty;
+      AudioFX.coin(); updateHUD(); openRanchShopModal('feed');
+    }));
+    const af = document.getElementById('btnBuyAutoFeeder');
+    if (af) af.addEventListener('click', () => {
+      if (state.gold < 300 || state.autoFeeder) return;
+      state.gold -= 300; state.autoFeeder = true;
+      AudioFX.coin(); updateHUD(); openRanchShopModal('feed');
+    });
+    document.querySelectorAll('[data-buypantry]').forEach(b => b.addEventListener('click', () => {
+      const iid = b.dataset.buypantry, qty = Number(b.dataset.qty), cost = ITEMS[iid].buyPrice * qty;
+      if (state.gold < cost) return;
+      state.gold -= cost; state.pantry[iid] = (state.pantry[iid] || 0) + qty;
+      AudioFX.coin(); updateHUD(); openRanchShopModal('pantry');
+    }));
+  }
+
+  // --- KITCHEN / COOKING RECIPES MODAL ---
+  function openKitchenModal() {
+    AudioFX.ui();
+    const m = T().modals;
+    if (!state.kitchenUnlocked) {
+      openModal('🍳', m.kitchenTitle,
+        `<div class="text-center py-5 space-y-2.5">
+           <div class="text-4xl">🏡🍳</div>
+           <div class="font-bold text-base text-[#4a3525]">${m.kitchenLockedTitle}</div>
+           <p class="text-xs text-[#75583e] max-w-[400px] mx-auto leading-relaxed">${m.kitchenLockedDesc}</p>
+         </div>`,
+        `<span class="text-xs font-bold text-amber-900">${m.yourGold}: 🪙 ${state.gold}g</span>
+         <button id="btnGoUpgradeKitchen" class="btn-peach px-3.5 py-1.5 rounded-xl text-xs font-bold cursor-pointer">${m.goBuyKitchen}</button>`);
+      document.getElementById('btnGoUpgradeKitchen').addEventListener('click', () => openShopModal('upgrades'));
+      return;
+    }
+
+    const cards = RECIPES.map(r => {
+      const cookable = canCookRecipe(r);
+      const owned = state.dishes[r.id] || 0;
+      const ingChips = Object.entries(r.ingredients).map(([ingId, req]) => {
+        const meta = getItemMeta(ingId);
+        const have = getAvailableIngredientCount(ingId);
+        const ok = have >= req;
+        return `<span class="px-1.5 py-0.5 rounded-lg text-[11px] font-semibold border ${ok ? 'bg-emerald-50 border-emerald-400 text-emerald-900' : 'bg-rose-50 border-rose-300 text-rose-800'}">${meta.emoji} ${L(meta.name)} ${have}/${req}</span>`;
+      }).join(' ');
+
+      return `
+        <div class="rounded-2xl p-2.5 bg-[#fffdf7] border border-[#d6ba91] flex flex-col justify-between gap-2">
+          <div>
+            <div class="flex items-center justify-between gap-1">
+              <span class="font-bold text-sm">${r.emoji} ${L(r.name)}</span>
+              <span class="text-[11px] font-semibold text-amber-800">${m.dishCount(owned)}</span>
+            </div>
+            <p class="text-[11px] text-[#75583e] mt-0.5">${L(r.desc)}</p>
+            <div class="flex flex-wrap gap-1 mt-1.5">${ingChips}</div>
+            <div class="text-[11px] font-semibold text-[#5c4028] mt-1.5 flex items-center gap-2.5">
+              <span>🪙 ${m.sells} ${r.sellPrice}g</span>
+              <span>🍀 +${r.energy}</span>
+            </div>
+          </div>
+          <button data-cook="${r.id}" ${cookable ? '' : 'disabled'} class="${cookable ? 'btn-sage' : 'btn-peach'} w-full py-1.5 rounded-xl text-xs font-bold cursor-pointer">
+            ${cookable ? m.cookBtn : m.missingIng}
+          </button>
+        </div>`;
+    }).join('');
+
+    openModal('🍳', m.kitchenTitle,
+      `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${cards}</div>`,
+      `<button id="btnKitchenToPantry" class="text-xs font-bold text-[#9c4a34] underline cursor-pointer">${m.openPantryLink}</button>
+       <span class="text-xs font-bold text-amber-900">${m.yourGold}: 🪙 ${state.gold}g</span>`);
+
+    document.getElementById('btnKitchenToPantry').addEventListener('click', () => openRanchShopModal('pantry'));
+    document.querySelectorAll('[data-cook]').forEach(b => b.addEventListener('click', () => {
+      const r = RECIPE_MAP[b.dataset.cook];
+      if (!r || !canCookRecipe(r)) { AudioFX.error(); return; }
+      for (const [ing, qty] of Object.entries(r.ingredients)) consumeIngredient(ing, qty);
+      state.dishes[r.id] = (state.dishes[r.id] || 0) + 1;
+      state.totalCooked += 1;
+      AudioFX.cook();
+      addFloatText(state.player.x, state.player.y - 26, T().floats.cookedDish(r.emoji, L(r.name)), '#fef08a');
+      updateHUD();
+      openKitchenModal();
+    }));
+  }
+
+  // --- PASTURE BARN MODAL ---
+  function openBarnModal() {
+    AudioFX.ui();
+    const m = T().modals;
+    const hungry = state.animals.filter(a => !a.fed).length;
+    const drops = state.pastureDrops.length;
+    let body = '';
+    if (state.animals.length === 0) {
+      body = `<div class="text-center py-5 text-xs text-[#75583e]">${m.barnEmpty}</div>`;
+    } else {
+      body = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">` + state.animals.map(a => {
+        const meta = ANIMALS[a.type], prod = ITEMS[meta.product];
+        return `
+          <div class="rounded-2xl p-2.5 bg-[#fffdf7] border border-[#d6ba91] flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">${meta.emoji}</span>
+              <div>
+                <div class="font-bold text-xs">${L(meta.name)} <span class="text-rose-500">${'♥'.repeat(Math.max(1, a.hearts || 0))}</span></div>
+                <div class="text-[11px] text-[#75583e]">→ ${prod.emoji} ${L(prod.name)}</div>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${a.fed ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900'}">${a.fed ? m.barnFedTag : m.barnHungryTag}</span>
+          </div>`;
+      }).join('') + `</div>`;
+    }
+    const footer = `
+      <span class="text-xs font-bold text-[#6e4c30]">🌾 ${m.feedOwned(state.feed)}</span>
+      <div class="flex flex-wrap gap-1.5">
+        ${drops > 0 ? `<button id="btnBarnCollect" class="btn-sage px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer">${m.barnCollectAll(drops)}</button>` : ''}
+        ${hungry > 0 ? `<button id="btnBarnFeed" ${state.feed > 0 ? '' : 'disabled'} class="btn-peach px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer">${m.barnFeedAll(hungry)}</button>` : ''}
+      </div>`;
+    openModal('🏠', m.barnTitle, body, footer);
+    const cf = document.getElementById('btnBarnFeed');
+    if (cf) cf.addEventListener('click', () => { feedAllHungryAnimals(); openBarnModal(); });
+    const cc = document.getElementById('btnBarnCollect');
+    if (cc) cc.addEventListener('click', () => { collectAllPastureDrops(); openBarnModal(); });
+  }
+
+  // --- BASKET / SATCHEL MODAL (3 Tabs: Farm & Ranch / Cooked Dishes / Pantry Staples) ---
+  let basketTab = 'farm';
+  function openSatchelModal(tab = basketTab) {
+    basketTab = tab; AudioFX.ui();
+    const m = T().modals;
+    let body = `
+      <div class="flex flex-wrap gap-1.5 border-b border-[#dcc49e] pb-2">
+        <button data-btab="farm" class="px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer ${basketTab==='farm'?'btn-peach':'bg-[#efe0c4] text-[#5c4028]'}">${m.tabBasketFarm}</button>
+        <button data-btab="dishes" class="px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer ${basketTab==='dishes'?'btn-peach':'bg-[#efe0c4] text-[#5c4028]'}">${m.tabBasketDishes}</button>
+        <button data-btab="pantry" class="px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer ${basketTab==='pantry'?'btn-peach':'bg-[#efe0c4] text-[#5c4028]'}">${m.tabBasketPantry}</button>
+      </div>
+    `;
+
+    let rows = [];
+    if (basketTab === 'farm') {
+      for (const [key, qty] of Object.entries(state.satchel)) {
+        if (!qty) continue;
+        const [id, qStr] = key.split('_'), q = Number(qStr), meta = getItemMeta(id);
+        if (!meta) continue;
+        rows.push({ kind: 'satchel', key, id, q, qty, meta, shipVal: getSellValue(id, q), energy: meta.energy || 0 });
+      }
+    } else if (basketTab === 'dishes') {
+      for (const [rid, qty] of Object.entries(state.dishes)) {
+        if (!qty) continue;
+        const meta = RECIPE_MAP[rid];
+        rows.push({ kind: 'dish', key: rid, id: rid, q: 0, qty, meta, shipVal: meta.sellPrice, energy: meta.energy });
+      }
+    } else {
+      for (const [iid, qty] of Object.entries(state.pantry)) {
+        if (!qty) continue;
+        const meta = ITEMS[iid];
+        rows.push({ kind: 'pantry', key: iid, id: iid, q: 0, qty, meta, shipVal: meta.sellPrice, energy: meta.energy || 0 });
+      }
+    }
+
+    if (rows.length === 0) {
+      body += `<div class="text-center py-6 space-y-1.5 text-[#75583e]"><div class="text-3xl">💐</div><div class="font-bold text-sm text-[#4a3525]">${m.satchelEmptyTitle}</div><p class="text-xs">${m.satchelEmptyDesc}</p></div>`;
+    } else {
+      body += `<div class="space-y-2">` + rows.map(r => {
+        const quick = Math.round(r.shipVal * 0.9);
+        return `
+          <div class="rounded-2xl p-2.5 bg-[#fffdf7] border border-[#d6ba91] flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">${r.meta.emoji}</span>
+              <div>
+                <div class="font-bold text-sm">${L(r.meta.name)} ${r.q === 1 ? '⭐' : ''} <span class="text-amber-800">×${r.qty}</span></div>
+                <div class="text-[11px] text-[#75583e]">${m.shipVal}: ${r.shipVal}g${r.energy > 0 ? ` · ${m.eatVal}: +${r.energy}🍀` : ''}</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5">
+              ${r.energy > 0 ? `<button data-eatkind="${r.kind}" data-eatkey="${r.key}" class="btn-sage px-2.5 py-1 rounded-xl text-xs font-bold cursor-pointer">${m.eatBtn(r.energy)}</button>` : ''}
+              ${r.kind !== 'pantry' ? `<button data-sellkind="${r.kind}" data-sellkey="${r.key}" class="btn-peach px-2.5 py-1 rounded-xl text-xs font-bold cursor-pointer">${m.sellAllBtn(quick * r.qty)}</button>` : ''}
+            </div>
+          </div>`;
+      }).join('') + `</div>`;
+    }
+
+    const pending = getShippingPendingGold(), shippable = getShippableBasketCount();
+    openModal('💐', m.satchelTitle, body,
+      `<span class="text-xs text-[#63452c]">${m.binTonight}: <strong>+${pending}g</strong></span>
+       ${shippable > 0 ? `<button id="btnShipNow" class="btn-peach px-3 py-1 rounded-xl text-xs font-bold cursor-pointer">${m.moveToBin}</button>` : `<span class="text-[11px] opacity-75">${m.binTip}</span>`}`);
+
+    document.querySelectorAll('[data-btab]').forEach(b => b.addEventListener('click', () => openSatchelModal(b.dataset.btab)));
+    document.querySelectorAll('[data-eatkey]').forEach(b => b.addEventListener('click', () => {
+      const kind = b.dataset.eatkind, key = b.dataset.eatkey;
+      let energy = 0;
+      if (kind === 'satchel' && state.satchel[key]) { state.satchel[key]--; if (state.satchel[key] <= 0) delete state.satchel[key]; energy = getItemMeta(key.split('_')[0]).energy; }
+      else if (kind === 'dish' && state.dishes[key]) { state.dishes[key]--; if (state.dishes[key] <= 0) delete state.dishes[key]; energy = RECIPE_MAP[key].energy; }
+      else if (kind === 'pantry' && state.pantry[key]) { state.pantry[key]--; if (state.pantry[key] <= 0) delete state.pantry[key]; energy = ITEMS[key].energy; }
+      state.energy = Math.min(state.maxEnergy, state.energy + energy);
+      AudioFX.harvest(); updateHUD(); openSatchelModal(basketTab);
+    }));
+    document.querySelectorAll('[data-sellkey]').forEach(b => b.addEventListener('click', () => {
+      const kind = b.dataset.sellkind, key = b.dataset.sellkey;
+      let gain = 0;
+      if (kind === 'satchel' && state.satchel[key]) { const [id, q] = key.split('_'); gain = Math.round(getSellValue(id, Number(q)) * 0.9) * state.satchel[key]; delete state.satchel[key]; }
+      else if (kind === 'dish' && state.dishes[key]) { gain = Math.round(RECIPE_MAP[key].sellPrice * 0.9) * state.dishes[key]; delete state.dishes[key]; }
+      state.gold += gain; state.lifetimeGold += gain;
+      AudioFX.coin(); updateHUD(); openSatchelModal(basketTab);
+    }));
+    const sb = document.getElementById('btnShipNow');
+    if (sb) sb.addEventListener('click', () => { shipAllFromSatchel(); openSatchelModal(basketTab); });
+  }
+
+  // --- COTTAGE MODAL (Cook + Sleep) ---
+  function openCottageModal() {
+    AudioFX.ui();
+    const m = T().modals, pending = getShippingPendingGold(), sc = getShippableBasketCount();
+    const body = `
+      <div class="space-y-2.5">
+        <p>${m.cottageAsk}</p>
+        <div class="rounded-2xl p-3 bg-[#fffdf7] border border-[#d6ba91] space-y-1 text-xs">
+          <div>${m.sleepBin(pending)}</div>
+          <div>${m.sleepGrow}</div>
+          ${sc > 0 ? `<div class="text-amber-800 font-semibold">${m.sleepSatchelWarn(sc)}</div>` : ''}
+        </div>
+      </div>
+    `;
+    const footer = `
+      <div class="flex flex-wrap gap-1.5">
+        <button id="btnCancelSleep" class="px-2.5 py-1.5 rounded-xl bg-[#e8d5b3] border border-[#b58d60] font-bold text-xs cursor-pointer">${m.stayAwake}</button>
+        <button id="btnCottageKitchen" class="btn-sage px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${m.openKitchenNow}</button>
+      </div>
+      <div class="flex flex-wrap gap-1.5">
+        ${sc > 0 ? `<button id="btnShipAndSleep" class="btn-sage px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${m.shipAndSleep}</button>` : ''}
+        <button id="btnConfirmSleep" class="btn-peach px-3.5 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${m.goSleep}</button>
+      </div>`;
+    openModal('🏡', m.cottageTitle, body, footer);
+    document.getElementById('btnCancelSleep').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
+    document.getElementById('btnCottageKitchen').addEventListener('click', () => openKitchenModal());
+    document.getElementById('btnConfirmSleep').addEventListener('click', () => startSleepSequence(false));
+    const sas = document.getElementById('btnShipAndSleep');
+    if (sas) sas.addEventListener('click', () => { shipAllFromSatchel(); startSleepSequence(false); });
+  }
+
+  // --- DAY SUMMARY ---
+  function openDaySummaryModal(entries, earned, passedOut, seasonChanged, sprinklerWaters, newDrops, autoFedCount) {
+    const m = T().modals, season = getSeason(), sName = getSeasonName();
+    let rowsHtml = entries.length === 0
+      ? `<div class="text-center py-3 text-[#75583e] italic">${m.ledgerNone}</div>`
+      : `<div class="space-y-1.5">` + entries.map(e => {
+          const meta = getItemMeta(e.id);
+          return `<div class="flex items-center justify-between text-xs border-b border-[#e5d2b0] pb-1">
+            <span>${meta ? meta.emoji : '📦'} ${meta ? L(meta.name) : e.id} ${e.quality ? '⭐' : ''} × ${e.qty} <span class="opacity-70">(${e.unit}g ${m.each})</span></span>
+            <strong class="text-amber-900 num-tabular">+${e.sub}g</strong></div>`;
+        }).join('') + `</div>`;
+
+    const body = `
+      <div class="space-y-2.5">
+        ${passedOut ? `<div class="rounded-xl p-2 bg-amber-100 border border-amber-400 text-xs">${m.passedOutNote}</div>` : ''}
+        ${seasonChanged ? `<div class="rounded-xl p-2.5 bg-emerald-100 border border-emerald-500 text-xs font-bold">${m.seasonWelcome(season.icon, sName, L(season.label))}</div>` : ''}
+        <div class="rounded-2xl p-3 bg-[#fffdf7] border border-[#d6ba91] space-y-2">
+          <div class="font-bold text-xs uppercase tracking-wider text-[#75583e]">${m.ledgerHeader}</div>
+          ${rowsHtml}
+          <div class="flex items-center justify-between pt-1.5 font-bold text-sm text-emerald-800">
+            <span>${m.totalEarned}</span><span class="num-tabular">🪙 +${earned}g</span>
+          </div>
+        </div>
+        <div class="rounded-2xl p-2.5 bg-[#fffdf7] border border-[#d6ba91] text-xs space-y-1">
+          <div><strong>${m.todayWeather}：</strong>${m.weatherDetail[state.weather]}</div>
+          ${sprinklerWaters > 0 ? `<div>${m.sprinklerNote(sprinklerWaters)}</div>` : ''}
+          ${newDrops > 0 ? `<div class="text-emerald-800">${m.pastureMorningNote(newDrops)}</div>` : ''}
+          ${autoFedCount > 0 ? `<div>${m.autoFedNote(autoFedCount)}</div>` : ''}
+        </div>
+      </div>
+    `;
+    openModal(season.icon, m.morningTitle(sName, state.day), body,
+      `<span class="text-xs font-bold text-amber-900">${m.wallet}: 🪙 ${state.gold}g</span>
+       <button id="btnStartNewDay" class="btn-peach px-4 py-1.5 rounded-xl text-xs font-bold cursor-pointer">${m.startDayBtn(sName, state.day)}</button>`);
+    document.getElementById('btnStartNewDay').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
+  }
+
+  // --- WARDROBE, MAILBOX, HELP ---
+  function openDressModal() {
+    AudioFX.ui();
+    const m = T().modals;
+    const cards = DRESS_THEMES.map((d, idx) => `
+      <button data-pickdress="${idx}" class="rounded-2xl p-3 text-left border-2 transition cursor-pointer flex items-center gap-3 ${idx === state.dressIdx ? 'bg-[#fff5e4] border-[#e07a5f] shadow-md' : 'bg-[#fffdf7] border-[#d6ba91] hover:border-[#c88c72]'}">
+        <div class="w-11 h-11 rounded-full flex items-center justify-center text-xl shrink-0 border-2 border-white" style="background:${d.skirt}; box-shadow:0 2px 6px rgba(0,0,0,0.12)">${d.preview}</div>
+        <div>
+          <div class="font-bold text-xs sm:text-sm text-[#4a3525]">${L(d.name)} ${idx === state.dressIdx ? '✓' : ''}</div>
+          <div class="flex items-center gap-1.5 mt-1">
+            <span class="w-3.5 h-3.5 rounded-full border border-black/15" style="background:${d.skirt}"></span>
+            <span class="w-3.5 h-3.5 rounded-full border border-black/15" style="background:${d.flowerA}"></span>
+            <span class="w-3.5 h-3.5 rounded-full border border-black/15" style="background:${d.flowerB}"></span>
+            <span class="w-3.5 h-3.5 rounded-full border border-black/15" style="background:${d.ribbon}"></span>
+          </div>
+        </div>
+      </button>`).join('');
+    openModal('👗', m.dressTitle, `<p class="text-xs text-[#73563d]">${m.dressHint}</p><div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">${cards}</div>`,
+      `<span class="text-[11px] opacity-75">👒 ${L(getDress().name)}</span><button id="btnDressDone" class="btn-peach px-4 py-1.5 rounded-xl text-xs font-bold cursor-pointer">${m.dressDone}</button>`);
+    document.querySelectorAll('[data-pickdress]').forEach(b => b.addEventListener('click', () => {
+      state.dressIdx = Number(b.dataset.pickdress);
+      AudioFX.harvest(); saveState(true);
+      spawnParticles(state.player.x, state.player.y - 10, getDress().skirt, 10, 1.8, 3.5);
+      addFloatText(state.player.x, state.player.y - 26, T().floats.dressChanged(L(getDress().name)), '#fff5d6');
+      openDressModal();
+    }));
+    document.getElementById('btnDressDone').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
+  }
+
+  function openMailboxModal() {
+    AudioFX.ui(); state.unreadMail = false;
+    const m = T().modals, season = getSeason();
+    const letter = (state.day === 1 && state.seasonIdx === 0) ? m.mailDay1 : m.mailGazette(season.icon, getSeasonName(), state.day, L(season.label), m.nextForecastText[state.nextWeather]);
+    openModal('📬', m.mailTitle, `<div class="space-y-2.5 leading-relaxed">${letter}</div>`,
+      `<span class="text-[11px] opacity-75">${m.mailChecked}</span><button id="btnCloseMail" class="btn-peach px-3.5 py-1 rounded-xl text-xs font-bold cursor-pointer">${m.mailOk}</button>`);
+    document.getElementById('btnCloseMail').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
+  }
+
+  function openHelpModal() {
+    AudioFX.ui(); const m = T().modals;
+    openModal('📖', m.helpTitle, m.helpBody,
+      `<span class="text-[11px] opacity-75">${m.helpFooter}</span><button id="btnCloseHelp" class="btn-peach px-3.5 py-1 rounded-xl text-xs font-bold cursor-pointer">${m.backToFarm}</button>`);
+    document.getElementById('btnCloseHelp').addEventListener('click', () => { AudioFX.ui(); closeModal(); });
+  }
+
+  // =========================================================================
+  // UI / HOTBAR / HUD UPDATES
+  // =========================================================================
+  function selectSlot(idx) {
+    const len = getAllHotbarSlots().all.length;
+    state.selectedSlot = Math.max(0, Math.min(len - 1, idx));
+    AudioFX.ui();
+    renderHotbar();
+  }
+
+  function renderHotbar() {
+    const { toolSlots, seedSlots, all } = getAllHotbarSlots();
+    const renderBtn = (s, globalIdx, keyLabel = '') => {
+      const active = globalIdx === state.selectedSlot ? 'active' : '';
+      const countBadge = s.count !== null
+        ? `<span class="absolute bottom-0.5 right-1 text-[9px] font-extrabold num-tabular ${Number(s.count) === 0 ? 'opacity-30' : 'text-[#5c3d22]'}">${s.count}</span>` : '';
+      return `
+        <button data-slot="${globalIdx}" class="slot-btn ${active} relative rounded-xl px-1 py-1 flex flex-col items-center justify-center min-h-[44px] cursor-pointer" title="${s.desc}">
+          ${keyLabel ? `<span class="absolute top-0.5 left-1 text-[8px] font-bold opacity-45">${keyLabel}</span>` : ''}
+          <span class="text-base leading-none">${s.icon}</span>
+          <span class="text-[9px] font-bold leading-tight mt-0.5 truncate max-w-full">${s.label}</span>
+          ${countBadge}
+        </button>`;
+    };
+
+    document.getElementById('hotbarTools').innerHTML = toolSlots.map((s, i) => renderBtn(s, i, String(i + 1))).join('');
+    document.getElementById('hotbarSeeds').innerHTML = seedSlots.map((s, i) => {
+      const gIdx = 5 + i;
+      const k = gIdx < 9 ? String(gIdx + 1) : gIdx === 9 ? '0' : '';
+      return renderBtn(s, gIdx, k);
+    }).join('');
+
+    document.querySelectorAll('[data-slot]').forEach(btn => btn.addEventListener('click', () => selectSlot(Number(btn.dataset.slot))));
+    document.getElementById('selectedToolInfo').textContent = (all[state.selectedSlot] || all[0]).desc;
+  }
+
+  function formatTime(mins) {
+    const total = Math.floor(mins / 10) * 10;
+    const h24 = Math.floor(total / 60) % 24, m = total % 60;
+    const h12 = h24 % 12 === 0 ? 12 : h24 % 12, mm = m.toString().padStart(2, '0');
+    return state.lang === 'zh' ? `${h24 >= 12 ? T().ampm.pm : T().ampm.am} ${h12}:${mm}` : `${h12}:${mm} ${h24 >= 12 ? 'PM' : 'AM'}`;
+  }
+
+  function applyStaticLabels() {
+    const t = T();
+    document.documentElement.lang = state.lang === 'zh' ? 'zh-CN' : 'en';
+    document.getElementById('uiGameTitle').textContent = t.gameTitle;
+    document.getElementById('uiControlsLine').textContent = t.controlsLine;
+    document.getElementById('uiLangLabel').textContent = t.langSwitch;
+    document.getElementById('uiDressLabel').textContent = t.dressBtn;
+    document.getElementById('uiShopBtn').textContent = t.shopBtn;
+    document.getElementById('uiRanchShopBtn').textContent = t.ranchShopBtn;
+    document.getElementById('uiKitchenBtn').textContent = t.kitchenBtn;
+    document.getElementById('uiSatchelBtn').textContent = t.satchelBtn;
+    document.getElementById('uiForecastLabel').textContent = t.forecast;
+    document.getElementById('uiHotbarHint').textContent = t.hotbarHint;
+    document.getElementById('uiStatHarvestLabel').textContent = t.statHarvest;
+    document.getElementById('uiStatAnimalsLabel').textContent = t.statAnimals;
+    document.getElementById('uiStatDishesLabel').textContent = t.statDishes;
+    document.getElementById('uiStatGoldLabel').textContent = t.statGold;
+    document.getElementById('saveStatus').textContent = t.autoSaveIdle;
+  }
+
+  function updateHUD() {
+    const season = getSeason(), t = T();
+    const inPasture = state.area === 'pasture';
+    document.getElementById('hudAreaPill').textContent = inPasture ? t.areaPasture : t.areaFarm;
+    document.getElementById('uiAreaToggleIcon').textContent = inPasture ? '🏡' : '🐮';
+    document.getElementById('uiAreaToggleLabel').textContent = inPasture ? t.toFarm : t.toPasture;
+
+    document.getElementById('hudSeasonIcon').textContent = season.icon;
+    document.getElementById('hudDate').textContent = t.dateFmt(getSeasonName(), state.day);
+    document.getElementById('hudTime').textContent = formatTime(state.timeMinutes);
+    document.getElementById('hudClockIcon').textContent = state.timeMinutes >= 19 * 60 ? '🌙' : state.timeMinutes >= 17 * 60 ? '🌅' : '☀️';
+
+    const wIcons = { sunny: '☀️', breezy: '🍃', rainy: '🌧️' };
+    document.getElementById('hudWeatherIcon').textContent = wIcons[state.weather] || '☀️';
+    document.getElementById('hudWeatherText').textContent = t.weather[state.weather] || t.weather.sunny;
+    document.getElementById('hudForecastIcon').textContent = wIcons[state.nextWeather] || '☀️';
+
+    document.getElementById('hudGold').textContent = state.gold;
+    document.getElementById('hudFeed').textContent = state.feed;
+    const pending = getShippingPendingGold(), shipWrap = document.getElementById('hudShippedWrap');
+    if (pending > 0) { shipWrap.classList.remove('hidden'); shipWrap.classList.add('flex'); document.getElementById('hudPendingGold').textContent = pending; }
+    else { shipWrap.classList.add('hidden'); shipWrap.classList.remove('flex'); }
+
+    const ePct = Math.round((state.energy / state.maxEnergy) * 100), eBar = document.getElementById('hudEnergyBar');
+    eBar.style.width = `${ePct}%`;
+    eBar.className = `h-full transition-all duration-150 ${ePct > 40 ? 'bg-emerald-500' : ePct > 20 ? 'bg-amber-400' : 'bg-rose-400'}`;
+    document.getElementById('hudEnergyText').textContent = state.energy;
+
+    const cap = getCanCapacity();
+    document.getElementById('hudWaterBar').style.width = `${Math.round((state.water / cap) * 100)}%`;
+    document.getElementById('hudWaterText').textContent = `${state.water}/${cap}`;
+
+    document.getElementById('satchelBadge').textContent = getBasketBadgeTotal();
+    document.getElementById('statHarvested').textContent = state.totalHarvested;
+    document.getElementById('statAnimals').textContent = state.animals.length;
+    document.getElementById('statDishes').textContent = state.totalCooked;
+    document.getElementById('statLifetimeGold').textContent = `${state.lifetimeGold}g`;
+
+    if (inPasture) {
+      const fed = state.animals.filter(a => a.fed).length;
+      document.getElementById('topRightPill').textContent = t.pastureBanner(fed, state.animals.length, state.pastureDrops.length);
+    } else {
+      document.getElementById('topRightPill').textContent = t.seasonBonus(season.icon, getSeasonName(), L(season.label));
+    }
+  }
+
+  function toggleSound() { AudioFX.muted = !AudioFX.muted; document.getElementById('btnSound').textContent = AudioFX.muted ? '🔇' : '🔊'; }
+  function toggleLanguage() { state.lang = state.lang === 'zh' ? 'en' : 'zh'; AudioFX.ui(); saveState(true); applyStaticLabels(); updateHUD(); renderHotbar(); }
+
+  document.getElementById('btnAreaToggle').addEventListener('click', () => switchArea(state.area === 'farm' ? 'pasture' : 'farm'));
+  document.getElementById('btnKitchen').addEventListener('click', openKitchenModal);
+  document.getElementById('btnShopShortcut').addEventListener('click', () => openShopModal());
+  document.getElementById('btnRanchShopShortcut').addEventListener('click', () => openRanchShopModal());
+  document.getElementById('btnSatchel').addEventListener('click', () => openSatchelModal());
+  document.getElementById('btnDress').addEventListener('click', openDressModal);
+  document.getElementById('btnLang').addEventListener('click', toggleLanguage);
+  document.getElementById('btnSleepQuick').addEventListener('click', openCottageModal);
+  document.getElementById('btnSound').addEventListener('click', toggleSound);
+  document.getElementById('btnHelp').addEventListener('click', openHelpModal);
+  document.getElementById('btnReset').addEventListener('click', () => {
+    const m = T().modals;
+    openModal('🌼', m.resetTitle, `<p class="text-xs">${m.resetBody}</p>`,
+      `<button id="btnCancelReset" class="px-3 py-1.5 rounded-xl bg-[#e8d5b3] border border-[#b58d60] font-bold text-xs cursor-pointer">${m.keepPlaying}</button>
+       <button id="btnDoReset" class="btn-peach px-3.5 py-1.5 rounded-xl font-bold text-xs cursor-pointer">${m.confirmReset}</button>`);
+    document.getElementById('btnCancelReset').addEventListener('click', closeModal);
+    document.getElementById('btnDoReset').addEventListener('click', () => {
+      const kl = state.lang, kd = state.dressIdx;
+      localStorage.removeItem(SAVE_KEY); localStorage.removeItem(OLD_SAVE_KEY);
+      state = createInitialState(kl, kd);
+      closeModal(); applyStaticLabels(); updateHUD(); renderHotbar();
+      AudioFX.morning(); addFloatText(state.player.x, state.player.y - 26, T().floats.freshStart, '#fef08a');
+    });
+  });
+
+  // =========================================================================
+  // COLLISION, ANIMAL AI & UPDATE LOOP
+  // =========================================================================
+  function isSolidAtPixel(px, py) {
+    const r = 8, m = curMap();
+    const pts = [[px - r, py - r], [px + r, py - r], [px - r, py + r], [px + r, py + r]];
+    for (const [x, y] of pts) {
+      const tx = Math.floor(x / TILE), ty = Math.floor(y / TILE);
+      if (tx < 0 || tx >= COLS || ty < 0 || ty >= ROWS) return true;
+      const t = m[ty][tx];
+      if (t === TILE_TYPE.WALL || t === TILE_TYPE.WATER) return true;
+      if (state.area === 'farm') {
+        const td = getTileData(tx, ty);
+        if (td && (td.debris === 'stone' || td.placeable)) return true;
+      }
+    }
+    return false;
+  }
+
+  let clockAccum = 0, lastTime = performance.now(), animTime = 0;
+
+  function update(dt) {
+    animTime += dt;
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += p.g; p.life -= p.decay;
+      if (p.life <= 0) particles.splice(i, 1);
+    }
+    for (let i = floatingTexts.length - 1; i >= 0; i--) {
+      const f = floatingTexts[i]; f.y += f.vy; f.life -= 0.015;
+      if (f.life <= 0) floatingTexts.splice(i, 1);
+    }
+
+    if (state.area === 'farm' && Math.random() < dt * 2.0) {
+      smokePuffs.push({ x: 4.7 * TILE + (Math.random() - 0.5) * 3, y: 1.9 * TILE, r: 4 + Math.random() * 2, life: 1, vx: 7 + Math.random() * 6, vy: -13 - Math.random() * 5 });
+    }
+    for (let i = smokePuffs.length - 1; i >= 0; i--) {
+      const s = smokePuffs[i]; s.x += s.vx * dt; s.y += s.vy * dt; s.r += dt * 4.5; s.life -= dt * 0.42;
+      if (s.life <= 0) smokePuffs.splice(i, 1);
+    }
+
+    // Gentle wandering AI for Pasture Animals
+    for (const a of state.animals) {
+      if (a.wait > 0) {
+        a.wait -= dt;
+        if (a.wait <= 0) {
+          a.tx = (3.8 + Math.random() * 12) * TILE;
+          a.ty = (7.6 + Math.random() * 5.2) * TILE;
+        }
+      } else {
+        const dx = a.tx - a.x, dy = a.ty - a.y, dist = Math.hypot(dx, dy);
+        if (dist < 4) { a.wait = 1.6 + Math.random() * 3.0; }
+        else {
+          const spd = (a.type === 'cow' ? 18 : a.type === 'sheep' ? 21 : 28) * dt;
+          a.x += (dx / dist) * spd; a.y += (dy / dist) * spd;
+          a.dir = dx >= 0 ? 1 : -1;
+        }
+      }
+    }
+
+    updateAmbient(dt);
+    if (modalOpen || isTransitioning) return;
+
+    clockAccum += dt;
+    if (clockAccum >= 2.4) {
+      clockAccum -= 2.4;
+      state.timeMinutes += 10;
+      updateHUD();
+      if (state.timeMinutes >= 24 * 60) { startSleepSequence(true); return; }
+    }
+
+    let mx = 0, my = 0;
+    if (keys['w'] || keys['arrowup']) my -= 1;
+    if (keys['s'] || keys['arrowdown']) my += 1;
+    if (keys['a'] || keys['arrowleft']) mx -= 1;
+    if (keys['d'] || keys['arrowright']) mx += 1;
+
+    if (mx === 0 && my === 0 && walkTarget) {
+      const dx = walkTarget.x - state.player.x, dy = walkTarget.y - state.player.y, dist = Math.hypot(dx, dy);
+      if (dist <= (walkTarget.stopDist || 0.25) * TILE + 3) { const cb = walkTarget.onArrive; walkTarget = null; if (cb) cb(); }
+      else { mx = dx / dist; my = dy / dist; }
+    }
+
+    if (mx !== 0 || my !== 0) {
+      const len = Math.hypot(mx, my); mx /= len; my /= len;
+      const speed = 116 * dt;
+      if (Math.abs(mx) > Math.abs(my)) state.player.dir = mx > 0 ? 'right' : 'left';
+      else state.player.dir = my > 0 ? 'down' : 'up';
+
+      const nx = state.player.x + mx * speed, ny = state.player.y + my * speed;
+      let moved = false;
+      if (!isSolidAtPixel(nx, state.player.y)) { state.player.x = nx; moved = true; }
+      if (!isSolidAtPixel(state.player.x, ny)) { state.player.y = ny; moved = true; }
+      if (moved) state.player.walkFrame += dt * 9.5;
+      else if (walkTarget) walkTarget = null;
+
+      // Seamless Walk-Through Area Gates!
+      if (state.area === 'farm' && state.player.x > (COLS - 0.55) * TILE && state.player.y > 4.6 * TILE && state.player.y < 8 * TILE) {
+        switchArea('pasture', 1.4 * TILE, state.player.y);
+      } else if (state.area === 'pasture' && state.player.x < 0.55 * TILE && state.player.y > 4.6 * TILE && state.player.y < 8 * TILE) {
+        switchArea('farm', (COLS - 1.4) * TILE, state.player.y);
+      }
+    } else state.player.walkFrame = 0;
+
+    if (state.player.swingTimer > 0) state.player.swingTimer = Math.max(0, state.player.swingTimer - dt);
+
+    const hint = getNearbyContext(), hintEl = document.getElementById('contextHint');
+    if (hint) {
+      document.getElementById('contextHintIcon').textContent = hint.icon;
+      document.getElementById('contextHintText').textContent = hint.text;
+      hintEl.classList.remove('hidden');
+    } else hintEl.classList.add('hidden');
+  }
+
+  function updateAmbient(dt) {
+    const isNight = state.timeMinutes >= 19 * 60;
+    const desired = state.weather === 'rainy' ? 75 : state.weather === 'breezy' ? 24 : isNight ? 20 : 12;
+    while (ambientDrops.length < desired) ambientDrops.push({ x: Math.random() * CANVAS_W, y: Math.random() * CANVAS_H, phase: Math.random() * Math.PI * 2, speed: 0.7 + Math.random() * 0.6 });
+    if (ambientDrops.length > desired) ambientDrops.length = desired;
+    for (const d of ambientDrops) {
+      d.phase += dt * 2.3;
+      if (state.weather === 'rainy') {
+        d.x -= 85 * dt * d.speed; d.y += 300 * dt * d.speed;
+        if (d.y > CANVAS_H) { d.y = -10; d.x = Math.random() * (CANVAS_W + 90); }
+        if (d.x < -10) d.x = CANVAS_W + 10;
+      } else if (isNight) {
+        d.x += Math.cos(d.phase) * 14 * dt; d.y += Math.sin(d.phase * 1.3) * 10 * dt;
+      } else {
+        d.x += (state.weather === 'breezy' ? 36 : 16) * dt * d.speed;
+        d.y += (15 + Math.sin(d.phase) * 9) * dt;
+        if (d.x > CANVAS_W + 10) d.x = -10;
+        if (d.y > CANVAS_H + 10) { d.y = -10; d.x = Math.random() * CANVAS_W; }
+      }
+    }
+  }
+
+  // =========================================================================
+  // STORYBOOK WATERCOLOR RENDERER
+  // =========================================================================
+  const INK = '#543c2c';
+  function roundRectPath(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+
+  function render() {
+    const season = getSeason();
+    ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+
+    for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) drawGroundTile(x, y, season);
+
+    if (state.area === 'farm') {
+      drawPondDuckling();
+      drawFarmFences();
+      for (let y = 7; y <= 13; y++) for (let x = 3; x <= 15; x++) {
+        const td = getTileData(x, y); if (td) drawFarmContents(x, y, td);
+      }
+      drawCursorHighlight();
+      drawCottage();
+      drawMailbox();
+      drawShippingBin();
+      drawShopStand();
+      drawSignpost(22, 4, T().gateToPasture);
+      drawGirlFarmer();
+    } else {
+      drawPastureFences();
+      drawBarn();
+      drawFeedTrough();
+      drawRanchShopStand();
+      drawSignpost(1, 4, T().gateToFarm);
+      // Collectible pasture drops
+      for (const d of state.pastureDrops) drawPastureDrop(d);
+      // Y-sort animals and player for cozy depth!
+      const actors = [
+        ...state.animals.map(a => ({ y: a.y, draw: () => drawAnimal(a) })),
+        { y: state.player.y, draw: () => drawGirlFarmer() }
+      ];
+      actors.sort((a, b) => a.y - b.y);
+      for (const ac of actors) ac.draw();
+    }
+
+    drawTrees(season);
+
+    if (state.area === 'farm') {
+      for (const s of smokePuffs) {
+        ctx.fillStyle = `rgba(255, 250, 242, ${Math.max(0, s.life * 0.65)})`;
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+
+    for (const p of particles) {
+      ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = p.color;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size * 0.6, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    drawAtmosphere(season);
+
+    ctx.font = 'bold 12px "PingFang SC", "Microsoft YaHei", ui-rounded, system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    for (const f of floatingTexts) {
+      ctx.globalAlpha = Math.min(1, f.life * 1.45);
+      ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(66, 44, 28, 0.78)';
+      ctx.strokeText(f.text, f.x, f.y);
+      ctx.fillStyle = f.color; ctx.fillText(f.text, f.x, f.y);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawGroundTile(x, y, season) {
+    const px = x * TILE, py = y * TILE, m = curMap(), t = m[y][x], h = hash2(x, y);
+    if (t === TILE_TYPE.WATER) {
+      ctx.fillStyle = '#6fb8d6'; ctx.fillRect(px, py, TILE, TILE);
+      if (y > 0 && m[y - 1][x] !== TILE_TYPE.WATER) {
+        ctx.fillStyle = '#e7d7b1'; ctx.fillRect(px, py, TILE, 3);
+        ctx.fillStyle = '#97d2e8'; ctx.fillRect(px, py + 3, TILE, 4);
+      }
+      const wave = Math.sin(animTime * 2.2 + x * 1.3 + y);
+      ctx.strokeStyle = 'rgba(255,255,255,0.45)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(px + 14 + wave * 2, py + 15, 6, 0.2, 1.8); ctx.stroke();
+      if ((x === 19 && y === 10) || (x === 20 && y === 12)) {
+        const bob = Math.sin(animTime * 2 + x) * 1.2;
+        ctx.fillStyle = '#5eb06d';
+        ctx.beginPath(); ctx.arc(px + 16, py + 16 + bob, 8.5, 0.35, Math.PI * 2 - 0.35); ctx.lineTo(px + 16, py + 16 + bob); ctx.fill();
+        ctx.fillStyle = '#ffb5c8'; ctx.beginPath(); ctx.arc(px + 16, py + 13 + bob, 3.6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffe58f'; ctx.beginPath(); ctx.arc(px + 16, py + 13 + bob, 1.5, 0, Math.PI * 2); ctx.fill();
+      }
+      return;
+    }
+
+    const isPlot = t === TILE_TYPE.FARMABLE || t === TILE_TYPE.PASTURE;
+    ctx.fillStyle = isPlot ? ((x + y) % 2 === 0 ? season.farmA : season.farmB) : ((x + y) % 2 === 0 ? season.grassA : season.grassB);
+    ctx.fillRect(px, py, TILE, TILE);
+
+    if ((t === TILE_TYPE.GRASS || t === TILE_TYPE.PASTURE) && h > 0.56) {
+      if (h > 0.78) {
+        const fx = px + 8 + (h * 17) % 16, fy = py + 8 + (h * 29) % 16;
+        ctx.fillStyle = h > 0.89 ? season.blossom : '#fffdf5';
+        for (let a = 0; a < 4; a++) { ctx.beginPath(); ctx.arc(fx + Math.cos(a * Math.PI / 2) * 2.2, fy + Math.sin(a * Math.PI / 2) * 2.2, 1.7, 0, Math.PI * 2); ctx.fill(); }
+        ctx.fillStyle = '#ffd56b'; ctx.beginPath(); ctx.arc(fx, fy, 1.4, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+
+    if (t === TILE_TYPE.PATH) {
+      ctx.fillStyle = '#e5d4b3'; ctx.fillRect(px, py, TILE, TILE);
+      for (const [sx, sy, rx, ry] of [[px+8,py+9,6.5,5],[px+22,py+10,6,4.5],[px+10,py+22,6,5],[px+23,py+23,6.5,4.5]]) {
+        ctx.fillStyle = '#f3e7cf'; ctx.beginPath(); ctx.ellipse(sx, sy, rx, ry, 0.1, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#c9b38c'; ctx.lineWidth = 1; ctx.stroke();
+      }
+    }
+    if (t === TILE_TYPE.DOCK) {
+      ctx.fillStyle = '#6fb8d6'; ctx.fillRect(px, py, TILE, TILE);
+      roundRectPath(px, py + 3, TILE, TILE - 6, 4);
+      ctx.fillStyle = '#c89b6e'; ctx.fill(); ctx.strokeStyle = '#7c5636'; ctx.lineWidth = 1.5; ctx.stroke();
+    }
+  }
+
+  function drawPondDuckling() {
+    const cx = 19.8 * TILE + Math.cos(animTime * 0.7) * 18, cy = 11.4 * TILE + Math.sin(animTime * 0.7) * 14;
+    ctx.save(); ctx.translate(cx, cy);
+    if (Math.sin(animTime * 0.7) > 0) ctx.scale(-1, 1);
+    ctx.strokeStyle = 'rgba(255,255,255,0.45)'; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.ellipse(0, 4, 8, 3.5, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = '#fffdf7'; ctx.strokeStyle = INK; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.ellipse(0, 1, 6.5, 4.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(4.5, -3.5, 3.8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#f59e0b'; ctx.beginPath(); ctx.ellipse(8.2, -3.2, 2.2, 1.2, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(5.4, -4.2, 0.9, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawFarmFences() {
+    for (let x = 3; x <= 15; x++) {
+      if (x === 11 || x === 12) continue;
+      const px = x * TILE, py = 6 * TILE + 20;
+      ctx.fillStyle = '#f4ead7'; ctx.strokeStyle = '#9c7d5c'; ctx.lineWidth = 1.2;
+      roundRectPath(px, py + 2, TILE, 4.5, 2); ctx.fill(); ctx.stroke();
+      roundRectPath(px + 12, py - 6, 8, 16, 3); ctx.fill(); ctx.stroke();
+    }
+  }
+
+  function drawPastureFences() {
+    for (let x = 3; x <= 16; x++) {
+      if (x === 9 || x === 10) continue;
+      const px = x * TILE, py = 6 * TILE + 20;
+      ctx.fillStyle = '#fffaf0'; ctx.strokeStyle = '#a38262'; ctx.lineWidth = 1.2;
+      roundRectPath(px, py + 2, TILE, 4.5, 2); ctx.fill(); ctx.stroke();
+      roundRectPath(px + 12, py - 6, 8, 16, 3); ctx.fill(); ctx.stroke();
+    }
+  }
+
+  function drawSignpost(tx, ty, label) {
+    const px = tx * TILE, py = ty * TILE;
+    ctx.fillStyle = '#8b5e38'; ctx.fillRect(px + 14, py + 14, 4, 16);
+    roundRectPath(px - 6, py + 4, 44, 15, 4);
+    ctx.fillStyle = '#fbf0d9'; ctx.fill(); ctx.strokeStyle = '#8a5a32'; ctx.lineWidth = 1.3; ctx.stroke();
+    ctx.fillStyle = '#5c3c22';
+    ctx.font = 'bold 9.5px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, px + 16, py + 15);
+  }
+
+  function drawFarmContents(x, y, td) {
+    const px = x * TILE, py = y * TILE;
+    if (td.tilled) {
+      roundRectPath(px + 2.5, py + 2.5, TILE - 5, TILE - 5, 6);
+      ctx.fillStyle = td.watered ? '#6e472d' : '#ab7952'; ctx.fill();
+      ctx.strokeStyle = td.watered ? '#52321e' : '#855a39'; ctx.lineWidth = 1.2; ctx.stroke();
+      ctx.strokeStyle = td.watered ? 'rgba(48,28,15,0.35)' : 'rgba(110,70,40,0.32)'; ctx.lineWidth = 1.4;
+      for (let fy = 9; fy <= 23; fy += 7) { ctx.beginPath(); ctx.moveTo(px + 6, py + fy); ctx.lineTo(px + TILE - 6, py + fy); ctx.stroke(); }
+    }
+    if (td.debris === 'weed') {
+      ctx.fillStyle = '#559c4e';
+      ctx.beginPath(); ctx.arc(px + 12, py + 18, 6, 0, Math.PI * 2); ctx.arc(px + 20, py + 17, 6.5, 0, Math.PI * 2); ctx.arc(px + 16, py + 13, 6, 0, Math.PI * 2); ctx.fill();
+    } else if (td.debris === 'twig') {
+      ctx.strokeStyle = '#7d502d'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(px + 7, py + 20); ctx.lineTo(px + 24, py + 15); ctx.stroke(); ctx.lineCap = 'butt';
+    } else if (td.debris === 'stone') {
+      ctx.fillStyle = '#a5aab3'; ctx.beginPath(); ctx.ellipse(px + 16, py + 18, 9.5, 7, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#6c727d'; ctx.lineWidth = 1.3; ctx.stroke();
+    }
+    if (td.placeable === 'sprinkler') {
+      ctx.fillStyle = '#8fa3b8'; ctx.beginPath(); ctx.arc(px + 16, py + 17, 8, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.3; ctx.stroke();
+      ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.arc(px + 16, py + 15, 2.8, 0, Math.PI * 2); ctx.fill();
+    } else if (td.placeable === 'lantern') {
+      ctx.strokeStyle = '#6e4c30'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(px + 16, py + 26); ctx.lineTo(px + 16, py + 11); ctx.stroke();
+      roundRectPath(px + 10, py + 7, 12, 11, 4); ctx.fillStyle = '#fef08a'; ctx.fill(); ctx.strokeStyle = '#6e4c30'; ctx.lineWidth = 1.4; ctx.stroke();
+    }
+    if (td.crop) drawCropSprite(px, py, td.crop, x, y);
+  }
+
+  function drawCropSprite(px, py, cropObj, gx, gy) {
+    const c = CROPS[cropObj.id], progress = Math.min(1, cropObj.daysGrown / c.days), ripe = progress >= 1;
+    const sway = Math.sin(animTime * 2.6 + gx * 0.9 + gy * 0.7) * (ripe ? 1.8 : 0.8);
+    if (progress === 0) {
+      ctx.fillStyle = '#f3dfb8';
+      for (const [ox, oy] of [[11, 16], [19, 14], [15, 21]]) { ctx.beginPath(); ctx.ellipse(px + ox, py + oy, 2.2, 1.5, 0.4, 0, Math.PI * 2); ctx.fill(); }
+    } else if (progress < 0.55) {
+      ctx.strokeStyle = '#4e9e4c'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(px + 16, py + 23); ctx.quadraticCurveTo(px + 16 + sway, py + 18, px + 16 + sway, py + 14); ctx.stroke();
+      ctx.fillStyle = '#7ad166';
+      ctx.beginPath(); ctx.ellipse(px + 12 + sway, py + 15, 4, 2.4, -0.4, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(px + 20 + sway, py + 15, 4, 2.4, 0.4, 0, Math.PI * 2); ctx.fill();
+    } else if (!ripe) {
+      ctx.fillStyle = c.leaf;
+      ctx.beginPath(); ctx.arc(px + 12 + sway, py + 17, 5.5, 0, Math.PI * 2); ctx.arc(px + 20 + sway, py + 17, 5.5, 0, Math.PI * 2); ctx.arc(px + 16 + sway, py + 13, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = c.color; ctx.beginPath(); ctx.arc(px + 16 + sway, py + 17, 3, 0, Math.PI * 2); ctx.fill();
+    } else {
+      const bounce = Math.abs(Math.sin(animTime * 3.2 + gx)) * -2;
+      ctx.fillStyle = 'rgba(65,45,25,0.2)'; ctx.beginPath(); ctx.ellipse(px + 16, py + 25, 8.5, 3, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = c.leaf;
+      ctx.beginPath(); ctx.ellipse(px + 11 + sway, py + 13 + bounce, 6, 4, -0.4, 0, Math.PI * 2); ctx.ellipse(px + 21 + sway, py + 13 + bounce, 6, 4, 0.4, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = INK; ctx.lineWidth = 1.2;
+      if (cropObj.id === 'wheat') {
+        ctx.fillStyle = c.color;
+        for (const ox of [-5, 0, 5]) { ctx.beginPath(); ctx.ellipse(px + 16 + ox + sway, py + 15 + bounce, 3, 7, ox * 0.05, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
+      } else if (cropObj.id === 'carrot') {
+        ctx.fillStyle = c.color;
+        ctx.beginPath(); ctx.moveTo(px + 11, py + 14 + bounce); ctx.lineTo(px + 21, py + 14 + bounce); ctx.lineTo(px + 16, py + 25 + bounce); ctx.closePath(); ctx.fill(); ctx.stroke();
+      } else if (cropObj.id === 'corn') {
+        ctx.fillStyle = c.color;
+        ctx.beginPath(); ctx.ellipse(px + 16 + sway * 0.5, py + 16 + bounce, 5, 8.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      } else if (cropObj.id === 'pumpkin') {
+        ctx.fillStyle = c.color; ctx.beginPath(); ctx.ellipse(px + 16, py + 19 + bounce, 9.5, 7.2, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      } else if (cropObj.id === 'blueberry') {
+        ctx.fillStyle = c.leaf; ctx.beginPath(); ctx.arc(px + 16 + sway, py + 17 + bounce, 9, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = c.color;
+        for (const [ox, oy] of [[12, 15], [20, 14], [16, 20]]) { ctx.beginPath(); ctx.arc(px + ox + sway, py + oy + bounce, 3.6, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
+      } else if (cropObj.id === 'starfruit') {
+        ctx.fillStyle = c.color; ctx.beginPath();
+        for (let i = 0; i < 10; i++) { const r = i % 2 === 0 ? 9.5 : 4.2, a = (i * Math.PI) / 5 - Math.PI / 2; const sx = px + 16 + Math.cos(a) * r, sy = py + 17 + bounce + Math.sin(a) * r; if (i === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy); }
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+      } else {
+        ctx.fillStyle = c.color; ctx.beginPath(); ctx.arc(px + 16, py + 18 + bounce, 7.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.beginPath(); ctx.arc(px + 13.5, py + 15.5 + bounce, 2.2, 0, Math.PI * 2); ctx.fill();
+      }
+      if (Math.sin(animTime * 4.5 + gx * 2 + gy) > 0.4) { ctx.fillStyle = '#fff9c4'; ctx.beginPath(); ctx.arc(px + 23, py + 8 + bounce, 2.2, 0, Math.PI * 2); ctx.fill(); }
+    }
+  }
+
+  function drawCursorHighlight() {
+    let tx, ty;
+    const ptx = state.player.x / TILE, pty = state.player.y / TILE;
+    if (mouseTile.inside && Math.hypot(mouseTile.x + 0.5 - ptx, mouseTile.y + 0.5 - pty) <= 2.3) { tx = mouseTile.x; ty = mouseTile.y; }
+    else { const f = getFacedTile(); tx = f.x; ty = f.y; }
+    if (tx < 0 || tx >= COLS || ty < 0 || ty >= ROWS) return;
+    const slot = getAllHotbarSlots().all[state.selectedSlot] || getAllHotbarSlots().all[0];
+    let tiles = [[tx, ty]];
+    if (slot.id === 'hoe' && MAPS.farm[ty][tx] === TILE_TYPE.FARMABLE) tiles = getAreaTiles(tx, ty, state.hoeLevel);
+    if (slot.id === 'can' && MAPS.farm[ty][tx] === TILE_TYPE.FARMABLE) tiles = getAreaTiles(tx, ty, state.canLevel);
+    ctx.strokeStyle = 'rgba(255, 250, 210, 0.9)'; ctx.lineWidth = 2;
+    for (const [gx, gy] of tiles) {
+      if (gx < 0 || gx >= COLS || gy < 0 || gy >= ROWS) continue;
+      roundRectPath(gx * TILE + 2, gy * TILE + 2, TILE - 4, TILE - 4, 6); ctx.stroke();
+    }
+  }
+
+  function drawCottage() {
+    const x = 2 * TILE, y = 2 * TILE, w = 4 * TILE, h = 3 * TILE;
+    const isEvening = state.timeMinutes >= 17 * 60 + 30;
+    ctx.fillStyle = 'rgba(56,40,25,0.18)'; ctx.beginPath(); ctx.ellipse(x + w / 2, y + h, w * 0.52, 9, 0, 0, Math.PI * 2); ctx.fill();
+    roundRectPath(x + w - 34, y - 6, 16, 26, 3); ctx.fillStyle = '#c2a791'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.4; ctx.stroke();
+    roundRectPath(x + 8, y + 36, w - 16, h - 36, 6); ctx.fillStyle = '#fbf1dc'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.6; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - 2, y + 40); ctx.quadraticCurveTo(x + w / 2, y - 4, x + w + 2, y + 40); ctx.closePath();
+    ctx.fillStyle = '#d47462'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.6; ctx.stroke();
+    ctx.fillStyle = '#f8e6cb';
+    for (let sx = x + 6; sx < x + w - 4; sx += 12) { ctx.beginPath(); ctx.arc(sx, y + 40, 4.5, 0, Math.PI); ctx.fill(); }
+    // Door
+    ctx.beginPath(); ctx.moveTo(x + 50, y + h); ctx.lineTo(x + 50, y + 66); ctx.arc(x + 63, y + 66, 13, Math.PI, 0); ctx.lineTo(x + 76, y + h); ctx.closePath();
+    ctx.fillStyle = '#b87b4c'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.strokeStyle = '#5fa35b'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(x + 63, y + 72, 4.5, 0, Math.PI * 2); ctx.stroke();
+    const winCol = isEvening ? '#fef08a' : '#bfe3f2';
+    for (const wx of [x + 17, x + w - 39]) {
+      roundRectPath(wx, y + 52, 22, 19, 5); ctx.fillStyle = winCol; ctx.fill(); ctx.strokeStyle = '#7c5636'; ctx.lineWidth = 1.8; ctx.stroke();
+      roundRectPath(wx - 2, y + 71, 26, 7, 2); ctx.fillStyle = '#9c6c47'; ctx.fill();
+      for (const [ox, col] of [[3, '#ffb3c6'], [11, '#fff3b0'], [19, '#ffb3c6']]) { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(wx + ox, y + 71, 3, 0, Math.PI * 2); ctx.fill(); }
+    }
+    // Cozy Kitchen badge on roof when kitchen is unlocked!
+    if (state.kitchenUnlocked) {
+      ctx.fillStyle = '#fff9e6'; ctx.beginPath(); ctx.arc(x + w / 2, y + 24, 10, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#9c6239'; ctx.lineWidth = 1.4; ctx.stroke();
+      ctx.font = '11px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('🍳', x + w / 2, y + 28);
+    }
+  }
+
+  function drawMailbox() {
+    const px = 6 * TILE, py = 4 * TILE;
+    ctx.fillStyle = '#a4754d'; ctx.fillRect(px + 14, py + 14, 4, 16);
+    roundRectPath(px + 8, py + 7, 16, 11, 5); ctx.fillStyle = '#e89587'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.3; ctx.stroke();
+    if (state.unreadMail) {
+      const bob = Math.sin(animTime * 4.5) * 3;
+      roundRectPath(px + 8, py - 9 + bob, 16, 11, 2.5); ctx.fillStyle = '#fffdf5'; ctx.fill(); ctx.strokeStyle = '#d97757'; ctx.lineWidth = 1.4; ctx.stroke();
+    }
+  }
+
+  function drawShippingBin() {
+    const px = 7 * TILE, py = 4 * TILE;
+    roundRectPath(px + 4, py + 8, 24, 19, 4); ctx.fillStyle = '#c48d59'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.4; ctx.stroke();
+    roundRectPath(px + 2.5, py + 5, 27, 7, 3); ctx.fillStyle = '#dba672'; ctx.fill(); ctx.stroke();
+    if (getShippingPendingGold() > 0) { ctx.fillStyle = '#ffd166'; ctx.beginPath(); ctx.arc(px + 25, py + 5, 4.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
+  }
+
+  function drawShopStand() {
+    const x = 16 * TILE, y = 2 * TILE, w = 5 * TILE, h = 3 * TILE;
+    roundRectPath(x + 8, y + 32, w - 16, h - 32, 6); ctx.fillStyle = '#f5e6cc'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.fillStyle = '#d9c29f'; ctx.fillRect(x + 14, y + 38, w - 28, 30);
+    const bob = Math.sin(animTime * 2.4) * 1.2, nx = x + w / 2, ny = y + 48 + bob;
+    ctx.fillStyle = '#73ab84'; roundRectPath(nx - 9, ny + 6, 18, 16, 5); ctx.fill();
+    ctx.fillStyle = '#ffe0c8'; ctx.beginPath(); ctx.arc(nx, ny, 8.5, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.fillStyle = '#4a3222'; ctx.beginPath(); ctx.arc(nx - 3, ny, 1.3, 0, Math.PI * 2); ctx.arc(nx + 3, ny, 1.3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#e08670'; ctx.beginPath(); ctx.ellipse(nx, ny - 7.5, 10, 4.5, -0.1, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    roundRectPath(x + 5, y + 65, w - 10, 28, 5); ctx.fillStyle = '#c99460'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.5; ctx.stroke();
+    roundRectPath(x + 3, y + 62, w - 6, 7, 3.5); ctx.fillStyle = '#e5b884'; ctx.fill(); ctx.stroke();
+    roundRectPath(x + w - 58, y + 72, 46, 16, 4); ctx.fillStyle = '#fffaf0'; ctx.fill(); ctx.strokeStyle = '#8a5a32'; ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.fillStyle = '#5c3c22'; ctx.font = 'bold 10px "PingFang SC", "Microsoft YaHei", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(T().shopSign, x + w - 35, y + 83);
+    const stripes = 8, sw = w / stripes;
+    for (let i = 0; i < stripes; i++) {
+      ctx.fillStyle = i % 2 === 0 ? '#7bb58d' : '#fffaf0';
+      ctx.fillRect(x + i * sw, y + 12, sw, 22);
+      ctx.beginPath(); ctx.arc(x + i * sw + sw / 2, y + 34, sw / 2, 0, Math.PI); ctx.fill();
+    }
+    ctx.strokeStyle = INK; ctx.lineWidth = 1.4; ctx.strokeRect(x, y + 12, w, 22);
+  }
+
+  // --- PASTURE BUILDINGS (Red Barn, Feed Trough, Millie's Ranch & Pantry Shop) ---
+  function drawBarn() {
+    const x = 3 * TILE, y = 2 * TILE, w = 5 * TILE, h = 3 * TILE;
+    ctx.fillStyle = 'rgba(56,40,25,0.18)'; ctx.beginPath(); ctx.ellipse(x + w / 2, y + h, w * 0.5, 9, 0, 0, Math.PI * 2); ctx.fill();
+    roundRectPath(x + 8, y + 36, w - 16, h - 36, 6); ctx.fillStyle = '#d9665b'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.6; ctx.stroke();
+    // Gambrel barn roof
+    ctx.beginPath();
+    ctx.moveTo(x, y + 38); ctx.lineTo(x + 24, y + 12); ctx.lineTo(x + w / 2, y + 2); ctx.lineTo(x + w - 24, y + 12); ctx.lineTo(x + w, y + 38);
+    ctx.closePath();
+    ctx.fillStyle = '#9c5243'; ctx.fill(); ctx.stroke();
+    // Hay loft window
+    roundRectPath(x + w / 2 - 14, y + 16, 28, 18, 4); ctx.fillStyle = '#f5d27a'; ctx.fill(); ctx.stroke();
+    // Big white X barn double doors
+    roundRectPath(x + w / 2 - 24, y + 52, 48, 44, 4); ctx.fillStyle = '#c45247'; ctx.fill();
+    ctx.strokeStyle = '#fff9ee'; ctx.lineWidth = 3; ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x + w / 2 - 22, y + 54); ctx.lineTo(x + w / 2 + 22, y + 94);
+    ctx.moveTo(x + w / 2 + 22, y + 54); ctx.lineTo(x + w / 2 - 22, y + 94);
+    ctx.stroke();
+  }
+
+  function drawFeedTrough() {
+    const x = 9 * TILE, y = 4 * TILE, w = 2 * TILE;
+    const anyFed = state.animals.some(a => a.fed);
+    roundRectPath(x + 3, y + 9, w - 6, 18, 5);
+    ctx.fillStyle = '#a8764a'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.4; ctx.stroke();
+    roundRectPath(x + 6, y + 11, w - 12, 10, 3);
+    ctx.fillStyle = anyFed ? '#f2cc66' : '#734d2e'; ctx.fill();
+    if (anyFed) {
+      ctx.strokeStyle = '#d6a436'; ctx.lineWidth = 1.2;
+      for (let hx = x + 10; hx < x + w - 10; hx += 7) { ctx.beginPath(); ctx.moveTo(hx, y + 13); ctx.lineTo(hx + 3, y + 19); ctx.stroke(); }
+    }
+  }
+
+  function drawRanchShopStand() {
+    const x = 15 * TILE, y = 2 * TILE, w = 6 * TILE, h = 3 * TILE;
+    roundRectPath(x + 8, y + 32, w - 16, h - 32, 6); ctx.fillStyle = '#fdf4e3'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.fillStyle = '#e6d3b3'; ctx.fillRect(x + 14, y + 38, w - 28, 30);
+    // Cute NPC Millie behind counter
+    const bob = Math.sin(animTime * 2.5 + 1) * 1.2, nx = x + w / 2, ny = y + 48 + bob;
+    ctx.fillStyle = '#b89cd9'; roundRectPath(nx - 9, ny + 6, 18, 16, 5); ctx.fill();
+    ctx.fillStyle = '#ffe4cc'; ctx.beginPath(); ctx.arc(nx, ny, 8.5, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.fillStyle = '#4a3222'; ctx.beginPath(); ctx.arc(nx - 3, ny, 1.3, 0, Math.PI * 2); ctx.arc(nx + 3, ny, 1.3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#f5a3b0'; ctx.beginPath(); ctx.arc(nx - 5, ny + 2, 1.6, 0, Math.PI * 2); ctx.arc(nx + 5, ny + 2, 1.6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#f2cc66'; ctx.beginPath(); ctx.arc(nx, ny - 6, 9, Math.PI, 0); ctx.fill();
+    // Counter with milk jug & honey jar
+    roundRectPath(x + 5, y + 65, w - 10, 28, 5); ctx.fillStyle = '#c99460'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.5; ctx.stroke();
+    roundRectPath(x + 3, y + 62, w - 6, 7, 3.5); ctx.fillStyle = '#e5b884'; ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#ffffff'; roundRectPath(x + 18, y + 53, 8, 10, 3); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#f6c343'; roundRectPath(x + 30, y + 55, 8, 8, 3); ctx.fill(); ctx.stroke();
+    // Sign
+    roundRectPath(x + w - 66, y + 72, 54, 16, 4); ctx.fillStyle = '#fffaf0'; ctx.fill(); ctx.strokeStyle = '#8a5a32'; ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.fillStyle = '#5c3c22'; ctx.font = 'bold 10px "PingFang SC", "Microsoft YaHei", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(T().ranchSign, x + w - 39, y + 83);
+    // Pastel lavender & buttercup striped awning
+    const stripes = 8, sw = w / stripes;
+    for (let i = 0; i < stripes; i++) {
+      ctx.fillStyle = i % 2 === 0 ? '#c3a6e0' : '#fff8d6';
+      ctx.fillRect(x + i * sw, y + 12, sw, 22);
+      ctx.beginPath(); ctx.arc(x + i * sw + sw / 2, y + 34, sw / 2, 0, Math.PI); ctx.fill();
+    }
+    ctx.strokeStyle = INK; ctx.lineWidth = 1.4; ctx.strokeRect(x, y + 12, w, 22);
+  }
+
+  // --- PASTURE ANIMALS (Cows, Sheep, Chickens, Ducks) & DROPS ---
+  function drawAnimal(a) {
+    const bob = Math.abs(Math.sin(animTime * 4 + a.x * 0.05)) * (a.wait > 0 ? 0.5 : 2.2);
+    ctx.save();
+    ctx.translate(a.x, a.y - bob);
+    ctx.scale(a.dir, 1);
+
+    ctx.fillStyle = 'rgba(56,40,25,0.2)';
+    ctx.beginPath(); ctx.ellipse(0, 8 + bob, a.type === 'cow' ? 14 : 10, 4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = INK; ctx.lineWidth = 1.25;
+
+    if (a.type === 'chicken') {
+      ctx.fillStyle = '#fffdf7';
+      ctx.beginPath(); ctx.ellipse(0, 1, 8.5, 7, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(5, -5, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#e85d5d'; ctx.beginPath(); ctx.arc(5, -10, 2.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#f59e0b'; ctx.beginPath(); ctx.moveTo(9.5, -5); ctx.lineTo(13, -4); ctx.lineTo(9.5, -3); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(6.5, -5.8, 1.1, 0, Math.PI * 2); ctx.fill();
+    } else if (a.type === 'duck') {
+      ctx.fillStyle = '#fff9e6';
+      ctx.beginPath(); ctx.ellipse(-1, 1, 9.5, 6.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(6, -6, 5.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#f59e0b'; ctx.beginPath(); ctx.ellipse(11.5, -5.2, 3.6, 1.7, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(7.2, -7, 1.1, 0, Math.PI * 2); ctx.fill();
+    } else if (a.type === 'sheep') {
+      // Fluffy cloud wool body
+      ctx.fillStyle = '#fffdf9';
+      for (const [ox, oy, r] of [[-7, 0, 6.5], [0, -3, 7.5], [7, 0, 6.5], [-3, 3, 6], [4, 3, 6]]) {
+        ctx.beginPath(); ctx.arc(ox, oy, r, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.strokeStyle = '#d6c8b8'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.ellipse(0, 0, 12.5, 8.5, 0, 0, Math.PI * 2); ctx.stroke();
+      // Cute dark-cream face + floppy ears
+      ctx.fillStyle = '#f2dec2'; ctx.strokeStyle = INK;
+      ctx.beginPath(); ctx.ellipse(10.5, -2, 5.5, 6, 0.1, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(7, -6.5, 3, 1.8, -0.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(12, -3, 1.2, 0, Math.PI * 2); ctx.fill();
+    } else if (a.type === 'cow') {
+      // Legs
+      ctx.fillStyle = '#fffaf0';
+      ctx.fillRect(-10, 4, 4, 6); ctx.fillRect(6, 4, 4, 6);
+      // Plump cow body + cute brown/dark spots
+      roundRectPath(-14, -7, 26, 14, 7); ctx.fillStyle = '#fffdf9'; ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#5c4033';
+      ctx.beginPath(); ctx.ellipse(-5, -2, 4.5, 3.2, 0.3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(4, 1, 3.5, 2.5, -0.2, 0, Math.PI * 2); ctx.fill();
+      // Head + pink snout + tiny horns
+      roundRectPath(9, -11, 11, 11, 4.5); ctx.fillStyle = '#fffdf9'; ctx.fill(); ctx.stroke();
+      roundRectPath(13, -4, 8, 5, 2.5); ctx.fillStyle = '#f7b2c4'; ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#e5c185';
+      ctx.beginPath(); ctx.arc(11.5, -12, 2, 0, Math.PI * 2); ctx.arc(16.5, -12, 2, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(14.5, -7.2, 1.2, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Little hungry bubble if not fed yet today!
+    if (!a.fed) {
+      ctx.scale(a.dir, 1); // unflip text
+      ctx.fillStyle = 'rgba(255, 252, 240, 0.9)';
+      ctx.beginPath(); ctx.arc(0, -18, 7, 0, Math.PI * 2); ctx.fill();
+      ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('🌾', 0, -15);
+    }
+    ctx.restore();
+  }
+
+  function drawPastureDrop(d) {
+    const bob = Math.sin(animTime * 4 + d.x) * 2.2;
+    const item = ITEMS[d.itemId];
+    ctx.fillStyle = 'rgba(255, 245, 175, 0.55)';
+    ctx.beginPath(); ctx.arc(d.x, d.y + bob, 11, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fffdf7'; ctx.strokeStyle = d.quality ? '#e59f1a' : '#b89468'; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.arc(d.x, d.y + bob, 8.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(item.emoji, d.x, d.y + 4 + bob);
+  }
+
+  // =========================================================================
+  // CUTE COTTAGECORE GIRL WITH TWIN BRAIDS (双麻花小辫子) + FLORAL DRESS + STRAW HAT
+  // =========================================================================
+  function drawBraid(x, y, sway, side, d) {
+    // 3 cute rounded descending braid puffs + matching ribbon bow tie at bottom!
+    ctx.fillStyle = d.hair;
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 1.1;
+    const pts = [
+      [x + side * 0.5, y],
+      [x + side * 1.4 + sway * 0.4, y + 4.3],
+      [x + side * 2.0 + sway * 0.8, y + 8.5]
+    ];
+    for (const [bx, by] of pts) {
+      ctx.beginPath(); ctx.arc(bx, by, 2.7, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    }
+    // Cute ribbon tie at the tip of the braid!
+    const tipX = pts[2][0], tipY = pts[2][1] + 2.5;
+    ctx.fillStyle = d.ribbon;
+    ctx.beginPath(); ctx.ellipse(tipX - 2, tipY, 2.1, 1.3, -0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(tipX + 2, tipY, 2.1, 1.3, 0.3, 0, Math.PI * 2); ctx.fill();
+    // Little hair tuft below ribbon
+    ctx.fillStyle = d.hair;
+    ctx.beginPath(); ctx.arc(tipX + sway * 0.2, tipY + 2.2, 1.5, 0, Math.PI * 2); ctx.fill();
+  }
+
+  function drawGirlFarmer() {
+    const p = state.player, d = getDress();
+    const walking = p.walkFrame > 0;
+    const step = walking ? Math.sin(p.walkFrame) * 3 : 0;
+    const bob = walking ? Math.abs(Math.cos(p.walkFrame)) * -2.2 : Math.sin(animTime * 2.5) * 0.6;
+    const sway = walking ? Math.sin(p.walkFrame) * 1.6 : Math.sin(animTime * 2) * 0.4;
+
+    ctx.save();
+    ctx.translate(p.x, p.y);
+
+    // Shadow
+    ctx.fillStyle = 'rgba(56, 40, 25, 0.24)';
+    ctx.beginPath(); ctx.ellipse(0, 6.5, 11, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+
+    // Boots & white socks
+    ctx.fillStyle = '#fffdf7';
+    ctx.fillRect(-5.5, -1 + step * 0.7, 3.6, 4);
+    ctx.fillRect(1.9, -1 - step * 0.7, 3.6, 4);
+    ctx.fillStyle = '#8a5536'; ctx.strokeStyle = INK; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.ellipse(-3.8, 4.2 + step * 0.8, 3.3, 2.3, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(3.8, 4.2 - step * 0.8, 3.3, 2.3, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+    // Puff sleeves
+    ctx.fillStyle = '#fff9ee'; ctx.strokeStyle = INK; ctx.lineWidth = 1.1;
+    ctx.beginPath(); ctx.arc(-8.5, -10.5 + bob, 3.6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(8.5, -10.5 + bob, 3.6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+    // Flared floral cottagecore dress (碎花农妇小裙子)
+    ctx.beginPath();
+    ctx.moveTo(-6, -13 + bob); ctx.lineTo(6, -13 + bob);
+    ctx.quadraticCurveTo(11 + sway * 0.5, -5 + bob, 12.5 + sway, 2 + bob);
+    ctx.quadraticCurveTo(6 + sway, 4.5 + bob, 0 + sway * 0.5, 3 + bob);
+    ctx.quadraticCurveTo(-6 + sway * 0.5, 4.5 + bob, -12.5 + sway, 2 + bob);
+    ctx.quadraticCurveTo(-11 + sway * 0.5, -5 + bob, -6, -13 + bob);
+    ctx.closePath();
+    ctx.fillStyle = d.skirt; ctx.fill();
+
+    // Tiny floral blooms scattered on skirt
+    for (const [bx, by, col] of [[-6.5,-3.5,d.flowerA],[5.8,-4,d.flowerB],[-2.5,-0.2,d.flowerB],[7.8,0.2,d.flowerA],[-8.2,0.5,d.flowerA],[2.4,-7.2,d.flowerA]]) {
+      ctx.fillStyle = d.leaf; ctx.beginPath(); ctx.arc(bx + sway * 0.6 + 1.4, by + bob + 0.8, 1.3, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(bx + sway * 0.6, by + bob, 1.8, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ffd56b'; ctx.beginPath(); ctx.arc(bx + sway * 0.6, by + bob, 0.7, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.strokeStyle = INK; ctx.lineWidth = 1.2; ctx.stroke();
+
+    // White pinafore apron (front) or waist bow (back)
+    if (p.dir !== 'up') {
+      ctx.fillStyle = '#fffdf8';
+      ctx.beginPath();
+      ctx.moveTo(-4.5, -10.5 + bob); ctx.lineTo(4.5, -10.5 + bob);
+      ctx.lineTo(6 + sway * 0.5, -0.5 + bob);
+      ctx.quadraticCurveTo(0 + sway * 0.5, 1.5 + bob, -6 + sway * 0.5, -0.5 + bob);
+      ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#d4c3aa'; ctx.lineWidth = 0.9; ctx.stroke();
+    } else {
+      ctx.fillStyle = d.ribbon;
+      ctx.beginPath(); ctx.ellipse(-3.5, -8 + bob, 3.2, 2, -0.3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(3.5, -8 + bob, 3.2, 2, 0.3, 0, Math.PI * 2); ctx.fill();
+      ctx.fillRect(-1.5, -7 + bob, 3, 5);
+    }
+
+    // Back head hair when facing up
+    if (p.dir === 'up') {
+      ctx.fillStyle = d.hair; ctx.strokeStyle = INK; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(0, -19.5 + bob, 8.6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    }
+
+    // Face
+    if (p.dir !== 'up') {
+      ctx.fillStyle = '#ffe4cc'; ctx.strokeStyle = INK; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(0, -19.5 + bob, 8.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      // Cute bangs
+      ctx.fillStyle = d.hair;
+      ctx.beginPath();
+      ctx.arc(0, -20.5 + bob, 8.4, Math.PI * 1.05, Math.PI * 1.95);
+      ctx.lineTo(6, -19 + bob);
+      ctx.quadraticCurveTo(2, -21.5 + bob, 0, -18.5 + bob);
+      ctx.quadraticCurveTo(-2.5, -21.5 + bob, -6.5, -19 + bob);
+      ctx.closePath(); ctx.fill();
+
+      const eyeShift = p.dir === 'right' ? 2.2 : p.dir === 'left' ? -2.2 : 0;
+      ctx.fillStyle = '#3d281b';
+      if (p.dir === 'down') {
+        ctx.beginPath(); ctx.arc(-3.1, -18 + bob, 1.5, 0, Math.PI * 2); ctx.arc(3.1, -18 + bob, 1.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(-3.5, -18.6 + bob, 0.55, 0, Math.PI * 2); ctx.arc(2.7, -18.6 + bob, 0.55, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(244, 134, 152, 0.58)';
+        ctx.beginPath(); ctx.ellipse(-5.3, -15.8 + bob, 1.9, 1.1, 0, 0, Math.PI * 2); ctx.ellipse(5.3, -15.8 + bob, 1.9, 1.1, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#9e5a49'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(0, -15.6 + bob, 1.6, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
+      } else {
+        ctx.beginPath(); ctx.arc(eyeShift * 1.3, -18 + bob, 1.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(eyeShift * 1.3 - 0.3, -18.6 + bob, 0.55, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(244, 134, 152, 0.55)'; ctx.beginPath(); ctx.ellipse(eyeShift * 1.7, -15.8 + bob, 1.8, 1.1, 0, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+
+    // ADORABLE TWIN BRAIDED PIGTAILS (明显的两个麻花小辫子!) drawn cleanly over shoulders!
+    if (p.dir === 'down' || p.dir === 'up') {
+      drawBraid(-8.2, -16.8 + bob, -sway, -1, d);
+      drawBraid(8.2, -16.8 + bob, sway, 1, d);
+    } else if (p.dir === 'right') {
+      drawBraid(-6.5, -16.8 + bob, -sway, -1, d);
+      drawBraid(3.2, -16.2 + bob, sway, 0.6, d);
+    } else {
+      drawBraid(6.5, -16.8 + bob, sway, 1, d);
+      drawBraid(-3.2, -16.2 + bob, -sway, -0.6, d);
+    }
+
+    // Little Woven Straw Sunhat + Ribbon Bow
+    ctx.fillStyle = '#f3d284';
+    ctx.beginPath(); ctx.ellipse(0, -24.5 + bob, 14.5, 5.2, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#9c7134'; ctx.lineWidth = 1.25; ctx.stroke();
+    ctx.fillStyle = '#f7dd99';
+    ctx.beginPath(); ctx.arc(0, -25.2 + bob, 8.2, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = d.ribbon; ctx.lineWidth = 2.6;
+    ctx.beginPath(); ctx.ellipse(0, -25 + bob, 8.2, 2.2, 0, 0.08 * Math.PI, 0.92 * Math.PI); ctx.stroke();
+    const bowX = p.dir === 'left' ? -6.5 : 6.8;
+    ctx.fillStyle = d.ribbon;
+    ctx.beginPath(); ctx.ellipse(bowX - 2, -25.5 + bob, 2.8, 1.6, -0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(bowX + 2, -25.5 + bob, 2.8, 1.6, 0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fffdf5'; ctx.beginPath(); ctx.arc(bowX, -25.5 + bob, 1.4, 0, Math.PI * 2); ctx.fill();
+
+    if (p.swingTimer > 0) {
+      const ang = p.dir === 'right' ? 0 : p.dir === 'down' ? Math.PI / 2 : p.dir === 'left' ? Math.PI : -Math.PI / 2;
+      ctx.fillStyle = p.swingTool === 'can' ? '#67d4f6' : '#fef08a';
+      ctx.beginPath(); ctx.arc(Math.cos(ang) * 16, -8 + Math.sin(ang) * 16, 4.5, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawTrees(season) {
+    const m = curMap();
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        if (m[y][x] !== TILE_TYPE.WALL || getLandmarkAt(x, y)) continue;
+        const px = x * TILE + 16, py = y * TILE + 16;
+        const sway = Math.sin(animTime * 1.4 + x * 0.7 + y * 0.5) * 1.2;
+        ctx.fillStyle = '#8b6240'; roundRectPath(px - 4, py + 2, 8, 12, 3); ctx.fill();
+        ctx.fillStyle = season.treeA;
+        ctx.beginPath(); ctx.arc(px - 7 + sway, py + 1, 9.5, 0, Math.PI * 2); ctx.arc(px + 7 + sway, py + 1, 9.5, 0, Math.PI * 2); ctx.arc(px + sway, py - 5, 11, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = season.treeB;
+        ctx.beginPath(); ctx.arc(px - 4 + sway, py - 3, 8, 0, Math.PI * 2); ctx.arc(px + 5 + sway, py - 2, 7.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = season.treeHi;
+        ctx.beginPath(); ctx.arc(px - 2 + sway, py - 8, 5, 0, Math.PI * 2); ctx.fill();
+        if (hash2(x, y) > 0.58) {
+          ctx.fillStyle = season.blossom;
+          ctx.beginPath(); ctx.arc(px + 5 + sway, py - 5, 2.2, 0, Math.PI * 2); ctx.arc(px - 6 + sway, py + 2, 1.9, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+    }
+  }
+
+  function drawAtmosphere(season) {
+    const mins = state.timeMinutes;
+    let tint = null;
+    if (mins < 7.5 * 60) tint = `rgba(255, 214, 153, ${((1 - (mins - 360) / 90) * 0.16).toFixed(3)})`;
+    else if (mins >= 17 * 60 && mins < 20 * 60) tint = `rgba(232, 132, 88, ${(((mins - 1020) / 180) * 0.25).toFixed(3)})`;
+    else if (mins >= 20 * 60) tint = `rgba(32, 42, 88, ${(0.26 + Math.min(1, (mins - 1200) / 180) * 0.30).toFixed(3)})`;
+
+    if (state.weather === 'rainy') { ctx.fillStyle = 'rgba(56, 86, 120, 0.14)'; ctx.fillRect(0, 0, CANVAS_W, CANVAS_H); }
+    if (tint) { ctx.fillStyle = tint; ctx.fillRect(0, 0, CANVAS_W, CANVAS_H); }
+
+    if (mins >= 18 * 60) {
+      const glowAlpha = Math.min(0.42, ((mins - 1080) / 180) * 0.42);
+      const lights = state.area === 'farm'
+        ? [[3.3 * TILE, 4.3 * TILE, 62], [4.8 * TILE, 4.3 * TILE, 62], [18.5 * TILE, 4.2 * TILE, 72]]
+        : [[5.5 * TILE, 4 * TILE, 68], [18 * TILE, 4.2 * TILE, 74]];
+      if (state.area === 'farm') {
+        for (const [k, td] of Object.entries(state.farm)) {
+          if (td.placeable === 'lantern') { const [lx, ly] = k.split(',').map(Number); lights.push([(lx + 0.5) * TILE, (ly + 0.5) * TILE, 80]); }
+        }
+      }
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      for (const [lx, ly, rad] of lights) {
+        const g = ctx.createRadialGradient(lx, ly, 4, lx, ly, rad);
+        g.addColorStop(0, `rgba(255, 232, 145, ${glowAlpha})`); g.addColorStop(1, 'rgba(255, 210, 100, 0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(lx, ly, rad, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    const isNight = mins >= 19 * 60;
+    for (const d of ambientDrops) {
+      if (state.weather === 'rainy') {
+        ctx.strokeStyle = 'rgba(205, 238, 255, 0.58)'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.moveTo(d.x, d.y); ctx.lineTo(d.x - 3.5, d.y + 10); ctx.stroke();
+      } else if (isNight) {
+        ctx.fillStyle = `rgba(254, 245, 158, ${(0.35 + 0.65 * Math.abs(Math.sin(d.phase))).toFixed(2)})`;
+        ctx.beginPath(); ctx.arc(d.x, d.y, 2.2, 0, Math.PI * 2); ctx.fill();
+      } else {
+        ctx.fillStyle = season.blossom; ctx.globalAlpha = 0.78;
+        ctx.beginPath(); ctx.ellipse(d.x, d.y, 3, 1.8, d.phase, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+      }
+    }
+  }
+
+  function loop(now) {
+    const dt = Math.min(0.05, (now - lastTime) / 1000);
+    lastTime = now;
+    update(dt);
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  window.addEventListener('themechange', () => render());
+
+  applyStaticLabels();
+  updateHUD();
+  renderHotbar();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
